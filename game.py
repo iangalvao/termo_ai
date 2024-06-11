@@ -1,3 +1,4 @@
+from unidecode import unidecode
 import csv
 import random
 
@@ -48,15 +49,14 @@ def show_result(chute):
 
     for i in range(5):
         cor = ENDC
-        if chute[i] == palavra[i]:
+        if chute[i] == unidecode(palavra[i]):
             cor = COR_CERTO
-        elif chute[i] in palavra:
-            if count_letters_in_wrong_pos(palavra, chute, chute[i]) >= count_letters(
-                chute[: i + 1], chute[i]
-            ):
+        elif chute[i] in unidecode(palavra):
+            if count_letters_in_wrong_pos(
+                unidecode(palavra), chute, chute[i]
+            ) >= count_letters(chute[: i + 1], chute[i]):
                 cor = COR_POSICAO
-
-        vis += f"{cor}{chute[i]}{ENDC}"
+        vis += f"{cor}{palavra[i]}{ENDC}"
     print(vis)
 
 
@@ -64,20 +64,25 @@ with open("palavras.csv") as csvfile:
     myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
     palavras = next(myreader)
 
+palavras_unidecode = {}
+for palavra in palavras:
+    palavras_unidecode[unidecode(palavra)] = palavra
+
+
 random_number = 3  # random.randint(1, len(palavras))
 palavra = palavras[random_number].upper()
-
+palavra = "pavão".upper()
 lim_chutes = 6
 chutes = []
 while 1:
     chute_atual = input("Seu chute: ").upper()
-    if chute_atual.lower() not in palavras:
+    if unidecode(chute_atual).lower() not in palavras_unidecode.keys():
         print("Essa palavra não é aceita")
         continue
     chutes.append(chute_atual)
     for chute in chutes:
         show_result(chute)
-    if chute_atual == palavra:
+    if unidecode(chute_atual) == unidecode(palavra):
         print("Você venceu!")
         exit(0)
     if len(chutes) == lim_chutes:

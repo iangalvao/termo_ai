@@ -93,7 +93,7 @@ def render_try(chute):
 def print_tries(chutes):
     # Clear any warning message
     clean_last_line()
-    print("\r", end="\033[7A")
+    print("\r", end="\033[11A")
 
     # Get current tries string with embeded colors codes
     chutes_coloridos = []
@@ -137,7 +137,7 @@ def clean_line():
 
 def clean_last_line():
     s = ""
-    for i in range(6 + 1):
+    for i in range(6 + 5):
         s += "\n"
     for i in range(80):
         s += " "
@@ -146,7 +146,7 @@ def clean_last_line():
 
 def clean_keyboard_area():
     s = ""
-    for i in range(6 + 3):
+    for i in range(6 + 2):
         s += "\n"
     for i in range(3):
         for i in range(80):
@@ -171,7 +171,7 @@ def print_keyboard(chutes):
 
         print(f"\r{linha_colorida}")
 
-    print("\r", end="\033[12A")
+    print("\r", end="\033[11A")
 
 
 def get_keyboard_lines_with_hints(chutes):
@@ -221,7 +221,8 @@ palavra = palavras[random_number].upper()
 # START
 lim_chutes = 6
 chutes = []
-print("----O TERMO TERMINAL----")
+print("-------------O TERMO TERMINAL--------------")
+print("cópia para terminal de https://www.term.ooo\n")
 while 1:
     # INPUT
     print_keyboard(chutes)
@@ -230,7 +231,7 @@ while 1:
         clean_last_line()
         print(
             f"\rEssa palavra não é aceita:{chute_atual}",
-            end="\033[8A",
+            end="\033[12A",
         )
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()
@@ -243,10 +244,10 @@ while 1:
     # GANHOU
     if won_the_game(chute_atual):
         clean_last_line()
-        print(f"\rParabéns! Você acertou em {len(chutes)} tentativas!\n\n\n\n")
+        print(f"\rParabéns! Você acertou em {len(chutes)} tentativas!")
         exit(0)
     # PERDEU
     if len(chutes) == lim_chutes:
         clean_last_line()
-        print(f"\rVocê perdeu. A palavra era {palavra}.\n\n\n\n")
+        print(f"\rVocê perdeu. A palavra era {palavra}.")
         exit(0)

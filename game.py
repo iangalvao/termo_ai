@@ -2,6 +2,7 @@ from unidecode import unidecode
 import csv
 import random
 
+# CORES PARA VISUALIZAÇÂO NO TERMINAL
 bcolors = {
     "HEADER": "\033[95m",
     "OKBLUE": "\033[94m",
@@ -13,14 +14,14 @@ bcolors = {
     "BOLD": "\033[1m",
     "UNDERLINE": "\033[4m",
 }
-
 COR_CERTO = bcolors["OKGREEN"]
 COR_POSICAO = bcolors["WARNING"]
 ENDC = bcolors["ENDC"]
 
-
-for name, color in bcolors.items():
-    print(f"{color}{name}{ENDC}")
+# CÒDIGOS PARA CORREÇÂO DE CADA LETRA
+LETRA_INCORRETA = 0
+POS_INCORRETA = 1
+CERTO = 2
 
 
 def count_letters_in_wrong_pos(palavra, chute, letra):
@@ -47,11 +48,6 @@ def letters_in_right_pos(palavra1, palavra2, letra):
             if c2 == letra:
                 c_count += 1
     return c_count
-
-
-LETRA_INCORRETA = 0
-POS_INCORRETA = 1
-CERTO = 2
 
 
 def check_word(chute):
@@ -99,31 +95,36 @@ def won_the_game(chute):
         return 1
 
 
+# ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
 with open("palavras.csv") as csvfile:
     myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
     palavras = next(myreader)
-
 palavras_unidecode = {}
 for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
 
-
+# SORTEIO DA PALAVRA
 random_number = random.randint(1, len(palavras))
 palavra = palavras[random_number].upper()
 
+# START
 lim_chutes = 6
 chutes = []
 while 1:
+    # INPUT
     chute_atual = get_input()
     if not chute_atual:
         print("Essa palavra não é aceita")
-
+    # CORRIGE
     chute_corrigido = check_word(chute_atual)
     chutes.append(chute_corrigido)
+    # VISUALIZA
     print_tries(chutes)
+    # GANHOU
     if won_the_game(chute_atual):
         print("Você venceu!")
         exit(0)
+    # PERDEU
     if len(chutes) == lim_chutes:
         print(f"Você perdeu. A palavra era {palavra}.")
         exit(0)

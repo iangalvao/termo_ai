@@ -14,9 +14,13 @@ bcolors = {
     "UNDERLINE": "\033[4m",
 }
 
-COR_CERTO = bcolors["OKBLUE"]
-COR_POSICAO = bcolors["HEADER"]
+COR_CERTO = bcolors["OKGREEN"]
+COR_POSICAO = bcolors["WARNING"]
 ENDC = bcolors["ENDC"]
+
+
+for name, color in bcolors.items():
+    print(f"{color}{name}{ENDC}")
 
 
 def count_letters_in_wrong_pos(palavra, chute, letra):
@@ -27,17 +31,18 @@ def count_letters_in_wrong_pos(palavra, chute, letra):
 
 def count_letters(palavra, letra):
     res = 0
-    for c in palavra:
-        if c == letra:
+    for c in unidecode(palavra):
+        if c == unidecode(letra):
             res += 1
     return res
 
 
 def letters_in_right_pos(palavra1, palavra2, letra):
     c_count = 0
+    letra = unidecode(letra)
     for i in range(len(palavra2)):
-        c1 = palavra1[i]
-        c2 = palavra2[i]
+        c1 = unidecode(palavra1[i])
+        c2 = unidecode(palavra2[i])
         if c1 == letra:
             if c2 == letra:
                 c_count += 1
@@ -49,9 +54,9 @@ def show_result(chute):
 
     for i in range(5):
         cor = ENDC
-        if chute[i] == palavra[i]:
+        if unidecode(chute[i]) == unidecode(palavra[i]):
             cor = COR_CERTO
-        elif chute[i] in palavra:
+        elif unidecode(chute[i]) in unidecode(palavra):
             if count_letters_in_wrong_pos(palavra, chute, chute[i]) >= count_letters(
                 chute[: i + 1], chute[i]
             ):
@@ -69,9 +74,9 @@ for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
 
 
-random_number = 3  # random.randint(1, len(palavras))
+random_number = random.randint(1, len(palavras))
 palavra = palavras[random_number].upper()
-palavra = "pavão".upper()
+
 lim_chutes = 6
 chutes = []
 while 1:

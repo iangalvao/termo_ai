@@ -80,6 +80,8 @@ def render_try(chute):
 
 def print_tries(chutes):
     # get current tries string with embeded colors codes
+    clean_last_line()
+    print("\r", end="\033[7A")
     render_strings = []
     for chute in chutes:
         render_strings.append((render_try(chute)))
@@ -101,15 +103,31 @@ def print_tries(chutes):
 
 
 def get_input():
-    chute_atual = unidecode(input("\r                           \rSeu chute: ")).upper()
-    if chute_atual.lower() not in palavras_unidecode.keys():
-        return None
-    return palavras_unidecode[chute_atual.lower()].upper()
+    clean_line()
+    chute_atual = unidecode(input("Seu chute: ")).upper()
+
+    return chute_atual
 
 
 def won_the_game(chute):
     if chute == palavra:
         return 1
+
+
+def clean_line():
+    s = ""
+    for i in range(80):
+        s += " "
+    print(f"\r{s}", end="\r")
+
+
+def clean_last_line():
+    s = ""
+    for i in range(6 + 1):
+        s += "\n"
+    for i in range(80):
+        s += " "
+    print(f"\r{s}", end="\r")
 
 
 # ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
@@ -130,12 +148,16 @@ chutes = []
 while 1:
     # INPUT
     chute_atual = get_input()
-    if not chute_atual:
+    if chute_atual.lower() not in palavras_unidecode.keys():
+        clean_last_line()
         print(
-            "\n\n\n\n\n\n\nEssa palavra não é aceita",
+            f"\rEssa palavra não é aceita:{chute_atual}",
             end="\033[8A",
         )
+
         continue
+    chute_atual = palavras_unidecode[chute_atual.lower()].upper()
+
     # CORRIGE
     chute_corrigido = check_word(chute_atual)
     chutes.append(chute_corrigido)
@@ -143,9 +165,11 @@ while 1:
     print_tries(chutes)
     # GANHOU
     if won_the_game(chute_atual):
-        print("\n\n\n\n\n\n\nVocê venceu!             ")
+        clean_last_line()
+        print(f"\rParabéns! Você venceu em {len(chutes)} tentativas!")
         exit(0)
     # PERDEU
     if len(chutes) == lim_chutes:
-        print(f"\n\n\n\n\n\n\nVocê perdeu. A palavra era {palavra}.")
+        clean_last_line()
+        print(f"\rVocê perdeu. A palavra era {palavra}.")
         exit(0)

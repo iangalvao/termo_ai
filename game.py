@@ -14,14 +14,24 @@ bcolors = {
     "BOLD": "\033[1m",
     "UNDERLINE": "\033[4m",
 }
+
+COR_ERRADO = bcolors["FAIL"]
 COR_CERTO = bcolors["OKGREEN"]
 COR_POSICAO = bcolors["WARNING"]
 ENDC = bcolors["ENDC"]
 
 # CÒDIGOS PARA CORREÇÂO DE CADA LETRA
+LETRA_DESCONHECIDA = -1
 LETRA_INCORRETA = 0
 POS_INCORRETA = 1
 CERTO = 2
+
+cores_das_dicas = {
+    LETRA_DESCONHECIDA: ENDC,
+    LETRA_INCORRETA: COR_ERRADO,
+    POS_INCORRETA: COR_POSICAO,
+    CERTO: COR_CERTO,
+}
 
 
 def count_letters_in_wrong_pos(palavra, chute, letra):
@@ -130,6 +140,68 @@ def clean_last_line():
     print(f"\r{s}", end="\r")
 
 
+def clean_keyboard_area():
+    s = ""
+    for i in range(6 + 3):
+        s += "\n"
+    for i in range(3):
+        for i in range(80):
+            s += " "
+        s += "\n"
+    print(f"\r{s}", end="\033[3A")
+
+
+def print_keyboard(chutes):
+    keyboard_lines = get_keyboard_lines_with_hints(chutes)
+    clean_keyboard_area()
+
+    for i in range(len(keyboard_lines)):
+        line = keyboard_lines[i]
+        linha_colorida = ""
+        for pack in line:
+            letra = pack[0]
+            dica = pack[1]
+            cor = cores_das_dicas[dica]
+            letra_colorida = f"{cor}{letra}{ENDC}"
+            linha_colorida += letra_colorida
+
+        print(f"\r{linha_colorida}")
+
+    print("\r", end="\033[12A")
+
+
+def get_keyboard_lines_with_hints(chutes):
+    lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
+    lines_with_hints = [[], [], []]
+    for i in range(len(lines)):
+        line = lines[i]
+        for c in line:
+            hint = get_better_hint(c, chutes)
+            lines_with_hints[i].append((c, hint))
+    return lines_with_hints
+
+
+def get_better_hint(c, chutes):
+    hint = -1
+    for chute in chutes:
+        h = get_hint(c, chute)
+        if h > hint:
+            hint = h
+    return hint
+
+
+def get_hint(c, chute):
+    res = -1
+    for letra_e_dica in chute:
+        letra = letra_e_dica[0]
+        dica = letra_e_dica[1]
+        if c == unidecode(letra):
+            d = dica
+            if d > res:
+                res = d
+    return res
+
+
 # ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
 with open("palavras.csv") as csvfile:
     myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
@@ -147,6 +219,7 @@ lim_chutes = 6
 chutes = []
 while 1:
     # INPUT
+    print_keyboard(chutes)
     chute_atual = get_input()
     if chute_atual.lower() not in palavras_unidecode.keys():
         clean_last_line()
@@ -166,10 +239,10 @@ while 1:
     # GANHOU
     if won_the_game(chute_atual):
         clean_last_line()
-        print(f"\rParabéns! Você venceu em {len(chutes)} tentativas!")
+        print(f"\rParabéns! Você venceu em {len(chutes)} tentativas!\n\n\n\n")
         exit(0)
     # PERDEU
     if len(chutes) == lim_chutes:
         clean_last_line()
-        print(f"\rVocê perdeu. A palavra era {palavra}.")
+        print(f"\rVocê perdeu. A palavra era {palavra}.\n\n\n\n")
         exit(0)

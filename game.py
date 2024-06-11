@@ -66,7 +66,7 @@ def check_word(chute):
     return word
 
 
-def show_result(chute):
+def render_try(chute):
     vis = ""
     for i in range(5):
         cor = ENDC
@@ -75,16 +75,33 @@ def show_result(chute):
         elif chute[i][1] == POS_INCORRETA:
             cor = COR_POSICAO
         vis += f"{cor}{chute[i][0]}{ENDC}"
-    print(vis)
+    return vis
 
 
 def print_tries(chutes):
+    # get current tries string with embeded colors codes
+    render_strings = []
     for chute in chutes:
-        show_result(chute)
+        render_strings.append((render_try(chute)))
+
+    # prepare the final strings, with 6 lines:
+    final_string = ""
+    prefix = "    "
+    for i in range(6):
+        if i < len(render_strings):
+            final_string += prefix + render_strings[i]
+        else:
+            final_string += prefix
+        if i < 5:
+            final_string += "\n"
+    print(
+        final_string,
+        end="\033[6A",
+    )
 
 
 def get_input():
-    chute_atual = unidecode(input("Seu chute: ")).upper()
+    chute_atual = unidecode(input("\r                           \rSeu chute: ")).upper()
     if chute_atual.lower() not in palavras_unidecode.keys():
         return None
     return palavras_unidecode[chute_atual.lower()].upper()
@@ -114,7 +131,11 @@ while 1:
     # INPUT
     chute_atual = get_input()
     if not chute_atual:
-        print("Essa palavra não é aceita")
+        print(
+            "\n\n\n\n\n\n\nEssa palavra não é aceita",
+            end="\033[8A",
+        )
+        continue
     # CORRIGE
     chute_corrigido = check_word(chute_atual)
     chutes.append(chute_corrigido)
@@ -122,9 +143,9 @@ while 1:
     print_tries(chutes)
     # GANHOU
     if won_the_game(chute_atual):
-        print("Você venceu!")
+        print("\n\n\n\n\n\n\nVocê venceu!             ")
         exit(0)
     # PERDEU
     if len(chutes) == lim_chutes:
-        print(f"Você perdeu. A palavra era {palavra}.")
+        print(f"\n\n\n\n\n\n\nVocê perdeu. A palavra era {palavra}.")
         exit(0)

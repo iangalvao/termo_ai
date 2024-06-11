@@ -1,4 +1,7 @@
 import csv
+import random
+
+# Generate a random number between 1 and 100
 
 bcolors = {
     "HEADER": "\033[95m",
@@ -12,16 +15,17 @@ bcolors = {
     "UNDERLINE": "\033[4m",
 }
 
-with open("poucas_palavras.csv") as csvfile:
+with open("palavras.csv") as csvfile:
     myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
     palavras = next(myreader)
 
 print(palavras)
+random_number = random.randint(1, len(palavras))
 
 
 cor_certo = "OKBLUE"
 cor_posicao = "HEADER"
-palavra = palavras[3].upper()
+palavra = palavras[random_number].upper()
 
 chute1 = "TRUPE"
 chute2 = "TERNO"
@@ -49,7 +53,7 @@ def show_result(chute):
 
 lim_chutes = 6
 chutes = []
-for chute in range(lim_chutes):
+while 1:
     a = input("Seu chute: ").upper()
     if a.lower() in palavras:
         chutes.append(a)
@@ -58,5 +62,8 @@ for chute in range(lim_chutes):
             if r:
                 print("Você venceu!")
                 exit(0)
+        if len(chutes) == lim_chutes:
+            print(f"Você perdeu. A palavra era {palavra}.")
+            exit(0)
     else:
         print("Essa palavra não é aceita")

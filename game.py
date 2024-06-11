@@ -93,7 +93,7 @@ def render_try(chute):
 def print_tries(chutes):
     # Clear any warning message
     clean_last_line()
-    print("\r", end="\033[11A")
+    print("\r", end="\033[12A")
 
     # Get current tries string with embeded colors codes
     chutes_coloridos = []
@@ -116,10 +116,14 @@ def print_tries(chutes):
     )
 
 
-def get_input():
-    clean_line()
-    chute_atual = unidecode(input("Seu chute: ")).upper()
-
+def get_input(n):
+    # clean_line()
+    s = ""
+    for i in range(n):
+        s += "\n"
+    chute_atual = unidecode(input(s + "    ")).upper()
+    if n:
+        print("\r", end=f"\033[{n}A")
     return chute_atual
 
 
@@ -171,7 +175,7 @@ def print_keyboard(chutes):
 
         print(f"\r{linha_colorida}")
 
-    print("\r", end="\033[11A")
+    print("\r", end="\033[10A")
 
 
 def get_keyboard_lines_with_hints(chutes):
@@ -222,16 +226,16 @@ palavra = palavras[random_number].upper()
 lim_chutes = 6
 chutes = []
 print("-------------O TERMO TERMINAL--------------")
-print("cópia para terminal de https://www.term.ooo\n")
+print("cópia para terminal de https://www.term.ooo")
 while 1:
     # INPUT
     print_keyboard(chutes)
-    chute_atual = get_input()
+    chute_atual = get_input(len(chutes))
     if chute_atual.lower() not in palavras_unidecode.keys():
         clean_last_line()
         print(
             f"\rEssa palavra não é aceita:{chute_atual}",
-            end="\033[12A",
+            end="\033[13A",
         )
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()

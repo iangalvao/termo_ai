@@ -102,7 +102,7 @@ def print_tries(chutes):
 
     # prepare the final string, with 6 lines:
     string_final = ""
-    prefix = "    "
+    prefix = "                  "
     for i in range(6):
         if i < len(chutes_coloridos):
             string_final += prefix + chutes_coloridos[i]
@@ -127,7 +127,7 @@ def get_input(n):
     if n:
         print(f"\r{s+sp}", end=f"\033[{n}A" + "\r")
 
-    chute_atual = unidecode(input(s + "    ")).upper()
+    chute_atual = unidecode(input(s + "                  ")).upper()
     if n:
         print("\r", end=f"\033[{n}A")
     return chute_atual
@@ -171,7 +171,7 @@ def print_keyboard(chutes):
 
     for i in range(len(keyboard_lines)):
         line = keyboard_lines[i]
-        linha_colorida = ""
+        linha_colorida = "                "
         for pack in line:
             letra = pack[0]
             dica = pack[1]
@@ -225,7 +225,7 @@ for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
 
 # SORTEIO DA PALAVRA
-random_number = 3  # random.randint(1, len(palavras))
+random_number = random.randint(1, len(palavras))
 palavra = palavras[random_number].upper()
 
 # START
@@ -239,9 +239,10 @@ while 1:
     chute_atual = get_input(len(chutes))
     if chute_atual.lower() not in palavras_unidecode.keys():
         clean_last_line()
+        print("\r", end="\033[1A")
         print(
             f"\rEssa palavra não é aceita:{chute_atual}",
-            end="\033[14A",
+            end="\033[13A",
         )
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()

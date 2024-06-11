@@ -93,7 +93,7 @@ def render_try(chute):
 def print_tries(chutes):
     # Clear any warning message
     clean_last_line()
-    print("\r", end="\033[12A")
+    print("\r", end="\033[13A")
 
     # Get current tries string with embeded colors codes
     chutes_coloridos = []
@@ -121,6 +121,12 @@ def get_input(n):
     s = ""
     for i in range(n):
         s += "\n"
+    sp = ""
+    for i in range(80):
+        sp += " "
+    if n:
+        print(f"\r{s+sp}", end=f"\033[{n}A" + "\r")
+
     chute_atual = unidecode(input(s + "    ")).upper()
     if n:
         print("\r", end=f"\033[{n}A")
@@ -141,7 +147,7 @@ def clean_line():
 
 def clean_last_line():
     s = ""
-    for i in range(6 + 5):
+    for i in range(6 + 6):
         s += "\n"
     for i in range(80):
         s += " "
@@ -219,7 +225,7 @@ for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
 
 # SORTEIO DA PALAVRA
-random_number = random.randint(1, len(palavras))
+random_number = 3  # random.randint(1, len(palavras))
 palavra = palavras[random_number].upper()
 
 # START
@@ -235,7 +241,7 @@ while 1:
         clean_last_line()
         print(
             f"\rEssa palavra não é aceita:{chute_atual}",
-            end="\033[13A",
+            end="\033[14A",
         )
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()

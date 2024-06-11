@@ -42,19 +42,48 @@ def count_letters(palavra, letra):
     return res
 
 
+def count_letters_in_wrong_pos(palavra, chute, letra):
+    c = count_letters(palavra, letra)
+    w = letters_in_right_pos(palavra, chute, letra)
+    return c - w
+
+
+def letters_in_right_pos(palavra1, palavra2, letra):
+    c_count = 0
+    for i in range(len(palavra2)):
+        c1 = palavra1[i]
+        c2 = palavra2[i]
+        if c1 == letra:
+            if c2 == letra:
+                c_count += 1
+    return c_count
+
+
+def letters_right_pos_dif(palavra1, palavra2, letra):
+    res = 0
+    for c in palavra1:
+        if c == letra:
+            res += 1
+    for c in palavra2:
+        if c == letra:
+            res -= 1
+
+    return res
+
+
 def show_result(chute):
     vis = ""
 
     for i in range(5):
+        cor = "ENDC"
         if chute[i] == palavra[i]:
             cor = cor_certo
         elif chute[i] in palavra:
-            if count_letters(palavra, chute[i]) >= count_letters(
+            if count_letters_in_wrong_pos(palavra, chute, chute[i]) >= count_letters(
                 chute[: i + 1], chute[i]
             ):
                 cor = cor_posicao
-        else:
-            cor = "ENDC"
+
         vis += f"{bcolors[cor]}{chute[i]}{bcolors['ENDC']}"
     print(vis)
     if chute == palavra:

@@ -49,20 +49,54 @@ def letters_in_right_pos(palavra1, palavra2, letra):
     return c_count
 
 
-def show_result(chute):
-    vis = ""
+LETRA_INCORRETA = 0
+POS_INCORRETA = 1
+CERTO = 2
+
+
+def check_word(chute):
+    word = []
 
     for i in range(5):
-        cor = ENDC
+        res = LETRA_INCORRETA
         if unidecode(chute[i]) == unidecode(palavra[i]):
-            cor = COR_CERTO
+            res = CERTO
         elif unidecode(chute[i]) in unidecode(palavra):
             if count_letters_in_wrong_pos(palavra, chute, chute[i]) >= count_letters(
                 chute[: i + 1], chute[i]
             ):
-                cor = COR_POSICAO
-        vis += f"{cor}{chute[i]}{ENDC}"
+                res = POS_INCORRETA
+        word.append((chute[i], res))
+    return word
+
+
+def show_result(chute):
+    vis = ""
+    for i in range(5):
+        cor = ENDC
+        if chute[i][1] == CERTO:
+            cor = COR_CERTO
+        elif chute[i][1] == POS_INCORRETA:
+            cor = COR_POSICAO
+        vis += f"{cor}{chute[i][0]}{ENDC}"
     print(vis)
+
+
+def print_tries(chutes):
+    for chute in chutes:
+        show_result(chute)
+
+
+def get_input():
+    chute_atual = unidecode(input("Seu chute: ")).upper()
+    if chute_atual.lower() not in palavras_unidecode.keys():
+        return None
+    return palavras_unidecode[chute_atual.lower()].upper()
+
+
+def won_the_game(chute):
+    if chute == palavra:
+        return 1
 
 
 with open("palavras.csv") as csvfile:
@@ -80,15 +114,14 @@ palavra = palavras[random_number].upper()
 lim_chutes = 6
 chutes = []
 while 1:
-    chute_atual = unidecode(input("Seu chute: ")).upper()
-    if chute_atual.lower() not in palavras_unidecode.keys():
+    chute_atual = get_input()
+    if not chute_atual:
         print("Essa palavra não é aceita")
-        continue
-    chute_atual = palavras_unidecode[chute_atual.lower()].upper()
-    chutes.append(chute_atual)
-    for chute in chutes:
-        show_result(chute)
-    if chute_atual == palavra:
+
+    chute_corrigido = check_word(chute_atual)
+    chutes.append(chute_corrigido)
+    print_tries(chutes)
+    if won_the_game(chute_atual):
         print("Você venceu!")
         exit(0)
     if len(chutes) == lim_chutes:

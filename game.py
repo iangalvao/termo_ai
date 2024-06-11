@@ -15,23 +15,14 @@ bcolors = {
     "UNDERLINE": "\033[4m",
 }
 
-with open("palavras.csv") as csvfile:
-    myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
-    palavras = next(myreader)
-
-print(palavras)
-random_number = 3  # random.randint(1, len(palavras))
-
-
 cor_certo = "OKBLUE"
 cor_posicao = "HEADER"
-palavra = palavras[random_number].upper()
 
-chute1 = "TRUPE"
-chute2 = "TERNO"
-chute3 = "TERMO"
 
-chutes = [chute1, chute2, chute3]
+def count_letters_in_wrong_pos(palavra, chute, letra):
+    c = count_letters(palavra, letra)
+    w = letters_in_right_pos(palavra, chute, letra)
+    return c - w
 
 
 def count_letters(palavra, letra):
@@ -40,12 +31,6 @@ def count_letters(palavra, letra):
         if c == letra:
             res += 1
     return res
-
-
-def count_letters_in_wrong_pos(palavra, chute, letra):
-    c = count_letters(palavra, letra)
-    w = letters_in_right_pos(palavra, chute, letra)
-    return c - w
 
 
 def letters_in_right_pos(palavra1, palavra2, letra):
@@ -57,18 +42,6 @@ def letters_in_right_pos(palavra1, palavra2, letra):
             if c2 == letra:
                 c_count += 1
     return c_count
-
-
-def letters_right_pos_dif(palavra1, palavra2, letra):
-    res = 0
-    for c in palavra1:
-        if c == letra:
-            res += 1
-    for c in palavra2:
-        if c == letra:
-            res -= 1
-
-    return res
 
 
 def show_result(chute):
@@ -86,24 +59,28 @@ def show_result(chute):
 
         vis += f"{bcolors[cor]}{chute[i]}{bcolors['ENDC']}"
     print(vis)
-    if chute == palavra:
-        return 1
-    return 0
 
+
+with open("palavras.csv") as csvfile:
+    myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
+    palavras = next(myreader)
+
+random_number = 3  # random.randint(1, len(palavras))
+palavra = palavras[random_number].upper()
 
 lim_chutes = 6
 chutes = []
 while 1:
-    a = input("Seu chute: ").upper()
-    if a.lower() in palavras:
-        chutes.append(a)
-        for chute in chutes:
-            r = show_result(chute)
-            if r:
-                print("Você venceu!")
-                exit(0)
-        if len(chutes) == lim_chutes:
-            print(f"Você perdeu. A palavra era {palavra}.")
-            exit(0)
-    else:
+    chute_atual = input("Seu chute: ").upper()
+    if chute_atual.lower() not in palavras:
         print("Essa palavra não é aceita")
+        continue
+    chutes.append(chute_atual)
+    for chute in chutes:
+        show_result(chute)
+    if chute_atual == palavra:
+        print("Você venceu!")
+        exit(0)
+    if len(chutes) == lim_chutes:
+        print(f"Você perdeu. A palavra era {palavra}.")
+        exit(0)

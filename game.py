@@ -20,7 +20,7 @@ with open("palavras.csv") as csvfile:
     palavras = next(myreader)
 
 print(palavras)
-random_number = random.randint(1, len(palavras))
+random_number = 3  # random.randint(1, len(palavras))
 
 
 cor_certo = "OKBLUE"
@@ -34,6 +34,14 @@ chute3 = "TERMO"
 chutes = [chute1, chute2, chute3]
 
 
+def count_letters(palavra, letra):
+    res = 0
+    for c in palavra:
+        if c == letra:
+            res += 1
+    return res
+
+
 def show_result(chute):
     vis = ""
 
@@ -41,7 +49,10 @@ def show_result(chute):
         if chute[i] == palavra[i]:
             cor = cor_certo
         elif chute[i] in palavra:
-            cor = cor_posicao
+            if count_letters(palavra, chute[i]) >= count_letters(
+                chute[: i + 1], chute[i]
+            ):
+                cor = cor_posicao
         else:
             cor = "ENDC"
         vis += f"{bcolors[cor]}{chute[i]}{bcolors['ENDC']}"

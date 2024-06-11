@@ -1,3 +1,5 @@
+import csv
+
 bcolors = {
     "HEADER": "\033[95m",
     "OKBLUE": "\033[94m",
@@ -10,15 +12,16 @@ bcolors = {
     "UNDERLINE": "\033[4m",
 }
 
-for name, color in bcolors.items():
-    print(f"{color}{name} ON THIS BIG SENTENCE{bcolors['ENDC']}")
-print(
-    f"{bcolors['HEADER']}A{bcolors['ENDC']}NO{bcolors['OKBLUE']}T{bcolors['ENDC']}A\n"
-)
+with open("poucas_palavras.csv") as csvfile:
+    myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
+    palavras = next(myreader)
+
+print(palavras)
+
 
 cor_certo = "OKBLUE"
 cor_posicao = "HEADER"
-palavra = "TERMO"
+palavra = palavras[3].upper()
 
 chute1 = "TRUPE"
 chute2 = "TERNO"
@@ -47,10 +50,13 @@ def show_result(chute):
 lim_chutes = 6
 chutes = []
 for chute in range(lim_chutes):
-    a = input("Seu chute:")
-    chutes.append(a)
-    for chute in chutes:
-        r = show_result(chute)
-        if r:
-            print("Você venceu!")
-            exit(0)
+    a = input("Seu chute: ").upper()
+    if a.lower() in palavras:
+        chutes.append(a)
+        for chute in chutes:
+            r = show_result(chute)
+            if r:
+                print("Você venceu!")
+                exit(0)
+    else:
+        print("Essa palavra não é aceita")

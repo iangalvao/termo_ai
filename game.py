@@ -1,8 +1,6 @@
 import csv
 import random
 
-# Generate a random number between 1 and 100
-
 bcolors = {
     "HEADER": "\033[95m",
     "OKBLUE": "\033[94m",
@@ -15,8 +13,9 @@ bcolors = {
     "UNDERLINE": "\033[4m",
 }
 
-cor_certo = "OKBLUE"
-cor_posicao = "HEADER"
+COR_CERTO = bcolors["OKBLUE"]
+COR_POSICAO = bcolors["HEADER"]
+ENDC = bcolors["ENDC"]
 
 
 def count_letters_in_wrong_pos(palavra, chute, letra):
@@ -48,16 +47,16 @@ def show_result(chute):
     vis = ""
 
     for i in range(5):
-        cor = "ENDC"
+        cor = ENDC
         if chute[i] == palavra[i]:
-            cor = cor_certo
+            cor = COR_CERTO
         elif chute[i] in palavra:
             if count_letters_in_wrong_pos(palavra, chute, chute[i]) >= count_letters(
                 chute[: i + 1], chute[i]
             ):
-                cor = cor_posicao
+                cor = COR_POSICAO
 
-        vis += f"{bcolors[cor]}{chute[i]}{bcolors['ENDC']}"
+        vis += f"{cor}{chute[i]}{ENDC}"
     print(vis)
 
 

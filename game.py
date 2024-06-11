@@ -1,6 +1,8 @@
 from unidecode import unidecode
 import csv
 import random
+from colorama import Fore, Back, Style
+
 
 # CORES PARA VISUALIZAÇÂO NO TERMINAL
 bcolors = {
@@ -15,10 +17,10 @@ bcolors = {
     "UNDERLINE": "\033[4m",
 }
 
-COR_ERRADO = bcolors["FAIL"]
-COR_CERTO = bcolors["OKGREEN"]
-COR_POSICAO = bcolors["WARNING"]
-ENDC = bcolors["ENDC"]
+COR_ERRADO = Back.LIGHTRED_EX
+COR_CERTO = Back.GREEN
+COR_POSICAO = Back.YELLOW
+ENDC = Back.RESET
 
 # CÒDIGOS PARA CORREÇÂO DE CADA LETRA
 LETRA_DESCONHECIDA = -1
@@ -89,25 +91,27 @@ def render_try(chute):
 
 
 def print_tries(chutes):
-    # get current tries string with embeded colors codes
+    # Clear any warning message
     clean_last_line()
     print("\r", end="\033[7A")
-    render_strings = []
-    for chute in chutes:
-        render_strings.append((render_try(chute)))
 
-    # prepare the final strings, with 6 lines:
-    final_string = ""
+    # Get current tries string with embeded colors codes
+    chutes_coloridos = []
+    for chute in chutes:
+        chutes_coloridos.append((render_try(chute)))
+
+    # prepare the final string, with 6 lines:
+    string_final = ""
     prefix = "    "
     for i in range(6):
-        if i < len(render_strings):
-            final_string += prefix + render_strings[i]
+        if i < len(chutes_coloridos):
+            string_final += prefix + chutes_coloridos[i]
         else:
-            final_string += prefix
+            string_final += prefix
         if i < 5:
-            final_string += "\n"
+            string_final += "\n"
     print(
-        final_string,
+        string_final,
         end="\033[6A",
     )
 
@@ -217,6 +221,7 @@ palavra = palavras[random_number].upper()
 # START
 lim_chutes = 6
 chutes = []
+print("----O TERMO TERMINAL----")
 while 1:
     # INPUT
     print_keyboard(chutes)
@@ -227,7 +232,6 @@ while 1:
             f"\rEssa palavra não é aceita:{chute_atual}",
             end="\033[8A",
         )
-
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()
 
@@ -239,7 +243,7 @@ while 1:
     # GANHOU
     if won_the_game(chute_atual):
         clean_last_line()
-        print(f"\rParabéns! Você venceu em {len(chutes)} tentativas!\n\n\n\n")
+        print(f"\rParabéns! Você acertou em {len(chutes)} tentativas!\n\n\n\n")
         exit(0)
     # PERDEU
     if len(chutes) == lim_chutes:

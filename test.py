@@ -1,14 +1,7 @@
-from time import sleep
+from colorama import Fore, Back, Style
 
-for x in range(10):
-    print(
-        """Progress {:2.1%}\n
-fa
-""".format(
-            x / 10
-        ),
-        end="\033[3A",
-    )
-    sleep(200 / 1000)
-
-print("Completed                \n           \n          ")
+print(Fore.RED + "some red text" + Fore.WHITE + " and not anymore")
+print(Back.GREEN + "GREEN TEXT" + Back.RESET + " and not anymore")
+print(Style.DIM + "and in dim text" + Style.RESET_ALL + " and not anymore", end="\r")
+print(f"\r{Style.RESET_ALL}")
+print("back to normal now")

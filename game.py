@@ -17,6 +17,8 @@ bcolors = {
     "UNDERLINE": "\033[4m",
 }
 
+UNDERLINE = "\033[4m"
+END_UNDERLINE = "\033[0m"
 COR_ERRADO = Back.LIGHTRED_EX
 COR_CERTO = Back.GREEN
 COR_POSICAO = Back.YELLOW
@@ -126,7 +128,8 @@ def get_input(n):
     for i in range(n):
         s += "\n"
     sp = ""
-    for i in range(80):
+    sp = "                  " + UNDERLINE + "     " + END_UNDERLINE
+    for i in range(80 - len(sp)):
         sp += " "
     if n:
         print(f"\r{s+sp}", end=f"\033[{n}A" + "\r")
@@ -231,8 +234,8 @@ for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
 
 # SORTEIO DA PALAVRA
-random_number = random.randint(1, len(palavras))
-palavra = palavras[random_number].upper()
+random_number = random.randint(1, len(palavras) - 9147)
+palavra = palavras[9147 + random_number].upper()
 
 
 # START
@@ -240,6 +243,13 @@ lim_chutes = 6
 chutes = []
 print("-------------O TERMO TERMINAL--------------")
 print("cópia para terminal de https://www.term.ooo")
+s = ""
+for i in range(lim_chutes):
+    s += "\n"
+    print(
+        s + "                  " + UNDERLINE + "     " + END_UNDERLINE + " ",
+        end=f"\033[{i+1}A\r",
+    )
 clean_last_line()
 print("\n\n\r", end="\033[12A\r")
 while 1:

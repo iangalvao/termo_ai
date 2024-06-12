@@ -242,7 +242,7 @@ palavra = palavras[9147 + random_number].upper()
 lim_chutes = 6
 chutes = []
 print("-------------O TERMO TERMINAL--------------")
-print("cópia para terminal de https://www.term.ooo")
+print("versão para terminal de https://www.term.ooo")
 s = ""
 for i in range(lim_chutes):
     s += "\n"
@@ -274,7 +274,7 @@ while 1:
     if won_the_game(chute_atual):
         print("\n")
         clean_last_line()
-        print(f"\r\nParabéns! Você acertou em {len(chutes)} tentativas!")
+        print(f"\rParabéns! Você acertou em {len(chutes)} tentativas!")
         exit(0)
     # PERDEU
     if len(chutes) == lim_chutes:

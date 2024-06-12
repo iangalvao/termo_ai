@@ -70,7 +70,11 @@ def check_word(chute):
         if unidecode(chute[i]) == unidecode(palavra[i]):
             res = CERTO
         elif unidecode(chute[i]) in unidecode(palavra):
-            if count_letters_in_wrong_pos(palavra, chute, chute[i]) >= count_letters(
+            if count_letters_in_wrong_pos(
+                palavra, chute, chute[i]
+            ) + letters_in_right_pos(
+                palavra[: i + 1], chute[: i + 1], chute[i]
+            ) >= count_letters(
                 chute[: i + 1], chute[i]
             ):
                 res = POS_INCORRETA
@@ -172,6 +176,8 @@ def print_keyboard(chutes):
     for i in range(len(keyboard_lines)):
         line = keyboard_lines[i]
         linha_colorida = "                "
+        if i == 2:
+            linha_colorida += " "
         for pack in line:
             letra = pack[0]
             dica = pack[1]
@@ -227,6 +233,7 @@ for palavra in palavras:
 # SORTEIO DA PALAVRA
 random_number = random.randint(1, len(palavras))
 palavra = palavras[random_number].upper()
+palavra = "ARAME"
 
 # START
 lim_chutes = 6

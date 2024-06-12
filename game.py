@@ -234,7 +234,7 @@ for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
 
 # SORTEIO DA PALAVRA
-random_number = random.randint(1, len(palavras) - 9147)
+random_number = random.randint(1, len(palavras) - 1 - 9147)
 palavra = palavras[9147 + random_number].upper()
 
 

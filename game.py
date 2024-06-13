@@ -115,40 +115,39 @@ class World_Checker:
 
 
 ###########################################################################
-################          TECLADO        ####################
+################                 TECLADO               ####################
 ###########################################################################
 
 
-def get_keyboard_lines_with_hints(chutes):
-    lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
-    lines_with_hints = [[], [], []]
-    for i in range(len(lines)):
-        line = lines[i]
-        for c in line:
-            hint = get_better_char_hint(c, chutes)
-            lines_with_hints[i].append((c, hint))
-    return lines_with_hints
+class Keyboard_Checker:
+    def get_keyboard_lines_with_hints(self, chutes):
+        lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
+        lines_with_hints = [[], [], []]
+        for i in range(len(lines)):
+            line = lines[i]
+            for c in line:
+                hint = self.get_better_char_hint(c, chutes)
+                lines_with_hints[i].append((c, hint))
+        return lines_with_hints
 
+    def get_better_char_hint(self, c, chutes):
+        hint = -1
+        for chute in chutes:
+            h = self.get_chat_hint(c, chute)
+            if h > hint:
+                hint = h
+        return hint
 
-def get_better_char_hint(c, chutes):
-    hint = -1
-    for chute in chutes:
-        h = get_chat_hint(c, chute)
-        if h > hint:
-            hint = h
-    return hint
-
-
-def get_chat_hint(c, chute):
-    res = -1
-    for letra_e_dica in chute:
-        letra = letra_e_dica[0]
-        dica = letra_e_dica[1]
-        if c == unidecode(letra):
-            d = dica
-            if d > res:
-                res = d
-    return res
+    def get_chat_hint(self, c, chute):
+        res = -1
+        for letra_e_dica in chute:
+            letra = letra_e_dica[0]
+            dica = letra_e_dica[1]
+            if c == unidecode(letra):
+                d = dica
+                if d > res:
+                    res = d
+        return res
 
 
 ###########################################################################
@@ -237,8 +236,7 @@ def print_tries(chutes):
 
 
 #################                TECLADO                  ####################
-def print_keyboard(chutes):
-    keyboard_lines = get_keyboard_lines_with_hints(chutes)
+def print_keyboard(keyboard_lines):
     clean_keyboard_area()
 
     for i in range(len(keyboard_lines)):
@@ -350,6 +348,7 @@ palavra = palavras[9147 + random_number].upper()
 lim_chutes = 6
 
 word_checker = World_Checker()
+keyboard_checker = Keyboard_Checker()
 chutes = []
 
 
@@ -361,7 +360,8 @@ first_print()
 
 while 1:
     # INPUT
-    print_keyboard(chutes)
+    keyboard_lines = keyboard_checker.get_keyboard_lines_with_hints(chutes)
+    print_keyboard(keyboard_lines)
     chute_atual = get_input(len(chutes))
     if word_checker.check_valid_word(chute_atual):
         print_word_not_accepted(chute_atual)

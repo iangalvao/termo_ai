@@ -67,9 +67,13 @@ def won_the_game(chute):
 ###########################################################################
 
 
-class World_Checker:
-    def check_valid_word(self, palavra):
-        return palavra.lower() not in palavras_unidecode.keys()
+def check_valid_word(palavra):
+    return palavra.lower() not in palavras_unidecode.keys()
+
+
+class Chutes:
+    def __init__(self) -> None:
+        self.chutes = []
 
     def count_letters_in_wrong_pos(self, palavra, chute, letra):
         c = self.count_letters(palavra, letra)
@@ -113,6 +117,9 @@ class World_Checker:
             word.append((chute[i], res))
         return word
 
+    def update(self, chute):
+        self.chutes.append(self.check_word(palavra, chute))
+
 
 ###########################################################################
 ################                 TECLADO               ####################
@@ -149,35 +156,6 @@ class Keyboard:
 
     def get_letter_hint(self, letra):
         return self.state[letra]
-
-    def get_keyboard_lines_with_hints_old(self, chutes):
-        lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
-        lines_with_hints = [[], [], []]
-        for i in range(len(lines)):
-            line = lines[i]
-            for c in line:
-                hint = self.get_better_char_hint(c, chutes)
-                lines_with_hints[i].append((c, hint))
-        return lines_with_hints
-
-    def get_better_char_hint(self, c, chutes):
-        hint = -1
-        for chute in chutes:
-            h = self.get_chat_hint(c, chute)
-            if h > hint:
-                hint = h
-        return hint
-
-    def get_chat_hint(self, c, chute):
-        res = -1
-        for letra_e_dica in chute:
-            letra = letra_e_dica[0]
-            dica = letra_e_dica[1]
-            if c == unidecode(letra):
-                d = dica
-                if d > res:
-                    res = d
-        return res
 
 
 ###########################################################################
@@ -377,7 +355,7 @@ palavra = palavras[9147 + random_number].upper()
 
 lim_chutes = 6
 
-word_checker = World_Checker()
+word_checker = Chutes()
 keyboard = Keyboard()
 chutes = []
 
@@ -393,7 +371,7 @@ while 1:
     keyboard_lines = keyboard.get_keyboard_lines_with_hints()
     print_keyboard(keyboard_lines)
     chute_atual = get_input(len(chutes))
-    if word_checker.check_valid_word(chute_atual):
+    if check_valid_word(chute_atual):
         print_word_not_accepted(chute_atual)
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()

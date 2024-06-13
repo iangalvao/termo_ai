@@ -119,8 +119,38 @@ class World_Checker:
 ###########################################################################
 
 
-class Keyboard_Checker:
-    def get_keyboard_lines_with_hints(self, chutes):
+class Keyboard:
+    def __init__(self) -> None:
+        self.lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
+        self.state = {}
+        for line in self.lines:
+            for c in line:
+                self.set_letter_hint(c, LETRA_DESCONHECIDA)
+
+    def process_hints(self, chute):
+        for letra_e_dica in chute:
+            letra = letra_e_dica[0]
+            dica = letra_e_dica[1]
+            dica_atual = self.get_letter_hint(letra)
+            if dica > dica_atual:
+                self.set_letter_hint(letra, dica)
+
+    def get_keyboard_lines_with_hints(self):
+        res = []
+        for linha in self.lines:
+            linha_com_dicas = []
+            for letra in linha:
+                linha_com_dicas.append((letra, self.get_letter_hint(letra)))
+            res.append(linha_com_dicas)
+        return res
+
+    def set_letter_hint(self, letra, dica):
+        self.state[letra] = dica
+
+    def get_letter_hint(self, letra):
+        return self.state[letra]
+
+    def get_keyboard_lines_with_hints_old(self, chutes):
         lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
         lines_with_hints = [[], [], []]
         for i in range(len(lines)):
@@ -348,7 +378,7 @@ palavra = palavras[9147 + random_number].upper()
 lim_chutes = 6
 
 word_checker = World_Checker()
-keyboard_checker = Keyboard_Checker()
+keyboard = Keyboard()
 chutes = []
 
 
@@ -360,7 +390,7 @@ first_print()
 
 while 1:
     # INPUT
-    keyboard_lines = keyboard_checker.get_keyboard_lines_with_hints(chutes)
+    keyboard_lines = keyboard.get_keyboard_lines_with_hints()
     print_keyboard(keyboard_lines)
     chute_atual = get_input(len(chutes))
     if word_checker.check_valid_word(chute_atual):
@@ -370,7 +400,9 @@ while 1:
 
     # CORRIGE
     chute_corrigido = word_checker.check_word(palavra, chute_atual)
+    # chutes.update(chutes)
     chutes.append(chute_corrigido)
+    keyboard.process_hints(chute_corrigido)
     # VISUALIZA
     print_tries(chutes)
     # GANHOU

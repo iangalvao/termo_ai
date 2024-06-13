@@ -45,6 +45,18 @@ cores_das_dicas = {
 
 ###########################################################################
 ################                                       ####################
+################                 JOGO                  ####################
+################                                       ####################
+###########################################################################
+
+
+def won_the_game(chute):
+    if chute == palavra:
+        return 1
+
+
+###########################################################################
+################                                       ####################
 ################                LÓGICA                 ####################
 ################                                       ####################
 ###########################################################################
@@ -55,59 +67,51 @@ cores_das_dicas = {
 ###########################################################################
 
 
-def check_valid_word(palavra):
-    return palavra.lower() not in palavras_unidecode.keys()
+class World_Checker:
+    def check_valid_word(self, palavra):
+        return palavra.lower() not in palavras_unidecode.keys()
 
+    def count_letters_in_wrong_pos(self, palavra, chute, letra):
+        c = self.count_letters(palavra, letra)
+        w = self.letters_in_right_pos(palavra, chute, letra)
+        return c - w
 
-def count_letters_in_wrong_pos(palavra, chute, letra):
-    c = count_letters(palavra, letra)
-    w = letters_in_right_pos(palavra, chute, letra)
-    return c - w
+    def count_letters(self, palavra, letra):
+        res = 0
+        for c in unidecode(palavra):
+            if c == unidecode(letra):
+                res += 1
+        return res
 
+    def letters_in_right_pos(self, palavra1, palavra2, letra):
+        c_count = 0
+        letra = unidecode(letra)
+        for i in range(len(palavra2)):
+            c1 = unidecode(palavra1[i])
+            c2 = unidecode(palavra2[i])
+            if c1 == letra:
+                if c2 == letra:
+                    c_count += 1
+        return c_count
 
-def count_letters(palavra, letra):
-    res = 0
-    for c in unidecode(palavra):
-        if c == unidecode(letra):
-            res += 1
-    return res
+    def check_word(self, palavra, chute):
+        word = []
 
-
-def letters_in_right_pos(palavra1, palavra2, letra):
-    c_count = 0
-    letra = unidecode(letra)
-    for i in range(len(palavra2)):
-        c1 = unidecode(palavra1[i])
-        c2 = unidecode(palavra2[i])
-        if c1 == letra:
-            if c2 == letra:
-                c_count += 1
-    return c_count
-
-
-def check_word(chute):
-    word = []
-
-    for i in range(5):
-        res = LETRA_INCORRETA
-        if unidecode(chute[i]) == unidecode(palavra[i]):
-            res = CERTO
-        elif unidecode(chute[i]) in unidecode(palavra):
-            if count_letters_in_wrong_pos(
-                palavra, chute, chute[i]
-            ) + letters_in_right_pos(
-                palavra[: i + 1], chute[: i + 1], chute[i]
-            ) >= count_letters(
-                chute[: i + 1], chute[i]
-            ):
-                res = POS_INCORRETA
-        word.append((chute[i], res))
-    return word
-
-
-def won_the_game(chute):
-    if chute == palavra:
-        return 1
+        for i in range(5):
+            res = LETRA_INCORRETA
+            if unidecode(chute[i]) == unidecode(palavra[i]):
+                res = CERTO
+            elif unidecode(chute[i]) in unidecode(palavra):
+                if self.count_letters_in_wrong_pos(
+                    palavra, chute, chute[i]
+                ) + self.letters_in_right_pos(
+                    palavra[: i + 1], chute[: i + 1], chute[i]
+                ) >= self.count_letters(
+                    chute[: i + 1], chute[i]
+                ):
+                    res = POS_INCORRETA
+            word.append((chute[i], res))
+        return word
 
 
 ###########################################################################
@@ -344,6 +348,8 @@ random_number = random.randint(1, len(palavras) - 1 - 9147)
 palavra = palavras[9147 + random_number].upper()
 
 lim_chutes = 6
+
+word_checker = World_Checker()
 chutes = []
 
 
@@ -357,13 +363,13 @@ while 1:
     # INPUT
     print_keyboard(chutes)
     chute_atual = get_input(len(chutes))
-    if check_valid_word(chute_atual):
+    if word_checker.check_valid_word(chute_atual):
         print_word_not_accepted(chute_atual)
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()
 
     # CORRIGE
-    chute_corrigido = check_word(chute_atual)
+    chute_corrigido = word_checker.check_word(palavra, chute_atual)
     chutes.append(chute_corrigido)
     # VISUALIZA
     print_tries(chutes)

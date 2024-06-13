@@ -38,6 +38,10 @@ cores_das_dicas = {
 }
 
 
+def check_valid_word(palavra):
+    return palavra.lower() not in palavras_unidecode.keys()
+
+
 def count_letters_in_wrong_pos(palavra, chute, letra):
     c = count_letters(palavra, letra)
     w = letters_in_right_pos(palavra, chute, letra)
@@ -84,6 +88,70 @@ def check_word(chute):
     return word
 
 
+def won_the_game(chute):
+    if chute == palavra:
+        return 1
+
+
+def get_keyboard_lines_with_hints(chutes):
+    lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
+    lines_with_hints = [[], [], []]
+    for i in range(len(lines)):
+        line = lines[i]
+        for c in line:
+            hint = get_better_char_hint(c, chutes)
+            lines_with_hints[i].append((c, hint))
+    return lines_with_hints
+
+
+def get_better_char_hint(c, chutes):
+    hint = -1
+    for chute in chutes:
+        h = get_chat_hint(c, chute)
+        if h > hint:
+            hint = h
+    return hint
+
+
+def get_chat_hint(c, chute):
+    res = -1
+    for letra_e_dica in chute:
+        letra = letra_e_dica[0]
+        dica = letra_e_dica[1]
+        if c == unidecode(letra):
+            d = dica
+            if d > res:
+                res = d
+    return res
+
+
+def clean_line():
+    s = ""
+    for i in range(80):
+        s += " "
+    print(f"\r{s}", end="\r")
+
+
+def clean_last_line():
+    s = ""
+    for i in range(6 + 4):
+        s += "\n"
+    for i in range(80):
+        s += " "
+    print(f"\r{s}", end="\r")
+
+
+def clean_keyboard_area():
+    s = ""
+    for i in range(6 + 2):
+        s += "\n"
+    for i in range(3):
+        for i in range(80):
+            s += " "
+        s += "\n"
+    print(f"\r{s}", end="\033[3A")
+
+
 def render_try(chute):
     vis = ""
     for i in range(5):
@@ -122,56 +190,6 @@ def print_tries(chutes):
     )
 
 
-def get_input(n):
-    # clean_line()
-    s = ""
-    for i in range(n):
-        s += "\n"
-    sp = ""
-    sp = "                  " + UNDERLINE + "     " + END_UNDERLINE
-    for i in range(80 - len(sp)):
-        sp += " "
-    if n:
-        print(f"\r{s+sp}", end=f"\033[{n}A" + "\r")
-
-    chute_atual = unidecode(input(s + "                  ")).upper()
-    if n:
-        print("\r", end=f"\033[{n}A")
-    return chute_atual
-
-
-def won_the_game(chute):
-    if chute == palavra:
-        return 1
-
-
-def clean_line():
-    s = ""
-    for i in range(80):
-        s += " "
-    print(f"\r{s}", end="\r")
-
-
-def clean_last_line():
-    s = ""
-    for i in range(6 + 4):
-        s += "\n"
-    for i in range(80):
-        s += " "
-    print(f"\r{s}", end="\r")
-
-
-def clean_keyboard_area():
-    s = ""
-    for i in range(6 + 2):
-        s += "\n"
-    for i in range(3):
-        for i in range(80):
-            s += " "
-        s += "\n"
-    print(f"\r{s}", end="\033[3A")
-
-
 def print_keyboard(chutes):
     keyboard_lines = get_keyboard_lines_with_hints(chutes)
     clean_keyboard_area()
@@ -193,37 +211,59 @@ def print_keyboard(chutes):
     print("\r", end="\033[10A")
 
 
-def get_keyboard_lines_with_hints(chutes):
-    lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
-    lines_with_hints = [[], [], []]
-    for i in range(len(lines)):
-        line = lines[i]
-        for c in line:
-            hint = get_better_hint(c, chutes)
-            lines_with_hints[i].append((c, hint))
-    return lines_with_hints
+def print_won_the_game(number_of_tries):
+    print("\n")
+    clean_last_line()
+    print(f"\rParabéns! Você acertou em {len(chutes)} tentativas!")
 
 
-def get_better_hint(c, chutes):
-    hint = -1
-    for chute in chutes:
-        h = get_hint(c, chute)
-        if h > hint:
-            hint = h
-    return hint
+def print_loss_the_game(palavra):
+    print("\n")
+    clean_last_line()
+    print(f"\rVocê perdeu. A palavra era {palavra}.")
 
 
-def get_hint(c, chute):
-    res = -1
-    for letra_e_dica in chute:
-        letra = letra_e_dica[0]
-        dica = letra_e_dica[1]
-        if c == unidecode(letra):
-            d = dica
-            if d > res:
-                res = d
-    return res
+def first_print():
+    print("-------------O TERMO TERMINAL--------------")
+    print("versão para terminal de https://www.term.ooo")
+    s = ""
+    for i in range(lim_chutes):
+        s += "\n"
+        print(
+            s + "                  " + UNDERLINE + "     " + END_UNDERLINE + " ",
+            end=f"\033[{i+1}A\r",
+        )
+    clean_last_line()
+    print("\n\n\r", end="\033[12A\r")
 
+
+def print_word_not_accepted(palavra):
+    clean_last_line()
+    print(
+        f"\rEssa palavra não é aceita:{chute_atual}",
+        end="\033[12A",
+    )
+
+
+def get_input(n):
+    # clean_line()
+    s = ""
+    for i in range(n):
+        s += "\n"
+    sp = ""
+    sp = "                  " + UNDERLINE + "     " + END_UNDERLINE
+    for i in range(80 - len(sp)):
+        sp += " "
+    if n:
+        print(f"\r{s+sp}", end=f"\033[{n}A" + "\r")
+
+    chute_atual = unidecode(input(s + "                  ")).upper()
+    if n:
+        print("\r", end=f"\033[{n}A")
+    return chute_atual
+
+
+# START
 
 # ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
 with open("palavras.csv") as csvfile:
@@ -233,35 +273,25 @@ palavras_unidecode = {}
 for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
 
+
+# GAME INIT
+
 # SORTEIO DA PALAVRA
 random_number = random.randint(1, len(palavras) - 1 - 9147)
 palavra = palavras[9147 + random_number].upper()
 
-
-# START
 lim_chutes = 6
 chutes = []
-print("-------------O TERMO TERMINAL--------------")
-print("versão para terminal de https://www.term.ooo")
-s = ""
-for i in range(lim_chutes):
-    s += "\n"
-    print(
-        s + "                  " + UNDERLINE + "     " + END_UNDERLINE + " ",
-        end=f"\033[{i+1}A\r",
-    )
-clean_last_line()
-print("\n\n\r", end="\033[12A\r")
+
+
+first_print()
+
 while 1:
     # INPUT
     print_keyboard(chutes)
     chute_atual = get_input(len(chutes))
-    if chute_atual.lower() not in palavras_unidecode.keys():
-        clean_last_line()
-        print(
-            f"\rEssa palavra não é aceita:{chute_atual}",
-            end="\033[12A",
-        )
+    if check_valid_word(chute_atual):
+        print_word_not_accepted(chute_atual)
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()
 
@@ -272,13 +302,9 @@ while 1:
     print_tries(chutes)
     # GANHOU
     if won_the_game(chute_atual):
-        print("\n")
-        clean_last_line()
-        print(f"\rParabéns! Você acertou em {len(chutes)} tentativas!")
+        print_won_the_game(len(chutes))
         exit(0)
     # PERDEU
     if len(chutes) == lim_chutes:
-        print("\n")
-        clean_last_line()
-        print(f"\rVocê perdeu. A palavra era {palavra}.")
+        print_loss_the_game(palavra)
         exit(0)

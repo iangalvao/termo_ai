@@ -1,5 +1,6 @@
 from unidecode import unidecode
 import csv
+import sys
 import random
 from colorama import Fore, Back, Style
 
@@ -137,9 +138,7 @@ class Keyboard:
                 self.set_letter_hint(c, LETRA_DESCONHECIDA)
 
     def process_hints(self, chute):
-        for letra_e_dica in chute:
-            letra = letra_e_dica[0]
-            dica = letra_e_dica[1]
+        for letra, dica in chute:
             dica_atual = self.get_letter_hint(letra)
             if dica > dica_atual:
                 self.set_letter_hint(letra, dica)
@@ -154,10 +153,10 @@ class Keyboard:
         return res
 
     def set_letter_hint(self, letra, dica):
-        self.state[letra] = dica
+        self.state[unidecode(letra)] = dica
 
     def get_letter_hint(self, letra):
-        return self.state[letra]
+        return self.state[unidecode(letra)]
 
 
 ###########################################################################
@@ -174,8 +173,9 @@ class Keyboard:
 ###########################################################################
 
 
-class TerminalVisualisation:
+class TerminalPresenter:
     def __init__(self) -> None:
+
         pass
 
     def go_to_line(self, n):
@@ -203,6 +203,33 @@ class TerminalVisualisation:
             end = "\r"
         print(s, end=end)
 
+    def go_to_line(self, n):
+        if n == 0:
+            return ""
+        elif n > 0:
+            return f"\033[{n}B"
+        else:
+            return f"\033[{-n}A"
+
+    def go_to_char(self, n):
+        if n == 0:
+            return ""
+        elif n > 0:
+            return f"\033[{n}C"
+        else:
+            return f"\033[{-n}D"
+
+    def go_to_pos(self, pos):
+        return self.go_to_line(pos[0]) + self.go_to_char(pos[1])
+
+    def print_at_pos(self, s, pos):
+        padding = self.go_to_pos(pos)
+        end_v = self.go_to_line(-pos[0])
+        end_h = self.go_to_char(-(pos[1] + len(s)))
+        end = end_v + end_h
+        print(padding + s, end=end)
+        sys.stdout.flush()
+
     def clean_line(self, n):
         s = ""
         for i in range(80):
@@ -226,6 +253,8 @@ class TerminalVisualisation:
         for chute in chutes:
             chutes_colorido = ""
             for letra, dica in chute:
+                if dica == LETRA_INCORRETA:
+                    dica = LETRA_DESCONHECIDA
                 cor = cores_das_dicas[dica]
                 letra_colorida = f"{cor}{letra}{ENDC}"
                 chutes_colorido += f"{cor}{letra_colorida}{ENDC}"
@@ -253,6 +282,13 @@ class TerminalVisualisation:
                 linha_colorida += letra_colorida
             linhas_de_teclas_coloridas.append(linha_colorida)
         return linhas_de_teclas_coloridas
+
+    def print_game_at_pos(self, chutes, teclado_com_dicas, pos):
+        print(self.go_to_pos(pos))
+        self.print_chutes(chutes)
+        self.print_keyboard(teclado_com_dicas)
+        print("\r", end=f"\033[{pos[0]}A")
+        pass
 
     ###########################################################################
     ################               MENSAGENS               ####################
@@ -294,7 +330,7 @@ class TerminalVisualisation:
         self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (n + 1, 2))
         s = self.go_to_pos((n + 1, 2))
         chute_atual = unidecode(input(s)).upper()
-        print("\r", end=f"\033[{n+2}A")
+        self.print_at_pos(self.go_to_pos((-n - 2, +1 + len(chute_atual))), (0, 0))
 
         return chute_atual
 
@@ -324,9 +360,9 @@ lim_chutes = 6
 word_checker = Chutes()
 keyboard = Keyboard()
 chutes = []
-tv = TerminalVisualisation()
+presenter = TerminalPresenter()
 
-tv.first_print()
+presenter.first_print()
 
 ###########################################################################
 ################             MAIN LOOP                 ####################
@@ -335,10 +371,10 @@ tv.first_print()
 while 1:
     # INPUT
     keyboard_lines = keyboard.get_keyboard_lines_with_hints()
-    tv.print_keyboard(keyboard_lines)
-    chute_atual = tv.get_input(len(word_checker.chutes))
+    presenter.print_keyboard(keyboard_lines)
+    chute_atual = presenter.get_input(len(word_checker.chutes))
     if check_valid_word(chute_atual):
-        tv.print_word_not_accepted(chute_atual)
+        presenter.print_word_not_accepted(chute_atual)
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()
 
@@ -346,12 +382,12 @@ while 1:
     chute_corrigido = word_checker.update(palavra, chute_atual)
     keyboard.process_hints(chute_corrigido)
     # VISUALIZA
-    tv.print_chutes(word_checker.chutes)
+    presenter.print_chutes(word_checker.chutes)
     # GANHOU
     if won_the_game(chute_atual):
-        tv.print_won_the_game(len(word_checker.chutes))
+        presenter.print_won_the_game(len(word_checker.chutes))
         exit(0)
     # PERDEU
     if len(word_checker.chutes) == lim_chutes:
-        tv.print_loss_the_game(palavra)
+        presenter.print_loss_the_game(palavra)
         exit(0)

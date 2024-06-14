@@ -312,6 +312,14 @@ class TerminalPresenter:
     def first_print(self):
         print("-------------O TERMO TERMINAL--------------")
         print("versão para terminal de https://www.term.ooo")
+        s = ""
+        for i in range(80):
+            s += " "
+
+        for i in range(13):
+            print(s)
+        print("\033[13A", end="")
+        sys.stdout.flush()
 
         ###########################################################################
         ###########################################################################
@@ -385,6 +393,12 @@ if __name__ == "__main__":
         if won_the_game(chute_atual):
             presenter.print_won_the_game(len(word_checker.chutes))
             exit(0)
+
+        # PERDEU
+        if len(word_checker.chutes) == lim_chutes:
+            presenter.print_loss_the_game(palavra)
+            exit(0)
+
         chute_atual = presenter.get_input(len(word_checker.chutes), padding)
         if check_valid_word(chute_atual):
             presenter.print_word_not_accepted(chute_atual)
@@ -402,8 +416,3 @@ if __name__ == "__main__":
         # VISUALIZA
         # presenter.print_chutes(word_checker.chutes)
         # GANHOU
-
-        # PERDEU
-        if len(word_checker.chutes) == lim_chutes:
-            presenter.print_loss_the_game(palavra)
-            exit(0)

@@ -241,7 +241,6 @@ class TerminalPresenter:
             self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2))
 
     def print_chutes(self, chutes):
-        self.clean_line(12)  # Apaga mensagens.
         chutes_coloridos = self.colore_lista_chutes(chutes)
         for i in range(len(chutes_coloridos)):
             self.print_at_pos(chutes_coloridos[i], (i + 1, 2))
@@ -374,6 +373,7 @@ if __name__ == "__main__":
     ################             MAIN LOOP                 ####################
     ###########################################################################
     padding = 4
+    chute_atual = ""
     while 1:
         # INPUT
         keyboard_lines = keyboard.get_keyboard_lines_with_hints()
@@ -382,11 +382,15 @@ if __name__ == "__main__":
 
         # desafio2_teclado_linhas = desafio2_teclado.get_keyboard_lines_with_hints()
         # presenter.print_game_at_pos(desafio2_chutes.chutes, desafio2_teclado_linhas, (0, padding + 16))
-
+        if won_the_game(chute_atual):
+            presenter.print_won_the_game(len(word_checker.chutes))
+            exit(0)
         chute_atual = presenter.get_input(len(word_checker.chutes), padding)
         if check_valid_word(chute_atual):
             presenter.print_word_not_accepted(chute_atual)
             continue
+
+        presenter.clean_line(12)  # Apaga mensagens.
         chute_atual = palavras_unidecode[chute_atual.lower()].upper()
 
         # CORRIGE
@@ -398,9 +402,6 @@ if __name__ == "__main__":
         # VISUALIZA
         # presenter.print_chutes(word_checker.chutes)
         # GANHOU
-        if won_the_game(chute_atual):
-            presenter.print_won_the_game(len(word_checker.chutes))
-            exit(0)
 
         # PERDEU
         if len(word_checker.chutes) == lim_chutes:

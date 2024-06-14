@@ -3,3 +3,4 @@ venv/
 draft.py
 draft2.py
 __pycache__
+.pytest_cache

@@ -1,4 +1,5 @@
 palavras.csv
 venv/
-draft*
+draft.py
+draft2.py
 __pycache__

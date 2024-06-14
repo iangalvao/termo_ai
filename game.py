@@ -174,139 +174,129 @@ class Keyboard:
 ###########################################################################
 
 
-def go_to_line(n):
-    s = ""
-    for i in range(n):
-        s += "\n"
-    return s
+class TerminalVisualisation:
+    def __init__(self) -> None:
+        pass
 
+    def go_to_line(self, n):
+        s = ""
+        for i in range(n):
+            s += "\n"
+        return s
 
-def go_to_char(n):
-    s = ""
-    for i in range(n):
-        s += " "
-    return s
+    def go_to_char(self, n):
+        s = ""
+        for i in range(n):
+            s += " "
+        return s
 
+    def go_to_pos(self, pos):
+        s = self.go_to_line(pos[0])
+        s += self.go_to_char(pos[1])
+        return s
 
-def go_to_pos(pos):
-    s = go_to_line(pos[0])
-    s += go_to_char(pos[1])
-    return s
+    def print_at_pos(self, string, pos):
+        s = self.go_to_pos(pos)
+        s += string
+        end = f"\033[{pos[0]}A\r"
+        if pos[0] == 0:
+            end = "\r"
+        print(s, end=end)
 
+    def clean_line(self, n):
+        s = ""
+        for i in range(80):
+            s += " "
+        self.print_at_pos(s, (n, 0))
 
-def print_at_pos(string, pos):
-    s = go_to_pos(pos)
-    s += string
-    end = f"\033[{pos[0]}A\r"
-    if pos[0] == 0:
-        end = "\r"
-    print(s, end=end)
+    ###########################################################################
+    ################           TELA PRINCIPAL              ####################
+    ###########################################################################
 
+    ################               CHUTES                  ####################
 
-def clean_line(n):
-    s = ""
-    for i in range(80):
-        s += " "
-    print_at_pos(s, (n, 0))
+    def print_chutes(self, chutes):
+        self.clean_line(12)  # Apaga mensagens.
+        chutes_coloridos = self.colore_lista_chutes(chutes)
+        for i in range(len(chutes_coloridos)):
+            self.print_at_pos(chutes_coloridos[i], (i + 1, 2))
 
+    def colore_lista_chutes(self, chutes):
+        chutes_coloridos = []
+        for chute in chutes:
+            chutes_colorido = ""
+            for letra, dica in chute:
+                cor = cores_das_dicas[dica]
+                letra_colorida = f"{cor}{letra}{ENDC}"
+                chutes_colorido += f"{cor}{letra_colorida}{ENDC}"
+            chutes_coloridos.append(chutes_colorido)
+        return chutes_coloridos
 
-###########################################################################
-################           TELA PRINCIPAL              ####################
-###########################################################################
+    #################                TECLADO                  ####################
+    def print_keyboard(self, linhas_teclado_dicas):
+        linhas_teclas_coloridas = self.color_keyboard_lines(linhas_teclado_dicas)
+        for i in range(3):
+            linha_colorida = linhas_teclas_coloridas[i]
+            if (
+                i == 2
+            ):  # A última linha começa uma casa depois por escolha de diagramação.
+                linha_colorida = " " + linha_colorida
+            self.print_at_pos(linhas_teclas_coloridas[i], (8 + i, 0))
 
+    def color_keyboard_lines(self, linhas_de_teclas_com_dicas):
+        linhas_de_teclas_coloridas = []
+        for linha in linhas_de_teclas_com_dicas:
+            linha_colorida = ""
+            for letra, dica in linha:
+                cor = cores_das_dicas[dica]
+                letra_colorida = f"{cor}{letra}{ENDC}"
+                linha_colorida += letra_colorida
+            linhas_de_teclas_coloridas.append(linha_colorida)
+        return linhas_de_teclas_coloridas
 
-################               CHUTES                  ####################
+    ###########################################################################
+    ################               MENSAGENS               ####################
+    ###########################################################################
 
+    def message(self, mensagem):
+        self.clean_line(12)
+        self.print_at_pos(mensagem, (12, 0))
 
-def print_chutes(chutes):
-    clean_line(12)  # Apaga mensagens.
-    chutes_coloridos = colore_lista_chutes(chutes)
-    for i in range(len(chutes_coloridos)):
-        print_at_pos(chutes_coloridos[i], (i + 1, 2))
+    def print_won_the_game(self, number_of_tries):
+        self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
+        print(self.go_to_pos((13, 0)))
 
+    def print_loss_the_game(self, palavra):
+        self.message(f"\rVocê perdeu. A palavra era {palavra}.")
+        print(self.go_to_pos((13, 0)))
 
-def colore_lista_chutes(chutes):
-    chutes_coloridos = []
-    for chute in chutes:
-        chutes_colorido = ""
-        for letra, dica in chute:
-            cor = cores_das_dicas[dica]
-            letra_colorida = f"{cor}{letra}{ENDC}"
-            chutes_colorido += f"{cor}{letra_colorida}{ENDC}"
-        chutes_coloridos.append(chutes_colorido)
-    return chutes_coloridos
+    def print_word_not_accepted(self, palavra):
+        self.message(f"Essa palavra não é aceita:{palavra}")
 
+    def first_print(self):
+        print("-------------O TERMO TERMINAL--------------")
+        print("versão para terminal de https://www.term.ooo")
+        s = ""
+        for i in range(lim_chutes):
+            self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + 1, 2))
+        self.clean_line(12)
 
-#################                TECLADO                  ####################
-def print_keyboard(linhas_teclado_dicas):
-    linhas_teclas_coloridas = color_keyboard_lines(linhas_teclado_dicas)
-    for i in range(3):
-        linha_colorida = linhas_teclas_coloridas[i]
-        if i == 2:  # A última linha começa uma casa depois por escolha de diagramação.
-            linha_colorida = " " + linha_colorida
-        print_at_pos(linhas_teclas_coloridas[i], (8 + i, 0))
+    ###########################################################################
+    ###########################################################################
+    ################                                       ####################
+    ################                INPUTS                 ####################
+    ################                                       ####################
+    ###########################################################################
+    ###########################################################################
 
+    def get_input(self, n):
+        self.clean_line(n + 1)
+        self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (n + 1, 2))
+        s = self.go_to_pos((n + 1, 2))
+        chute_atual = unidecode(input(s)).upper()
+        print("\r", end=f"\033[{n+2}A")
 
-def color_keyboard_lines(linhas_de_teclas_com_dicas):
-    linhas_de_teclas_coloridas = []
-    for linha in linhas_de_teclas_com_dicas:
-        linha_colorida = ""
-        for letra, dica in linha:
-            cor = cores_das_dicas[dica]
-            letra_colorida = f"{cor}{letra}{ENDC}"
-            linha_colorida += letra_colorida
-        linhas_de_teclas_coloridas.append(linha_colorida)
-    return linhas_de_teclas_coloridas
-
-
-###########################################################################
-################               MENSAGENS               ####################
-###########################################################################
-
-
-def message(mensagem):
-    clean_line(12)
-    print_at_pos(mensagem, (12, 0))
-
-
-def print_won_the_game(number_of_tries):
-    message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
-
-
-def print_loss_the_game(palavra):
-    message(f"\rVocê perdeu. A palavra era {palavra}.")
-
-
-def print_word_not_accepted(palavra):
-    message(f"Essa palavra não é aceita:{chute_atual}")
-
-
-def first_print():
-    print("-------------O TERMO TERMINAL--------------")
-    print("versão para terminal de https://www.term.ooo")
-    s = ""
-    for i in range(lim_chutes):
-        print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + 1, 2))
-    clean_line(12)
-
-
-###########################################################################
-###########################################################################
-################                                       ####################
-################                INPUTS                 ####################
-################                                       ####################
-###########################################################################
-###########################################################################
-
-
-def get_input(n):
-    clean_line(n + 1)
-    print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (n + 1, 2))
-    s = go_to_pos((n + 1, 2))
-    chute_atual = unidecode(input(s)).upper()
-    print("\r", end=f"\033[{n+2}A")
-
-    return chute_atual
+        return chute_atual
 
 
 ###########################################################################
@@ -334,9 +324,9 @@ lim_chutes = 6
 word_checker = Chutes()
 keyboard = Keyboard()
 chutes = []
+tv = TerminalVisualisation()
 
-
-first_print()
+tv.first_print()
 
 ###########################################################################
 ################             MAIN LOOP                 ####################
@@ -345,10 +335,10 @@ first_print()
 while 1:
     # INPUT
     keyboard_lines = keyboard.get_keyboard_lines_with_hints()
-    print_keyboard(keyboard_lines)
-    chute_atual = get_input(len(word_checker.chutes))
+    tv.print_keyboard(keyboard_lines)
+    chute_atual = tv.get_input(len(word_checker.chutes))
     if check_valid_word(chute_atual):
-        print_word_not_accepted(chute_atual)
+        tv.print_word_not_accepted(chute_atual)
         continue
     chute_atual = palavras_unidecode[chute_atual.lower()].upper()
 
@@ -356,14 +346,12 @@ while 1:
     chute_corrigido = word_checker.update(palavra, chute_atual)
     keyboard.process_hints(chute_corrigido)
     # VISUALIZA
-    print_chutes(word_checker.chutes)
+    tv.print_chutes(word_checker.chutes)
     # GANHOU
     if won_the_game(chute_atual):
-        print_won_the_game(len(word_checker.chutes))
-        print(go_to_pos((13, 0)))
+        tv.print_won_the_game(len(word_checker.chutes))
         exit(0)
     # PERDEU
     if len(word_checker.chutes) == lim_chutes:
-        print_loss_the_game(palavra)
-        print(go_to_pos((13, 0)))
+        tv.print_loss_the_game(palavra)
         exit(0)

@@ -179,31 +179,6 @@ class TerminalPresenter:
         pass
 
     def go_to_line(self, n):
-        s = ""
-        for i in range(n):
-            s += "\n"
-        return s
-
-    def go_to_char(self, n):
-        s = ""
-        for i in range(n):
-            s += " "
-        return s
-
-    def go_to_pos(self, pos):
-        s = self.go_to_line(pos[0])
-        s += self.go_to_char(pos[1])
-        return s
-
-    def print_at_pos(self, string, pos):
-        s = self.go_to_pos(pos)
-        s += string
-        end = f"\033[{pos[0]}A\r"
-        if pos[0] == 0:
-            end = "\r"
-        print(s, end=end)
-
-    def go_to_line(self, n):
         if n == 0:
             return ""
         elif n > 0:
@@ -222,10 +197,29 @@ class TerminalPresenter:
     def go_to_pos(self, pos):
         return self.go_to_line(pos[0]) + self.go_to_char(pos[1])
 
+    def tamanho_string(self, s):
+        count = 0
+        n = 0
+        for i in range(len(s)):
+            if i + n >= len(s):
+                break
+            c = s[i + n]
+            if c == "\033":
+                while len(s) > i + n:
+                    n += 1
+                    c = s[i + n]
+                    if c.isalpha():
+                        break
+                continue
+            # print("c:", c)
+            if c.isalnum() or c == " " or c == ":":
+                count += 1
+        return count
+
     def print_at_pos(self, s, pos):
         padding = self.go_to_pos(pos)
         end_v = self.go_to_line(-pos[0])
-        end_h = self.go_to_char(-(pos[1] + len(s)))
+        end_h = self.go_to_char(-(pos[1] + self.tamanho_string(s)))
         end = end_v + end_h
         print(padding + s, end=end)
         sys.stdout.flush()
@@ -242,6 +236,10 @@ class TerminalPresenter:
 
     ################               CHUTES                  ####################
 
+    def print_tabela(self, n):
+        for i in range(6 - n):
+            self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2))
+
     def print_chutes(self, chutes):
         self.clean_line(12)  # Apaga mensagens.
         chutes_coloridos = self.colore_lista_chutes(chutes)
@@ -257,7 +255,7 @@ class TerminalPresenter:
                     dica = LETRA_DESCONHECIDA
                 cor = cores_das_dicas[dica]
                 letra_colorida = f"{cor}{letra}{ENDC}"
-                chutes_colorido += f"{cor}{letra_colorida}{ENDC}"
+                chutes_colorido += letra_colorida
             chutes_coloridos.append(chutes_colorido)
         return chutes_coloridos
 
@@ -284,10 +282,13 @@ class TerminalPresenter:
         return linhas_de_teclas_coloridas
 
     def print_game_at_pos(self, chutes, teclado_com_dicas, pos):
-        print(self.go_to_pos(pos))
-        self.print_chutes(chutes)
+        print(self.go_to_pos(pos), end="")
+        sys.stdout.flush()
         self.print_keyboard(teclado_com_dicas)
-        print("\r", end=f"\033[{pos[0]}A")
+        self.print_tabela(len(chutes))
+        self.print_chutes(chutes)
+        print(self.go_to_pos((-pos[0], -pos[1])), end="")
+        sys.stdout.flush()
         pass
 
     ###########################################################################
@@ -312,26 +313,26 @@ class TerminalPresenter:
     def first_print(self):
         print("-------------O TERMO TERMINAL--------------")
         print("versão para terminal de https://www.term.ooo")
-        s = ""
-        for i in range(lim_chutes):
-            self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + 1, 2))
-        self.clean_line(12)
 
-    ###########################################################################
-    ###########################################################################
-    ################                                       ####################
-    ################                INPUTS                 ####################
-    ################                                       ####################
-    ###########################################################################
-    ###########################################################################
+        ###########################################################################
+        ###########################################################################
+        ################                                       ####################
+        ################                INPUTS                 ####################
+        ################                                       ####################
+        ###########################################################################
+        ###########################################################################
 
-    def get_input(self, n):
+    ###########################
+    def get_input(self, n, padding):
+        pos = (0, padding)
+        print(self.go_to_pos(pos), end="")
         self.clean_line(n + 1)
-        self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (n + 1, 2))
+        self.print_tabela(n)
         s = self.go_to_pos((n + 1, 2))
         chute_atual = unidecode(input(s)).upper()
-        self.print_at_pos(self.go_to_pos((-n - 2, +1 + len(chute_atual))), (0, 0))
-
+        print(self.go_to_line(-n - 2), end="")
+        # print(self.go_to_pos((-pos[0], -pos[1])), end="")
+        sys.stdout.flush()
         return chute_atual
 
 
@@ -344,50 +345,64 @@ class TerminalPresenter:
 ###########################################################################
 
 # ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
-with open("palavras.csv") as csvfile:
-    myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
-    palavras = next(myreader)
-palavras_unidecode = {}
-for palavra in palavras:
-    palavras_unidecode[unidecode(palavra)] = palavra
 
-# SORTEIO DA PALAVRA
-random_number = random.randint(1, len(palavras) - 1 - 9147)
-palavra = palavras[9147 + random_number].upper()
+if __name__ == "__main__":
+    with open("palavras.csv") as csvfile:
+        myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
+        palavras = next(myreader)
+    palavras_unidecode = {}
+    for palavra in palavras:
+        palavras_unidecode[unidecode(palavra)] = palavra
 
-lim_chutes = 6
+    # SORTEIO DA PALAVRA
+    random_number = random.randint(1, len(palavras) - 1 - 9147)
+    palavra = palavras[9147 + random_number].upper()
+    random_number = random.randint(1, len(palavras) - 1 - 9147)
+    palavra2 = palavras[9147 + random_number].upper()
+    lim_chutes = 6
 
-word_checker = Chutes()
-keyboard = Keyboard()
-chutes = []
-presenter = TerminalPresenter()
+    word_checker = Chutes()
+    desafio2_chutes = Chutes()
+    keyboard = Keyboard()
+    desafio2_teclado = Keyboard()
 
-presenter.first_print()
+    presenter = TerminalPresenter()
 
-###########################################################################
-################             MAIN LOOP                 ####################
-###########################################################################
+    presenter.first_print()
 
-while 1:
-    # INPUT
-    keyboard_lines = keyboard.get_keyboard_lines_with_hints()
-    presenter.print_keyboard(keyboard_lines)
-    chute_atual = presenter.get_input(len(word_checker.chutes))
-    if check_valid_word(chute_atual):
-        presenter.print_word_not_accepted(chute_atual)
-        continue
-    chute_atual = palavras_unidecode[chute_atual.lower()].upper()
+    ###########################################################################
+    ################             MAIN LOOP                 ####################
+    ###########################################################################
+    padding = 4
+    while 1:
+        # INPUT
+        keyboard_lines = keyboard.get_keyboard_lines_with_hints()
 
-    # CORRIGE
-    chute_corrigido = word_checker.update(palavra, chute_atual)
-    keyboard.process_hints(chute_corrigido)
-    # VISUALIZA
-    presenter.print_chutes(word_checker.chutes)
-    # GANHOU
-    if won_the_game(chute_atual):
-        presenter.print_won_the_game(len(word_checker.chutes))
-        exit(0)
-    # PERDEU
-    if len(word_checker.chutes) == lim_chutes:
-        presenter.print_loss_the_game(palavra)
-        exit(0)
+        presenter.print_game_at_pos(word_checker.chutes, keyboard_lines, (0, padding))
+
+        # desafio2_teclado_linhas = desafio2_teclado.get_keyboard_lines_with_hints()
+        # presenter.print_game_at_pos(desafio2_chutes.chutes, desafio2_teclado_linhas, (0, padding + 16))
+
+        chute_atual = presenter.get_input(len(word_checker.chutes), padding)
+        if check_valid_word(chute_atual):
+            presenter.print_word_not_accepted(chute_atual)
+            continue
+        chute_atual = palavras_unidecode[chute_atual.lower()].upper()
+
+        # CORRIGE
+        chute_corrigido = word_checker.update(palavra, chute_atual)
+        keyboard.process_hints(chute_corrigido)
+
+        # chute_corrigido2 = desafio2_chutes.update(palavra2, chute_atual)
+        # desafio2_teclado.process_hints(chute_corrigido2)
+        # VISUALIZA
+        # presenter.print_chutes(word_checker.chutes)
+        # GANHOU
+        if won_the_game(chute_atual):
+            presenter.print_won_the_game(len(word_checker.chutes))
+            exit(0)
+
+        # PERDEU
+        if len(word_checker.chutes) == lim_chutes:
+            presenter.print_loss_the_game(palavra)
+            exit(0)

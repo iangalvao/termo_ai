@@ -55,3 +55,7 @@ def clean_line(n):
 
 
 first_print()
+
+# last line = 12
+# chutes = 1 até 6
+# teclado = 8 até 10

@@ -55,6 +55,10 @@ def won_the_game(chute):
         return 1
 
 
+def check_valid_word(palavra):
+    return palavra.lower() not in palavras_unidecode.keys()
+
+
 ###########################################################################
 ################                                       ####################
 ################                LÓGICA                 ####################
@@ -65,10 +69,6 @@ def won_the_game(chute):
 ###########################################################################
 ################            CHECAGEM DE LETRAS         ####################
 ###########################################################################
-
-
-def check_valid_word(palavra):
-    return palavra.lower() not in palavras_unidecode.keys()
 
 
 class Chutes:
@@ -210,20 +210,21 @@ def clean_line(n):
     print_at_pos(s, (n, 0))
 
 
-def clean_last_line():
-    s = ""
-
-    for i in range(80):
-        s += " "
-    print_at_pos(f"\r{s}", (10, 0))
-
-
 ###########################################################################
 ################           TELA PRINCIPAL              ####################
 ###########################################################################
 
 
 ################               CHUTES                  ####################
+
+
+def print_chutes(chutes):
+    clean_line(12)  # Apaga mensagens.
+    chutes_coloridos = colore_lista_chutes(chutes)
+    for i in range(len(chutes_coloridos)):
+        print_at_pos(chutes_coloridos[i], (i + 1, 2))
+
+
 def colore_lista_chutes(chutes):
     chutes_coloridos = []
     for chute in chutes:
@@ -234,12 +235,6 @@ def colore_lista_chutes(chutes):
             chutes_colorido += f"{cor}{letra_colorida}{ENDC}"
         chutes_coloridos.append(chutes_colorido)
     return chutes_coloridos
-
-
-def print_chutes(chutes):
-    chutes_coloridos = colore_lista_chutes(chutes)
-    for i in range(len(chutes_coloridos)):
-        print_at_pos(chutes_coloridos[i], (1 + i, 2))
 
 
 #################                TECLADO                  ####################
@@ -270,11 +265,12 @@ def color_keyboard_lines(linhas_de_teclas_com_dicas):
 
 
 def message(mensagem):
+    clean_line(12)
     print_at_pos(mensagem, (12, 0))
 
 
 def print_won_the_game(number_of_tries):
-    message(f"\rParabéns! Você acertou em {len(chutes)} tentativas!")
+    message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
 
 
 def print_loss_the_game(palavra):
@@ -290,11 +286,8 @@ def first_print():
     print("versão para terminal de https://www.term.ooo")
     s = ""
     for i in range(lim_chutes):
-        s += "\n"
-        print(
-            s + "  " + UNDERLINE + "     " + END_UNDERLINE,
-            end=f"\033[{i+1}A\r",
-        )
+        print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + 1, 2))
+    clean_line(12)
 
 
 ###########################################################################
@@ -331,9 +324,6 @@ with open("palavras.csv") as csvfile:
 palavras_unidecode = {}
 for palavra in palavras:
     palavras_unidecode[unidecode(palavra)] = palavra
-
-
-# GAME INIT
 
 # SORTEIO DA PALAVRA
 random_number = random.randint(1, len(palavras) - 1 - 9147)

@@ -51,9 +51,11 @@ cores_das_dicas = {
 ###########################################################################
 
 
-def won_the_game(chute):
-    if chute == palavra:
-        return 1
+def won_the_game(jogos, chute):
+    for jogo in jogos:
+        if not jogo.solved:
+            return 0
+    return 1
 
 
 def check_valid_word(palavra):
@@ -73,17 +75,19 @@ def check_valid_word(palavra):
 
 
 class Chutes:
-    def __init__(self) -> None:
+    def __init__(self, palavra) -> None:
         self.chutes = []
+        self.palavra = palavra
+        self.solved = 0
 
-    def count_letters_in_wrong_pos(self, palavra, chute, letra):
-        c = self.count_letters(palavra, letra)
-        w = self.letters_in_right_pos(palavra, chute, letra)
+    def count_letters_in_wrong_pos(self, chute, letra):
+        c = self.count_letters(self.palavra, letra)
+        w = self.letters_in_right_pos(self.palavra, chute, letra)
         return c - w
 
-    def count_letters(self, palavra, letra):
+    def count_letters(self, chute, letra):
         res = 0
-        for c in unidecode(palavra):
+        for c in unidecode(chute):
             if c == unidecode(letra):
                 res += 1
         return res
@@ -99,16 +103,17 @@ class Chutes:
                     c_count += 1
         return c_count
 
-    def check_word(self, palavra, chute):
+    def check_word(self, chute):
         word = []
-
+        if chute == self.palavra:
+            self.solved = 1
         for i in range(5):
             res = LETRA_INCORRETA
-            if unidecode(chute[i]) == unidecode(palavra[i]):
+            if unidecode(chute[i]) == unidecode(self.palavra[i]):
                 res = CERTO
-            elif unidecode(chute[i]) in unidecode(palavra):
+            elif unidecode(chute[i]) in unidecode(self.palavra):
                 if self.count_letters_in_wrong_pos(
-                    palavra, chute, chute[i]
+                    chute, chute[i]
                 ) + self.letters_in_right_pos(
                     palavra[: i + 1], chute[: i + 1], chute[i]
                 ) >= self.count_letters(
@@ -116,10 +121,11 @@ class Chutes:
                 ):
                     res = POS_INCORRETA
             word.append((chute[i], res))
+
         return word
 
-    def update(self, palavra, chute):
-        chute_corrigido = self.check_word(palavra, chute)
+    def update(self, chute):
+        chute_corrigido = self.check_word(chute)
         self.chutes.append(chute_corrigido)
         return chute_corrigido
 
@@ -368,8 +374,8 @@ if __name__ == "__main__":
     palavra2 = palavras[9147 + random_number].upper()
     lim_chutes = 6
 
-    word_checker = Chutes()
-    desafio2_chutes = Chutes()
+    word_checker = Chutes(palavra)
+    desafio2_chutes = Chutes(palavra2)
     keyboard = Keyboard()
     desafio2_teclado = Keyboard()
 
@@ -388,9 +394,11 @@ if __name__ == "__main__":
 
         presenter.print_game_at_pos(word_checker.chutes, keyboard_lines, (0, padding))
 
-        # desafio2_teclado_linhas = desafio2_teclado.get_keyboard_lines_with_hints()
-        # presenter.print_game_at_pos(desafio2_chutes.chutes, desafio2_teclado_linhas, (0, padding + 16))
-        if won_the_game(chute_atual):
+        desafio2_teclado_linhas = desafio2_teclado.get_keyboard_lines_with_hints()
+        presenter.print_game_at_pos(
+            desafio2_chutes.chutes, desafio2_teclado_linhas, (0, padding + 16)
+        )
+        if won_the_game([word_checker, desafio2_chutes], chute_atual):
             presenter.print_won_the_game(len(word_checker.chutes))
             exit(0)
 
@@ -408,11 +416,11 @@ if __name__ == "__main__":
         chute_atual = palavras_unidecode[chute_atual.lower()].upper()
 
         # CORRIGE
-        chute_corrigido = word_checker.update(palavra, chute_atual)
+        chute_corrigido = word_checker.update(chute_atual)
         keyboard.process_hints(chute_corrigido)
 
-        # chute_corrigido2 = desafio2_chutes.update(palavra2, chute_atual)
-        # desafio2_teclado.process_hints(chute_corrigido2)
+        chute_corrigido2 = desafio2_chutes.update(chute_atual)
+        desafio2_teclado.process_hints(chute_corrigido2)
         # VISUALIZA
         # presenter.print_chutes(word_checker.chutes)
         # GANHOU

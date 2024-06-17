@@ -51,15 +51,15 @@ cores_das_dicas = {
 ###########################################################################
 
 
-def won_the_game(jogos, chute):
-    for jogo in jogos:
-        if not jogo.solved:
+def won_the_game(desafios):
+    for desafio in desafios:
+        if not desafio.solved:
             return 0
     return 1
 
 
 def check_valid_word(palavra):
-    return palavra.lower() not in palavras_unidecode.keys()
+    return palavra.lower() in palavras_unidecode.keys()
 
 
 ###########################################################################
@@ -74,9 +74,10 @@ def check_valid_word(palavra):
 ###########################################################################
 
 
-class Chutes:
+class Desafio:
     def __init__(self, palavra) -> None:
         self.chutes = []
+        self.teclado = Keyboard()
         self.palavra = palavra
         self.solved = 0
 
@@ -88,7 +89,7 @@ class Chutes:
     def count_letters(self, chute, letra):
         res = 0
         for c in unidecode(chute):
-            if c == unidecode(letra):
+            if unidecode(c) == unidecode(letra):
                 res += 1
         return res
 
@@ -105,26 +106,27 @@ class Chutes:
 
     def check_word(self, chute):
         word = []
-        if chute == self.palavra:
-            self.solved = 1
+
         for i in range(5):
-            res = LETRA_INCORRETA
+            dica = LETRA_INCORRETA
             if unidecode(chute[i]) == unidecode(self.palavra[i]):
-                res = CERTO
+                dica = CERTO
             elif unidecode(chute[i]) in unidecode(self.palavra):
                 if self.count_letters_in_wrong_pos(
                     chute, chute[i]
                 ) + self.letters_in_right_pos(
-                    palavra[: i + 1], chute[: i + 1], chute[i]
+                    self.palavra[: i + 1], chute[: i + 1], chute[i]
                 ) >= self.count_letters(
                     chute[: i + 1], chute[i]
                 ):
-                    res = POS_INCORRETA
-            word.append((chute[i], res))
+                    dica = POS_INCORRETA
+            word.append((chute[i], dica))
 
         return word
 
     def update(self, chute):
+        if chute == self.palavra:
+            self.solved = 1
         chute_corrigido = self.check_word(chute)
         self.chutes.append(chute_corrigido)
         return chute_corrigido
@@ -243,7 +245,7 @@ class TerminalPresenter:
     ################               CHUTES                  ####################
 
     def print_tabela(self, n):
-        for i in range(6 - n):
+        for i in range(lim_chutes - n):
             self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2))
 
     def print_chutes(self, chutes):
@@ -269,11 +271,10 @@ class TerminalPresenter:
         linhas_teclas_coloridas = self.color_keyboard_lines(linhas_teclado_dicas)
         for i in range(3):
             linha_colorida = linhas_teclas_coloridas[i]
-            if (
-                i == 2
-            ):  # A última linha começa uma casa depois por escolha de diagramação.
+            if i == 2:
+                # A última linha começa uma casa depois por escolha de diagramação.
                 linha_colorida = " " + linha_colorida
-            self.print_at_pos(linhas_teclas_coloridas[i], (8 + i, 0))
+            self.print_at_pos(linhas_teclas_coloridas[i], (lim_chutes + 2 + i, 0))
 
     def color_keyboard_lines(self, linhas_de_teclas_com_dicas):
         linhas_de_teclas_coloridas = []
@@ -301,16 +302,19 @@ class TerminalPresenter:
     ###########################################################################
 
     def message(self, mensagem):
-        self.clean_line(12)
-        self.print_at_pos(mensagem, (12, 0))
+        self.clean_line(lim_chutes + 6)
+        self.print_at_pos(mensagem, (lim_chutes + 6, 0))
 
     def print_won_the_game(self, number_of_tries):
         self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
-        print(self.go_to_pos((13, 0)))
+        print(self.go_to_pos((lim_chutes + 7, 0)))
 
-    def print_loss_the_game(self, palavra):
-        self.message(f"\rVocê perdeu. A palavra era {palavra}.")
-        print(self.go_to_pos((13, 0)))
+    def print_loss_the_game(self, desafios):
+        palavras_sorteadas = ""
+        for d in desafios:
+            palavras_sorteadas += " " + d.palavra
+        self.message(f"\rVocê perdeu. As palavras eram{palavras_sorteadas}.")
+        print(self.go_to_pos((lim_chutes + 7, 0)))
 
     def print_word_not_accepted(self, palavra):
         self.message(f"Essa palavra não é aceita:{palavra}")
@@ -318,13 +322,13 @@ class TerminalPresenter:
     def first_print(self):
         print("-------------O TERMO TERMINAL--------------")
         print("versão para terminal de https://www.term.ooo")
+        # Limpa a tela
         s = ""
         for i in range(80):
             s += " "
-
-        for i in range(13):
+        for i in range(lim_chutes + 7):
             print(s)
-        print("\033[13A", end="")
+        print(f"\033[{lim_chutes + 7}A", end="")
         sys.stdout.flush()
 
         ###########################################################################
@@ -357,27 +361,47 @@ class TerminalPresenter:
 ###########################################################################
 ###########################################################################
 
+
+def sort_words(lista, n):
+    palavras_sorteadas = []
+    for i in range(n):
+        palavra = ""
+        while palavra not in palavras_sorteadas:
+            random_number = random.randint(1, len(lista) - 1 - 9147)
+            palavra = lista[9147 + random_number].upper()
+            if palavra not in palavras_sorteadas:
+                palavras_sorteadas.append(palavra)
+
+    return palavras_sorteadas
+
+
 # ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
 
 if __name__ == "__main__":
+
+    # Check if an argument is passed
+    if len(sys.argv) > 1:
+        try:
+            # Convert the argument to an integer and store it in a variable
+            n_desafios = int(sys.argv[1])
+        except ValueError:
+            print("Please pass a valid integer as argument.")
+    else:
+        n_desafios = 1
+
     with open("palavras.csv") as csvfile:
         myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
         palavras = next(myreader)
     palavras_unidecode = {}
     for palavra in palavras:
         palavras_unidecode[unidecode(palavra)] = palavra
+    # n_desafios = 2
+    lim_chutes = 5 + n_desafios
 
-    # SORTEIO DA PALAVRA
-    random_number = random.randint(1, len(palavras) - 1 - 9147)
-    palavra = palavras[9147 + random_number].upper()
-    random_number = random.randint(1, len(palavras) - 1 - 9147)
-    palavra2 = palavras[9147 + random_number].upper()
-    lim_chutes = 6
-
-    word_checker = Chutes(palavra)
-    desafio2_chutes = Chutes(palavra2)
-    keyboard = Keyboard()
-    desafio2_teclado = Keyboard()
+    desafios = []
+    palavras = sort_words(palavras, n_desafios)
+    for i in range(n_desafios):
+        desafios.append(Desafio(palavras[i]))
 
     presenter = TerminalPresenter()
 
@@ -388,39 +412,37 @@ if __name__ == "__main__":
     ###########################################################################
     padding = 4
     chute_atual = ""
+    tentativas = 0
+    spacing = 16
     while 1:
-        # INPUT
-        keyboard_lines = keyboard.get_keyboard_lines_with_hints()
+        # VISUALIZA
+        for i in range(len(desafios)):
+            teclado_linhas = desafios[i].teclado.get_keyboard_lines_with_hints()
+            presenter.print_game_at_pos(
+                desafios[i].chutes, teclado_linhas, (0, padding + i * spacing)
+            )
 
-        presenter.print_game_at_pos(word_checker.chutes, keyboard_lines, (0, padding))
-
-        desafio2_teclado_linhas = desafio2_teclado.get_keyboard_lines_with_hints()
-        presenter.print_game_at_pos(
-            desafio2_chutes.chutes, desafio2_teclado_linhas, (0, padding + 16)
-        )
-        if won_the_game([word_checker, desafio2_chutes], chute_atual):
-            presenter.print_won_the_game(len(word_checker.chutes))
+        # GANHOU
+        if won_the_game(desafios):
+            presenter.print_won_the_game(tentativas)  ### mudar a função
             exit(0)
 
         # PERDEU
-        if len(word_checker.chutes) == lim_chutes:
-            presenter.print_loss_the_game(palavra)
+        if tentativas == lim_chutes:
+            presenter.print_loss_the_game(desafios)  ### mudar a função
             exit(0)
 
-        chute_atual = presenter.get_input(len(word_checker.chutes), padding)
-        if check_valid_word(chute_atual):
+        # INPUT
+        chute_atual = presenter.get_input(tentativas, padding)
+        if not check_valid_word(chute_atual):
             presenter.print_word_not_accepted(chute_atual)
             continue
-
-        presenter.clean_line(12)  # Apaga mensagens.
         chute_atual = palavras_unidecode[chute_atual.lower()].upper()
+        tentativas += 1
+        presenter.clean_line(12)  # Apaga mensagens.
 
         # CORRIGE
-        chute_corrigido = word_checker.update(chute_atual)
-        keyboard.process_hints(chute_corrigido)
-
-        chute_corrigido2 = desafio2_chutes.update(chute_atual)
-        desafio2_teclado.process_hints(chute_corrigido2)
-        # VISUALIZA
-        # presenter.print_chutes(word_checker.chutes)
-        # GANHOU
+        for i in range(len(desafios)):
+            if not desafios[i].solved:
+                chute_corrigido = desafios[i].update(chute_atual)
+                desafios[i].teclado.process_hints(chute_corrigido)

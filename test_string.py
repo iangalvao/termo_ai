@@ -186,3 +186,23 @@ def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_err
     check_word = desafio.check_word(chute)
     for i in range(len(esperado)):
         assert check_word[i] == esperado[i]
+
+
+def test_count_letters_recebe_chute_sem_a_letra_devolve_zero():
+    desafio = Desafio("AAAAA")
+    chute = "AAAAA"
+    caracter = "B"
+    esperado = 0
+
+    count_letters = desafio.count_letters(chute, caracter)
+    assert count_letters == esperado
+
+
+def test_count_letters_recebe_chute_com_cinco_letras_devolve_cinco():
+    desafio = Desafio("AAAAA")
+    chute = "BBBBB"
+    caracter = "B"
+    esperado = 5
+
+    count_letters = desafio.count_letters(chute, caracter)
+    assert count_letters == esperado

@@ -58,8 +58,8 @@ def won_the_game(desafios):
     return 1
 
 
-def check_valid_word(palavra):
-    return palavra.lower() in palavras_unidecode.keys()
+def check_valid_word(palavra, palavras):
+    return palavra.lower() in palavras.keys()
 
 
 ###########################################################################
@@ -434,7 +434,7 @@ if __name__ == "__main__":
 
         # INPUT
         chute_atual = presenter.get_input(tentativas, padding)
-        if not check_valid_word(chute_atual):
+        if not check_valid_word(chute_atual, palavras_unidecode):
             presenter.print_word_not_accepted(chute_atual)
             continue
         chute_atual = palavras_unidecode[chute_atual.lower()].upper()

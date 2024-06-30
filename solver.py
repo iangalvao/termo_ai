@@ -17,7 +17,7 @@ class Solver:
             word = self.random_word(self.word_list)
             return word, palavras
         else:
-            palavras = self.get_letters_with_hints(chutes)
+            palavras = self.filter_from_hints(chutes)
             word = self.random_word(palavras)
             return word, palavras
 
@@ -69,6 +69,34 @@ class Solver:
                     s.add(c.lower())
         return palavras
 
+    def filter_from_hints(self, hints):
+        hint_list = self.get_all_hints(hints)
+        palavras = self.word_list
+
+        for c, hint_dict in hint_list.hints.items():
+            for hint, value_set in hint_dict.items():
+                for val in value_set:
+                    if hint == 1:
+                        palavras = [
+                            w
+                            for w in palavras
+                            if (c.lower() in w and w[val] != c.lower())
+                        ]
+
+                    elif hint == 0:
+                        palavras = [w for w in palavras if c.lower() not in w]
+
+                    elif hint == 2:
+                        palavras = [w for w in palavras if w[val] == c.lower()]
+
+                    elif hint == 3:
+                        palavras = [
+                            w
+                            for w in palavras
+                            if len([l for l in w if l == c.lower()]) >= val
+                        ]
+        return palavras
+
     def get_best_hints(self, chutes):
         res = {}
         for chute in chutes:
@@ -81,8 +109,64 @@ class Solver:
                 pos += 1
         return res
 
+    def get_hints(self, chute):
+        hints = HintList()
+        pos = 0
+        number_of_letters = {}
+        for c, d in chute:
+            if d == 2:
+                if c not in number_of_letters.keys():
+                    number_of_letters[c] = 0
+                number_of_letters[c] += 1
+                hints.add(c, d, pos)
+            elif d == 1:
+                if c not in number_of_letters.keys():
+                    number_of_letters[c] = 0
+                number_of_letters[c] += 1
+                hints.add(c, d, pos)
+            elif d == 0:
+                do = True
+                for letra, dica in chute:
+                    if letra == c:
+                        if dica > 0:
+                            do = False
+                if do:
+                    hints.add(c, d, 0)
+                else:
+                    hints.add(c, 1, pos)
+            pos += 1
+        for c in number_of_letters.keys():
+            hints.add(c, 3, number_of_letters[c])
+        return hints
+
+    def get_all_hints(self, chutes):
+        all_hints = HintList()
+        for chute in chutes:
+            all_hints.merge(self.get_hints(chute))
+        return all_hints
+
     def generate_random_char(self):
         return random.choice(string.ascii_lowercase)
+
+
+class HintList:
+    def __init__(self) -> None:
+        self.hints = {}
+
+    def add(self, c, hint, val):
+        if c not in self.hints.keys():
+            self.hints[c] = {}
+        if hint not in self.hints[c].keys():
+            self.hints[c][hint] = set()
+        if hint == 0 and (1 in self.hints[c].keys() or 2 in self.hints[c].keys()):
+            return
+        self.hints[c][hint].add(val)
+
+    def merge(self, other):
+        for c, hint_dict in other.hints.items():
+            for hint, value_set in hint_dict.items():
+                for val in value_set:
+                    self.add(c, hint, val)
 
 
 # ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO

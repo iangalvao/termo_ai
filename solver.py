@@ -11,56 +11,6 @@ POS_INCORRETA = 1
 CERTO = 2
 
 
-class DesafioS:
-    def __init__(self, palavra) -> None:
-        self.chutes = []
-        self.palavra = palavra
-        self.solved = 0
-
-    def count_letters_in_wrong_pos(self, chute, letra):
-        c = self.count_letters(self.palavra, letra)
-        w = self.letters_in_right_pos(self.palavra, chute, letra)
-        return c - w
-
-    def count_letters(self, chute, letra):
-        res = 0
-        for c in unidecode(chute):
-            if unidecode(c) == unidecode(letra):
-                res += 1
-        return res
-
-    def letters_in_right_pos(self, palavra1, palavra2, letra):
-        c_count = 0
-        letra = unidecode(letra)
-        for i in range(len(palavra2)):
-            c1 = unidecode(palavra1[i])
-            c2 = unidecode(palavra2[i])
-            if c1 == letra:
-                if c2 == letra:
-                    c_count += 1
-        return c_count
-
-    def check_word(self, chute):
-        word = []
-
-        for i in range(5):
-            dica = LETRA_INCORRETA
-            if unidecode(chute[i]) == unidecode(self.palavra[i]):
-                dica = CERTO
-            elif unidecode(chute[i]) in unidecode(self.palavra):
-                if self.count_letters_in_wrong_pos(
-                    chute, chute[i]
-                ) + self.letters_in_right_pos(
-                    self.palavra[: i + 1], chute[: i + 1], chute[i]
-                ) >= self.count_letters(
-                    chute[: i + 1], chute[i]
-                ):
-                    dica = POS_INCORRETA
-            word.append((chute[i], dica))
-
-        return [word]
-
-
 class Solver:
     def __init__(self, word_list) -> None:
         self.word_list = word_list
@@ -71,9 +21,11 @@ class Solver:
         if len(chutes) == 1:
             return "mugir", palavras
         if len(chutes) == 2:
-            return "bolas", palavras
+            return "belas", palavras
         if len(chutes) == 3:
-            return "fenda", palavras
+            palavras = self.filter_from_hints(chutes, palavras)
+            palavra, media = self.select_word_from_mean_filter_size(palavras)
+            return palavra, palavras
         if len(chutes) == 4:
             palavras = self.filter_from_hints(chutes, palavras)
             palavra, media = self.select_word_from_mean_filter_size(palavras)
@@ -153,7 +105,7 @@ class Solver:
             elif d == 0:
                 do = True
                 for letra, dica in chute:
-                    if letra == c:
+                    if letra.lower() == c.lower():
                         if dica > 0:
                             do = False
                 if do:
@@ -176,27 +128,27 @@ class Solver:
 
     def mean_filter_size(self, word, possible_words):
         summation = 0
-
-        i = 0
         for pw in possible_words:
-            desafio = DesafioS(pw)
-            hints = desafio.check_word(word)
+            desafio = Desafio(pw)
+            hints = [desafio.check_word(word)]
             remaining_words_size = len(
                 self.filter_from_hints(
                     hints,
                     possible_words,
                 )
-            )  # change filter_from_hints to receive original list and dont change it
-
-            i += 1
+            )
             summation += remaining_words_size
 
         mean = summation / len(possible_words)
+
         return mean
 
     def select_word_from_mean_filter_size(self, possible_words):
         best_mean = 1000000
         best_word = self.word_list[0]
+        # só uma palavra certa
+        if len(possible_words) == 1:
+            return possible_words[0], 1
         for word in self.word_list:
             mean = self.mean_filter_size(word, possible_words)
             if mean == 1:
@@ -265,6 +217,7 @@ def init_game():
 def simulate(n_desafios, lim_chutes, palavras_unidecode, palavras, solver):
     desafios = []
     palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
+    # palavras = ["LOCAL"]
     print("A Palavra é", palavras[0])
     for i in range(n_desafios):
         desafios.append(Desafio(palavras[i]))
@@ -302,7 +255,7 @@ def simulate(n_desafios, lim_chutes, palavras_unidecode, palavras, solver):
 
 
 n_desafios, lim_chutes, palavras_unidecode, palavras, solver = init_game()
-for i in range(3000):
+for i in range(1000):
     simulate(n_desafios, lim_chutes, palavras_unidecode, palavras, solver)
     print(i, data)
 print(data)

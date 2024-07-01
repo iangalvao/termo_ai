@@ -4,20 +4,85 @@ from game import Desafio, sort_words, won_the_game, check_valid_word
 
 # Example usage
 
+# CÒDIGOS PARA CORREÇÂO DE CADA LETRA
+LETRA_DESCONHECIDA = -1
+LETRA_INCORRETA = 0
+POS_INCORRETA = 1
+CERTO = 2
+
+
+class DesafioS:
+    def __init__(self, palavra) -> None:
+        self.chutes = []
+        self.palavra = palavra
+        self.solved = 0
+
+    def count_letters_in_wrong_pos(self, chute, letra):
+        c = self.count_letters(self.palavra, letra)
+        w = self.letters_in_right_pos(self.palavra, chute, letra)
+        return c - w
+
+    def count_letters(self, chute, letra):
+        res = 0
+        for c in unidecode(chute):
+            if unidecode(c) == unidecode(letra):
+                res += 1
+        return res
+
+    def letters_in_right_pos(self, palavra1, palavra2, letra):
+        c_count = 0
+        letra = unidecode(letra)
+        for i in range(len(palavra2)):
+            c1 = unidecode(palavra1[i])
+            c2 = unidecode(palavra2[i])
+            if c1 == letra:
+                if c2 == letra:
+                    c_count += 1
+        return c_count
+
+    def check_word(self, chute):
+        word = []
+
+        for i in range(5):
+            dica = LETRA_INCORRETA
+            if unidecode(chute[i]) == unidecode(self.palavra[i]):
+                dica = CERTO
+            elif unidecode(chute[i]) in unidecode(self.palavra):
+                if self.count_letters_in_wrong_pos(
+                    chute, chute[i]
+                ) + self.letters_in_right_pos(
+                    self.palavra[: i + 1], chute[: i + 1], chute[i]
+                ) >= self.count_letters(
+                    chute[: i + 1], chute[i]
+                ):
+                    dica = POS_INCORRETA
+            word.append((chute[i], dica))
+
+        return [word]
+
 
 class Solver:
     def __init__(self, word_list) -> None:
         self.word_list = word_list
 
     def generate_answer(self, chutes, palavras):
-
+        if len(chutes) == 0:
+            return "pacto", palavras
+        if len(chutes) == 1:
+            return "mugir", palavras
+        if len(chutes) == 2:
+            return "bolas", palavras
+        if len(chutes) == 3:
+            return "fenda", palavras
+        if len(chutes) == 4:
+            palavras = self.filter_from_hints(chutes, palavras)
+            palavra, media = self.select_word_from_mean_filter_size(palavras)
+            return palavra, palavras
         if len(palavras) == 0:
-
-            # print(                "Random guess",            )
             word = self.random_word(self.word_list)
             return word, palavras
         else:
-            palavras = self.filter_from_hints(chutes)
+            palavras = self.filter_from_hints(chutes, palavras)
             word = self.random_word(palavras)
             return word, palavras
 
@@ -28,7 +93,6 @@ class Solver:
                 s += self.generate_random_char()
             return s
         random_number = random.randint(0, len(words) - 1)
-        # print(f"Number:{random_number} Len:{len(words)}")
 
         word = words[random_number]
 
@@ -43,35 +107,9 @@ class Solver:
                 count[c] += n
         return count
 
-    def get_letters_with_hints(self, hints):
-        hints = self.get_best_hints(hints)
-        palavras = self.word_list
-        s = set()
-        for c, hint_list in hints.items():
-            for d, p in hint_list:
-
-                if d == 1:
-                    palavras = [
-                        w for w in palavras if (c.lower() in w and w[p] != c.lower())
-                    ]
-                    s.add(c.lower())
-
-                elif d == 0:
-                    do = True
-                    for dica, pos in hint_list:
-                        if dica > 0:
-                            do = False
-                    if do:
-                        palavras = [w for w in palavras if c.lower() not in w]
-
-                elif d == 2:
-                    palavras = [w for w in palavras if w[p] == c.lower()]
-                    s.add(c.lower())
-        return palavras
-
-    def filter_from_hints(self, hints):
+    def filter_from_hints(self, hints, palavras: list):
         hint_list = self.get_all_hints(hints)
-        palavras = self.word_list
+        palavras = palavras.copy()
 
         for c, hint_dict in hint_list.hints.items():
             for hint, value_set in hint_dict.items():
@@ -96,18 +134,6 @@ class Solver:
                             if len([l for l in w if l == c.lower()]) >= val
                         ]
         return palavras
-
-    def get_best_hints(self, chutes):
-        res = {}
-        for chute in chutes:
-            pos = 0
-            for c, d in chute:
-                if c not in res.keys():
-                    res[c] = [(d, pos)]
-                else:
-                    res[c].append((d, pos))
-                pos += 1
-        return res
 
     def get_hints(self, chute):
         hints = HintList()
@@ -148,6 +174,40 @@ class Solver:
     def generate_random_char(self):
         return random.choice(string.ascii_lowercase)
 
+    def mean_filter_size(self, word, possible_words):
+        summation = 0
+
+        i = 0
+        for pw in possible_words:
+            desafio = DesafioS(pw)
+            hints = desafio.check_word(word)
+            remaining_words_size = len(
+                self.filter_from_hints(
+                    hints,
+                    possible_words,
+                )
+            )  # change filter_from_hints to receive original list and dont change it
+
+            i += 1
+            summation += remaining_words_size
+
+        mean = summation / len(possible_words)
+        return mean
+
+    def select_word_from_mean_filter_size(self, possible_words):
+        best_mean = 1000000
+        best_word = self.word_list[0]
+        for word in self.word_list:
+            mean = self.mean_filter_size(word, possible_words)
+            if mean == 1:
+                print(word, mean)
+                return word, mean
+            if mean < best_mean:
+                best_mean = mean
+                best_word = word
+        print(best_word, best_mean)
+        return best_word, best_mean
+
 
 class HintList:
     def __init__(self) -> None:
@@ -158,8 +218,7 @@ class HintList:
             self.hints[c] = {}
         if hint not in self.hints[c].keys():
             self.hints[c][hint] = set()
-        if hint == 0 and (1 in self.hints[c].keys() or 2 in self.hints[c].keys()):
-            return
+
         self.hints[c][hint].add(val)
 
     def merge(self, other):
@@ -197,7 +256,7 @@ def init_game():
         lista_unidecode.append(unidecode(palavra))
     lim_chutes = 5 + n_desafios
     palavra_possiveis = list(palavras_unidecode.keys())[9147:]
-    solver = Solver(palavra_possiveis)
+    solver = Solver(lista_unidecode)
 
     return n_desafios, lim_chutes, palavras_unidecode, palavras, solver
     # n_desafios = 2
@@ -209,7 +268,7 @@ def simulate(n_desafios, lim_chutes, palavras_unidecode, palavras, solver):
     print("A Palavra é", palavras[0])
     for i in range(n_desafios):
         desafios.append(Desafio(palavras[i]))
-    lista_chutes = palavras
+    lista_chutes = palavras_unidecode
     ###########################################################################
     ################             MAIN LOOP                 ####################
     ###########################################################################

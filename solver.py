@@ -1,6 +1,9 @@
 import random
 import string
 from game import Desafio, sort_words, won_the_game, check_valid_word
+import csv
+from unidecode import unidecode
+
 
 # Example usage
 
@@ -11,17 +14,30 @@ POS_INCORRETA = 1
 CERTO = 2
 
 
+################################################################################
+################################################################################
+################################################################################
+#####                                                                      #####
+#####                                                                      #####
+#####                                Solver                                #####
+#####                                                                      #####
+#####                                                                      #####
+################################################################################
+################################################################################
+################################################################################
+
+
 class Solver:
     def __init__(self, word_list) -> None:
         self.word_list = word_list
 
     def generate_answer(self, chutes, palavras):
         if len(chutes) == 0:
-            return "pacto", palavras
+            return "ricas", palavras
         if len(chutes) == 1:
-            return "mugir", palavras
+            return "nuvem", palavras
         if len(chutes) == 2:
-            return "belas", palavras
+            return "ptdob", palavras
         if len(chutes) == 3:
             palavras = self.filter_from_hints(chutes, palavras)
             palavra, media = self.select_word_from_mean_filter_size(palavras)
@@ -46,7 +62,7 @@ class Solver:
             return s
         random_number = random.randint(0, len(words) - 1)
 
-        word = words[random_number]
+        word = words[0]
 
         return word
 
@@ -161,6 +177,85 @@ class Solver:
         return best_word, best_mean
 
 
+################################################################################
+################################################################################
+################################################################################
+#####                                                                      #####
+#####                                                                      #####
+#####                           Hints and Checks                           #####
+#####                                                                      #####
+#####                                                                      #####
+################################################################################
+################################################################################
+################################################################################
+
+
+class WordChecker:
+    def __init__(self, word):
+        self.word = word
+
+    def filter_from_hint_list(self, hints, palavras: list):
+        hint_list = self.get_all_hints(hints)
+        palavras = palavras.copy()
+
+        for c, char_hint_dict in hint_list.hints.items():
+            for hint, value_set in char_hint_dict.items():
+                for val in value_set:
+                    palavras = self.filter_from_hint(self, hint, c, val, palavras)
+
+    def filter_from_hint(self, hint, c, val, palavras):
+        if hint == 1:
+            palavras = [w for w in palavras if (c.lower() in w and w[val] != c.lower())]
+
+        elif hint == 0:
+            palavras = [w for w in palavras if c.lower() not in w]
+
+        elif hint == 2:
+            palavras = [w for w in palavras if w[val] == c.lower()]
+
+        elif hint == 3:
+            palavras = [
+                w for w in palavras if len([l for l in w if l == c.lower()]) >= val
+            ]
+        return palavras
+
+    def get_hints(self, chute):
+        hints = HintList()
+        pos = 0
+        number_of_letters = {}
+        for c, d in chute:
+            if d == 2:
+                if c not in number_of_letters.keys():
+                    number_of_letters[c] = 0
+                number_of_letters[c] += 1
+                hints.add(c, d, pos)
+            elif d == 1:
+                if c not in number_of_letters.keys():
+                    number_of_letters[c] = 0
+                number_of_letters[c] += 1
+                hints.add(c, d, pos)
+            elif d == 0:
+                do = True
+                for letra, dica in chute:
+                    if letra.lower() == c.lower():
+                        if dica > 0:
+                            do = False
+                if do:
+                    hints.add(c, d, 0)
+                else:
+                    hints.add(c, 1, pos)
+            pos += 1
+        for c in number_of_letters.keys():
+            hints.add(c, 3, number_of_letters[c])
+        return hints
+
+    def get_all_hints(self, chutes):
+        all_hints = HintList()
+        for chute in chutes:
+            all_hints.merge(self.get_hints(chute))
+        return all_hints
+
+
 class HintList:
     def __init__(self) -> None:
         self.hints = {}
@@ -180,19 +275,17 @@ class HintList:
                     self.add(c, hint, val)
 
 
-# ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
-import csv
-from unidecode import unidecode
-
-data = [0, 0]
-
-
-def won():
-    data[0] += 1
-
-
-def lose():
-    data[1] += 1
+################################################################################
+################################################################################
+################################################################################
+#####                                                                      #####
+#####                                                                      #####
+#####                           Experiment Setup                           #####
+#####                                                                      #####
+#####                                                                      #####
+################################################################################
+################################################################################
+################################################################################
 
 
 def init_game():
@@ -200,33 +293,50 @@ def init_game():
     n_desafios = 1
     with open("palavras.csv") as csvfile:
         myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
-        palavras = next(myreader)
+        palavras_originais = next(myreader)
     palavras_unidecode = {}
     lista_unidecode = []
-    for palavra in palavras:
+    for palavra in palavras_originais:
         palavras_unidecode[unidecode(palavra)] = palavra
         lista_unidecode.append(unidecode(palavra))
     lim_chutes = 5 + n_desafios
     palavra_possiveis = list(palavras_unidecode.keys())[9147:]
     solver = Solver(lista_unidecode)
 
-    return n_desafios, lim_chutes, palavras_unidecode, palavras, solver
-    # n_desafios = 2
+    return (
+        n_desafios,
+        lim_chutes,
+        palavras_unidecode,
+        palavras_originais,
+        solver,
+        palavra_possiveis,
+    )
 
 
-def simulate(n_desafios, lim_chutes, palavras_unidecode, palavras, solver):
+def simulate(
+    n_desafios, lim_chutes, palavras_unidecode, palavras, solver, target_words=None
+):
+    # Setup da simulação
+    if target_words:
+        palavras = target_words
+    else:
+        palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
+    for i in range(len(palavras)):
+        palavra = palavras[i]
+        print(f"A {i}ª palavra é:", palavra)
+
+    # Setup do Jogo
     desafios = []
-    palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
-    # palavras = ["LOCAL"]
-    print("A Palavra é", palavras[0])
     for i in range(n_desafios):
         desafios.append(Desafio(palavras[i]))
     lista_chutes = palavras_unidecode
+    chute_atual = ""
+    tentativas = 0
+
     ###########################################################################
     ################             MAIN LOOP                 ####################
     ###########################################################################
-    chute_atual = ""
-    tentativas = 0
+
     while 1:
         # GANHOU
         if won_the_game(desafios):
@@ -254,8 +364,27 @@ def simulate(n_desafios, lim_chutes, palavras_unidecode, palavras, solver):
                 desafios[i].teclado.process_hints(chute_corrigido)
 
 
-n_desafios, lim_chutes, palavras_unidecode, palavras, solver = init_game()
-for i in range(1000):
-    simulate(n_desafios, lim_chutes, palavras_unidecode, palavras, solver)
+def won():
+    data[0] += 1
+
+
+def lose():
+    data[1] += 1
+
+
+n_desafios, lim_chutes, palavras_unidecode, palavras, solver, palavras_possiveis = (
+    init_game()
+)
+data = [0, 0]
+for i in range(len(palavras_possiveis)):
+    target_words = [unidecode(palavras_possiveis[i]).upper()]
+    simulate(
+        n_desafios,
+        lim_chutes,
+        palavras_unidecode,
+        palavras,
+        solver,
+        target_words=target_words,
+    )
     print(i, data)
 print(data)

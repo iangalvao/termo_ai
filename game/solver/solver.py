@@ -30,29 +30,33 @@ CERTO = 2
 class Solver:
     def __init__(self, word_list) -> None:
         self.word_list = word_list
+        self.possible_words = word_list.copy()
 
-    def generate_answer(self, chutes, palavras):
+    def reset(self):
+        self.possible_words = self.word_list.copy()
+
+    def generate_answer(self, chutes):
         if len(chutes) == 0:
-            return "ricas", palavras
+            return "ricas"
         if len(chutes) == 1:
-            return "nuvem", palavras
+            return "nuvem"
         if len(chutes) == 2:
-            return "ptdob", palavras
+            return "ptdob"
         if len(chutes) == 3:
-            palavras = self.filter_from_hints(chutes, palavras)
-            palavra, media = self.select_word_from_mean_filter_size(palavras)
-            return palavra, palavras
+            self.possible_words = self.filter_from_hints(chutes, self.possible_words)
+            palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
+            return palavra
         if len(chutes) == 4:
-            palavras = self.filter_from_hints(chutes, palavras)
-            palavra, media = self.select_word_from_mean_filter_size(palavras)
-            return palavra, palavras
-        if len(palavras) == 0:
+            self.possible_words = self.filter_from_hints(chutes, self.possible_words)
+            palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
+            return palavra
+        if len(self.possible_words) == 0:
             word = self.random_word(self.word_list)
-            return word, palavras
+            return word
         else:
-            palavras = self.filter_from_hints(chutes, palavras)
-            word = self.random_word(palavras)
-            return word, palavras
+            self.possible_words = self.filter_from_hints(chutes, self.possible_words)
+            word = self.random_word(self.possible_words)
+            return word
 
     def random_word(self, words):
         if len(words) == 0:
@@ -65,15 +69,6 @@ class Solver:
         word = words[0]
 
         return word
-
-    def count_letters_in_list(self, word_list):
-        count = {}
-        for c in "qwertyuiopasdfghjklzxcvbnm":
-            count[c] = 0
-        for word in word_list:
-            for c, n in self.count_letters(word):
-                count[c] += n
-        return count
 
     def filter_from_hints(self, hints, palavras: list):
         hint_list = self.get_all_hints(hints)
@@ -139,9 +134,6 @@ class Solver:
             all_hints.merge(self.get_hints(chute))
         return all_hints
 
-    def generate_random_char(self):
-        return random.choice(string.ascii_lowercase)
-
     def mean_filter_size(self, word, possible_words):
         summation = 0
         for pw in possible_words:
@@ -165,6 +157,13 @@ class Solver:
         # só uma palavra certa
         if len(possible_words) == 1:
             return possible_words[0], 1
+        if len(possible_words) < 12:
+            for word in possible_words:
+                mean = self.mean_filter_size(word, possible_words)
+                if mean == 1:
+                    print(word, mean)
+                    return word, mean
+
         for word in self.word_list:
             mean = self.mean_filter_size(word, possible_words)
             if mean == 1:
@@ -323,13 +322,12 @@ def simulate(
         palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
     for i in range(len(palavras)):
         palavra = palavras[i]
-        print(f"A {i}ª palavra é:", palavra)
+        print(f"A {i+1}ª palavra é:", palavra)
 
     # Setup do Jogo
     desafios = []
     for i in range(n_desafios):
         desafios.append(Desafio(palavras[i]))
-    lista_chutes = palavras_unidecode
     chute_atual = ""
     tentativas = 0
 
@@ -349,19 +347,18 @@ def simulate(
             lose()
             break
         # INPUT
-        chute_atual, lista_chutes = solver.generate_answer(
-            desafios[i].chutes, lista_chutes
-        )
-        chute_atual = unidecode(chute_atual)
+        chute_atual = solver.generate_answer(desafios[i].chutes)
         if not check_valid_word(chute_atual, palavras_unidecode):
-            continue
-        chute_atual = chute_atual.lower().upper()
-        print(f"CHUTE: {chute_atual}")
+            raise RuntimeError(f"Invalid solver guess:{chute_atual}")  # sec
+        chute_atual = chute_atual.upper()
+        print(f"CHUTE: {chute_atual.upper()}")
         tentativas += 1
         for i in range(len(desafios)):
             if not desafios[i].solved:
                 chute_corrigido = desafios[i].update(chute_atual)
                 desafios[i].teclado.process_hints(chute_corrigido)
+
+    solver.reset()
 
 
 def won():

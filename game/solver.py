@@ -1,6 +1,6 @@
 import random
 import string
-from game import Desafio, sort_words, won_the_game, check_valid_word
+from mygame import Desafio, sort_words, won_the_game, check_valid_word
 import csv
 from unidecode import unidecode
 
@@ -347,7 +347,8 @@ def simulate(
             lose()
             break
         # INPUT
-        chute_atual = solver.generate_answer(desafios[i].chutes)
+        chute_atual = solver.generate_answer(desafios[0].chutes)
+        print(desafios[0].chutes)
         if not check_valid_word(chute_atual, palavras_unidecode):
             raise RuntimeError(f"Invalid solver guess:{chute_atual}")  # sec
         chute_atual = chute_atual.upper()
@@ -373,6 +374,7 @@ n_desafios, lim_chutes, palavras_unidecode, palavras, solver, palavras_possiveis
     init_game()
 )
 data = [0, 0]
+
 for i in range(len(palavras_possiveis)):
     target_words = [unidecode(palavras_possiveis[i]).upper()]
     simulate(

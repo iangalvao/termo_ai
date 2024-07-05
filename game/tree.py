@@ -1,6 +1,7 @@
-from word_checker import WordChecker
+from game.word_checker import WordChecker
 from solver import Solver
 from abc import ABC
+from common import Hint
 
 
 class ISolver(ABC):
@@ -37,13 +38,25 @@ class Tree:
                 node = node.add_children(k)
         node.set_word(guess)
 
+    def feedback_to_key(self, fb):
+        s = ""
+        for i in fb:
+            if i == Hint.RIGHT_POS:
+                s += "2"
+            elif i == Hint.WRONG_POS:
+                s += "1"
+            elif i == Hint.WRONG_LETTER:
+                s += "0"
+        return s
+
 
 class TreeBuilder:
     def __init__(self, words) -> None:
         self.word_checker = WordChecker()
+        self.words = words
 
     def make_tree(self, solver: ISolver):
-        first_guess = solver.genrate_answer(feedback)
+        first_guess = solver.genrate_answer([])
         tree = Tree(root_word=first_guess)
         for w in self.words:
             feedbacks = []

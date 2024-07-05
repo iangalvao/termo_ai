@@ -15,7 +15,7 @@ class IHintList(ABC):
         pass
 
 
-class HintList:
+class HintList(IHintList):
     def __init__(self) -> None:
         self.hints = {}
 
@@ -62,10 +62,15 @@ class WordFilter:
     @typechecked
     def filter_from_hint_list(self, hint_list: IHintList, possible_words: list[str]):
         filtered_words = possible_words.copy()
-
         for letter, hint, val in hint_list:
             filtered_words = self.filter_from_hint(hint, letter, val, filtered_words)
         return filtered_words
+
+    def filter_from_feedback_list(
+        self, chutes: list[str], feedbacks: list[Hint], possible_words: list[str]
+    ):
+        hint_list = self.get_hints_from_feedback_list(chutes, feedbacks)
+        return self.filter_from_hint_list(hint_list, possible_words)
 
     @typechecked
     def filter_from_hint(
@@ -108,9 +113,11 @@ class WordFilter:
                 hints.add(c, d, pos)
             elif d == Hint.WRONG_LETTER:
                 do = True
-                for letra, dica in chute:
+                for i in range(len(chute)):
+                    letra = chute[i]
+                    dica = feedback[i]
                     if letra.lower() == c.lower():
-                        if dica > 0:
+                        if dica == Hint.WRONG_POS or dica == Hint.RIGHT_POS:
                             do = False
                 if do:
                     hints.add(c, d, 0)
@@ -121,8 +128,10 @@ class WordFilter:
             hints.add(c, Hint.NUMBER_OF_LETTERS, number_of_letters[c])
         return hints
 
-    def get_hints_from_feedback_list(self, chutes):
+    def get_hints_from_feedback_list(self, chutes, feedbacks):
         all_hints = HintList()
-        for chute in chutes:
-            all_hints.merge(self.get_hints(chute))
+        for i in range(len(feedbacks)):
+            chute = chutes[i]
+            fb = feedbacks[i]
+            all_hints.merge(self.get_hints_from_feedback(chute, fb))
         return all_hints

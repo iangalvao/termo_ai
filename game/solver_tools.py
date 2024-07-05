@@ -61,7 +61,7 @@ class HintList(IHintList):
 class WordFilter:
     @typechecked
     def filter_from_hint_list(self, hint_list: IHintList, possible_words: list[str]):
-        filtered_words = possible_words.copy()
+        filtered_words = possible_words
         for letter, hint, val in hint_list:
             filtered_words = self.filter_from_hint(hint, letter, val, filtered_words)
         return filtered_words
@@ -71,6 +71,13 @@ class WordFilter:
     ):
         hint_list = self.get_hints_from_feedback_list(chutes, feedbacks)
         return self.filter_from_hint_list(hint_list, possible_words)
+
+    def filter_from_feedback(
+        self, chute: str, feedback: Hint, possible_words: list[str]
+    ):
+        hint_list = self.get_hints_from_feedback(chute, feedback)
+        return self.filter_from_hint_list(hint_list, possible_words)
+
 
     @typechecked
     def filter_from_hint(

@@ -63,22 +63,17 @@ class Solver:
 
         return word
 
-    def mean_filter_size(self, word, possible_words, feedbacks, chutes, word_checker):
+    def mean_filter_size(self, word, possible_words, word_checker:WordChecker):
         summation = 0
         for pw in possible_words:
-
-            feedback = word_checker.get_feedback_from_guess(word, pw)
-            feedbacks.append(feedback)
-            chutes.append(word)
+            feedback = word_checker.check_word_L(word, pw)
             remaining_words_size = len(
-                self.word_filter.filter_from_feedback_list(
-                    chutes,
-                    feedbacks,
+                self.word_filter.filter_from_feedback(
+                    word,
+                    feedback,
                     possible_words,
                 )
             )
-            feedbacks.pop()
-            chutes.pop()
             summation += remaining_words_size
 
         mean = summation / len(possible_words)
@@ -88,16 +83,14 @@ class Solver:
     def select_word_from_mean_filter_size(self, possible_words):
         best_mean = 1000000
         best_word = self.word_list[0]
-        chutes = [c for c in self.chutes]
-        feedbacks = [f for f in self.feedbacks]
         word_checker = WordChecker()
         # só uma palavra certa
         if len(possible_words) == 1:
             return possible_words[0], 1
-        if len(possible_words) < 50:
+        if len(possible_words) < 16:
             for word in possible_words:
                 mean = self.mean_filter_size(
-                    word, possible_words, feedbacks, chutes, word_checker
+                    word, possible_words,  word_checker
                 )
                 if mean == 1:
                     print(word, mean)
@@ -105,7 +98,7 @@ class Solver:
 
         for word in self.word_list:
             mean = self.mean_filter_size(
-                word, possible_words, feedbacks, chutes, word_checker
+                word, possible_words,  word_checker
             )
             if mean == 1:
                 print(word, mean)
@@ -160,7 +153,7 @@ if __name__ == "__main__":
             guess = solver.generate_answer(feedbacks)
             print(guess)
             if guess != palavra:
-                fb = wchecker.get_feedback_from_guess(guess, palavra)
+                fb = wchecker.check_word_L(guess, palavra)
                 feedbacks.append(fb)
             else:
                 print("Ganhou")

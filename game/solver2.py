@@ -1,4 +1,7 @@
-from solver_tools import WordFilter, HintList, Hint
+import datetime
+import time
+from solver_tools import WordFilter, HintList
+from common import *
 import random
 from word_checker import WordChecker
 
@@ -67,6 +70,7 @@ class Solver:
         summation = 0
         for pw in possible_words:
             feedback = word_checker.check_word_L(word, pw)
+            
             remaining_words_size = len(
                 self.word_filter.filter_from_feedback(
                     word,
@@ -95,7 +99,6 @@ class Solver:
                 if mean == 1:
                     print(word, mean)
                     return word, mean
-
         for word in self.word_list:
             mean = self.mean_filter_size(
                 word, possible_words,  word_checker

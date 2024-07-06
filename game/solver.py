@@ -1,3 +1,4 @@
+import datetime
 import random
 import string
 from mygame import Desafio, sort_words, won_the_game, check_valid_word
@@ -73,7 +74,6 @@ class Solver:
     def filter_from_hints(self, hints, palavras: list):
         hint_list = self.get_all_hints(hints)
         palavras = palavras.copy()
-
         for c, hint_dict in hint_list.hints.items():
             for hint, value_set in hint_dict.items():
                 for val in value_set:
@@ -126,6 +126,7 @@ class Solver:
             pos += 1
         for c in number_of_letters.keys():
             hints.add(c, 3, number_of_letters[c])
+            
         return hints
 
     def get_all_hints(self, chutes):
@@ -139,6 +140,8 @@ class Solver:
         for pw in possible_words:
             desafio = Desafio(pw)
             hints = [desafio.check_word(word)]
+            
+            
             remaining_words_size = len(
                 self.filter_from_hints(
                     hints,
@@ -165,7 +168,9 @@ class Solver:
                     return word, mean
 
         for word in self.word_list:
+            
             mean = self.mean_filter_size(word, possible_words)
+
             if mean == 1:
                 print(word, mean)
                 return word, mean
@@ -369,21 +374,21 @@ def won():
 def lose():
     data[1] += 1
 
-
-n_desafios, lim_chutes, palavras_unidecode, palavras, solver, palavras_possiveis = (
-    init_game()
-)
-data = [0, 0]
-
-for i in range(len(palavras_possiveis)):
-    target_words = [unidecode(palavras_possiveis[i]).upper()]
-    simulate(
-        n_desafios,
-        lim_chutes,
-        palavras_unidecode,
-        palavras,
-        solver,
-        target_words=target_words,
+if __name__ == "__main__":
+    n_desafios, lim_chutes, palavras_unidecode, palavras, solver, palavras_possiveis = (
+        init_game()
     )
-    print(i, data)
-print(data)
+    data = [0, 0]
+
+    for i in range(len(palavras_possiveis)):
+        target_words = [unidecode(palavras_possiveis[i]).upper()]
+        simulate(
+            n_desafios,
+            lim_chutes,
+            palavras_unidecode,
+            palavras,
+            solver,
+            target_words=target_words,
+        )
+        print(i, data)
+    print(data)

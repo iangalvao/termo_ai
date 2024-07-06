@@ -1,6 +1,6 @@
-from game.word_checker import WordChecker
+from word_checker import WordChecker
 from abc import ABC
-from common import Hint
+from common import *
 from solver2 import Solver
 
 class ISolver(ABC):
@@ -24,6 +24,7 @@ class Node:
 
     def add_children(self, k):
         self._children[k] = Node()
+        return self._children[k]
 
 class Tree:
     def __init__(self, root_word=None) -> None:
@@ -42,13 +43,19 @@ class Tree:
     def feedback_to_key(self, fb):
         s = ""
         for i in fb:
-            if i == Hint.RIGHT_POS:
+            if i == RIGHT_POS:
                 s += "2"
-            elif i == Hint.WRONG_POS:
+            elif i == WRONG_POS:
                 s += "1"
-            elif i == Hint.WRONG_LETTER:
+            elif i == WRONG_LETTER:
                 s += "0"
         return s
+    
+    def print(self):
+        node = self.root
+        children = node._children.keys()
+        for children in children:
+            print(self.root.children(children).word)
 
 
 class TreeBuilder:
@@ -57,14 +64,17 @@ class TreeBuilder:
         self.words = words
 
     def make_tree(self, solver: ISolver):
-        first_guess = solver.genrate_answer([])
+        
+        first_guess = solver.generate_answer([])
         tree = Tree(root_word=first_guess)
+        solver.reset()
+
         for w in self.words:
-            feedbacks = []
-            guess = first_guess
+            feedbacks = []        
+            guess = solver.generate_answer(feedbacks)
             while w != guess:
-                if guess != palavra:
-                    fb = wchecker.check_word_L(guess, palavra)
+                if guess != w:
+                    fb = wchecker.check_word_L(guess, w)
                     feedbacks.append(fb)
                 else:
                     print("Ganhou")
@@ -73,6 +83,7 @@ class TreeBuilder:
                 print(guess)
                 tree.add(feedbacks, guess)
             solver.reset()
+        return tree
 
 from unidecode import unidecode
 import csv
@@ -108,16 +119,23 @@ if __name__ == "__main__":
     )
     palavra = "termo"
     wchecker = WordChecker()
-    for i in range(len(palavras_possiveis)):
-        palavra = unidecode(palavras_possiveis[i])
-        feedbacks = []
-        for i in range(6):
-            guess = solver.generate_answer(feedbacks)
-            print(guess)
-            if guess != palavra:
-                fb = wchecker.check_word_L(guess, palavra)
-                feedbacks.append(fb)
-            else:
-                print("Ganhou")
-                break
-        solver.reset()
+    palavras_possiveis = palavras_possiveis[:10]
+    treebuilder = TreeBuilder(palavras_possiveis)
+    tree = treebuilder.make_tree(solver)
+    print(tree.print())
+    
+    
+    # for i in range(len(palavras_possiveis)):
+    #     palavra = unidecode(palavras_possiveis[i])
+    #     feedbacks = []
+    #     for i in range(6):
+    #         guess = solver.generate_answer(feedbacks)
+    #         print(guess)
+    #         if guess != palavra:
+    #             fb = wchecker.check_word_L(guess, palavra)
+    #             feedbacks.append(fb)
+    #         else:
+    #             print("Ganhou")
+    #             break
+    #     solver.reset()
+    #     tree.ad

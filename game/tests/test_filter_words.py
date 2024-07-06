@@ -17,10 +17,10 @@ def test_fil(string, expected):
 
 
 @pytest.mark.parametrize(
-    "string, expected",
+    "c, h, v, expected",
     [("s", 1), ("á", 1), ("sapos", 5), ("     ", 5)],
 )
-def test_tamanho_string_recebe_sem_formatacao(string, expected):
+def test_filter_from_hint_receives_hint_that_does_not_change_original_words(c,h,v, expected):
     t = TerminalPresenter()
     tamanho = t.tamanho_string(string)
     assert tamanho == expected

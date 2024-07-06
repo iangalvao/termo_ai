@@ -2,7 +2,7 @@ from unidecode import unidecode
 from enum import Enum
 from typeguard import typechecked
 from abc import ABC
-from common import Hint
+from common import *
 
 
 class IWordChecker(ABC):
@@ -20,15 +20,15 @@ class WordChecker(IWordChecker):
         letters_count = {l: 0 for l in set(guess)}
 
         # Mark all according to rightPos, incorrectPos and wrong
-        feedbacks = [Hint.WRONG_LETTER for l in guess]
+        feedbacks = [WRONG_LETTER for l in guess]
         for pos in range(len(correct_word)):
             letter = guess[pos]
             # giving position feedback
             if letter == correct_word[pos]:
-                feedbacks[pos] = Hint.RIGHT_POS
+                feedbacks[pos] = RIGHT_POS
                 correct_letters_count[letter] += 1
             elif letter in correct_word:
-                feedbacks[pos] = Hint.WRONG_POS
+                feedbacks[pos] = WRONG_POS
 
         # Unmark excess incorrect pos. There should be no more marks for a given
         # letter than the total of this letter in this word. This includes correct
@@ -36,13 +36,13 @@ class WordChecker(IWordChecker):
         for i in range(len(feedbacks)):
             letter = guess[i]
             feedback = feedbacks[i]
-            if feedback == Hint.WRONG_POS:
+            if feedback == WRONG_POS:
                 letters_count[letter] += 1
                 occur_in_correct_pos = correct_letters_count[letter]
                 total_occur = self.count_letters(correct_word, letter)
                 occurence_until_now = letters_count[letter]
                 if occur_in_correct_pos + occurence_until_now > total_occur:
-                    feedbacks[i] = Hint.WRONG_LETTER
+                    feedbacks[i] = WRONG_LETTER
         return feedbacks
 
     def count_letters(self, chute, letra):
@@ -79,9 +79,9 @@ class WordChecker(IWordChecker):
         word = []
 
         for i in range(5):
-            dica = Hint.WRONG_LETTER
+            dica = WRONG_LETTER
             if unidecode(chute[i]) == unidecode(palavra[i]):
-                dica = Hint.RIGHT_POS
+                dica = RIGHT_POS
             elif unidecode(chute[i]) in unidecode(palavra):
                 if self.count_letters_in_wrong_pos_L(
                     chute, chute[i], palavra
@@ -90,7 +90,7 @@ class WordChecker(IWordChecker):
                 ) >= self.count_letters_L(
                     chute[: i + 1], chute[i]
                 ):
-                    dica = Hint.WRONG_POS
+                    dica = WRONG_POS
             word.append(dica)
 
         return word

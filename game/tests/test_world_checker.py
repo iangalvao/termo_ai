@@ -9,11 +9,11 @@ def test_get_feedback_from_guess_recebe_chute_sem_letras_certa_e_devolve_correca
     palavra = "ABCDE"
     chute = "FGHIJ"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -26,11 +26,11 @@ def test_get_feedback_from_guess_recebe_chute_com_todas_letras_na_pos_certa_e_de
     palavra = "ABCDE"
     chute = "ABCDE"
     esperado = [
-        Hint.RIGHT_POS,
-        Hint.RIGHT_POS,
-        Hint.RIGHT_POS,
-        Hint.RIGHT_POS,
-        Hint.RIGHT_POS,
+        RIGHT_POS,
+        RIGHT_POS,
+        RIGHT_POS,
+        RIGHT_POS,
+        RIGHT_POS,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -43,11 +43,11 @@ def test_get_feedback_from_guess_recebe_chute_com_todas_letras_na_pos_errada_e_d
     palavra = "ABCDE"
     chute = "BCDEA"
     esperado = [
-        Hint.WRONG_POS,
-        Hint.WRONG_POS,
-        Hint.WRONG_POS,
-        Hint.WRONG_POS,
-        Hint.WRONG_POS,
+        WRONG_POS,
+        WRONG_POS,
+        WRONG_POS,
+        WRONG_POS,
+        WRONG_POS,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -60,11 +60,11 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letras_na_pos_certa_e_devo
     palavra = "ABCDE"
     chute = "AGHIJ"
     esperado = [
-        Hint.RIGHT_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        RIGHT_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -77,11 +77,11 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letras_na_pos_errada_e_dev
     palavra = "ABCDE"
     chute = "GAHIJ"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.WRONG_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -94,11 +94,11 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_na_pos_certa_e_dev
     palavra = "ABCDE"
     chute = "ABHIJ"
     esperado = [
-        Hint.RIGHT_POS,
-        Hint.RIGHT_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        RIGHT_POS,
+        RIGHT_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -111,11 +111,11 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_na_pos_errada_e_de
     palavra = "ABCDE"
     chute = "GABIJ"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.WRONG_POS,
-        Hint.WRONG_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_POS,
+        WRONG_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -128,11 +128,11 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_iguais_na_pos_erra
     palavra = "ABCDE"
     chute = "GAAHI"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.WRONG_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -145,11 +145,11 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_iguais_na_pos_erra
     palavra = "BCDEA"
     chute = "GAAHI"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.WRONG_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -162,11 +162,11 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_u
     palavra = "AACDE"
     chute = "GAAHI"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.RIGHT_POS,
-        Hint.WRONG_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        RIGHT_POS,
+        WRONG_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -179,11 +179,11 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_u
     palavra = "BCAAD"
     chute = "GAAHI"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.WRONG_POS,
-        Hint.RIGHT_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        WRONG_POS,
+        RIGHT_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)
@@ -196,11 +196,11 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_u
     palavra = "BAFAD"
     chute = "GAAHI"
     esperado = [
-        Hint.WRONG_LETTER,
-        Hint.RIGHT_POS,
-        Hint.WRONG_POS,
-        Hint.WRONG_LETTER,
-        Hint.WRONG_LETTER,
+        WRONG_LETTER,
+        RIGHT_POS,
+        WRONG_POS,
+        WRONG_LETTER,
+        WRONG_LETTER,
     ]
 
     check_word = word_checker.get_feedback_from_guess(chute, palavra)

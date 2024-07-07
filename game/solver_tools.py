@@ -32,15 +32,25 @@ class HintList(IHintList):
             self.add(c, hint, val)
 
     def set_char_occurrences(self, c: str, n: int):
+        if self.check_hint(c, MAX_LETTERS):
+            return
         if self.check_hint(c, NUMBER_OF_LETTERS):
             if n <= list(self.hints[c][NUMBER_OF_LETTERS])[0]:
                 return
+        
         self.hints[c][NUMBER_OF_LETTERS] = {n}
 
+
+    def set_max_occurrences(self, c: str, n: int):
+        self.hints[c][MAX_LETTERS] = {n}
+        if self.check_hint(c, NUMBER_OF_LETTERS):
+            del self.hints[c][NUMBER_OF_LETTERS]
+        
     def get_char_occurrences(self, c: str):
         if self.check_hint(c, NUMBER_OF_LETTERS):
             return self.hints[c][NUMBER_OF_LETTERS]
         return 0
+    
 
     def check_hint(self, c: str, hint: int):
         if c in self.hints:
@@ -87,7 +97,7 @@ class WordFilter:
         elif hint == WRONG_LETTER:
             filtered_words = [w for w in original_words if letter not in w]
 
-        else:  # NUMBER OF LETTERS
+        elif hint == NUMBER_OF_LETTERS:
             if val == 0:
                 filtered_words = [w for w in original_words if letter not in w]
 
@@ -97,6 +107,8 @@ class WordFilter:
                     for w in original_words
                     if len([l for l in w if l == letter]) >= val
                 ]
+        else:
+            filtered_words = [w for w in original_words if len([l for l in w if l == letter]) == val]
 
         return filtered_words
 
@@ -112,15 +124,16 @@ class WordFilter:
                 number_of_letters[c] += 1
                 hints.add(c, d, pos)
             elif d == WRONG_LETTER:
-                do = True
+                max_letters = 0
                 for i in range(len(chute)):
                     letra = chute[i]
                     dica = feedback[i]
                     if letra.lower() == c.lower():
                         if dica == WRONG_POS or dica == RIGHT_POS:
-                            do = False
-                if not do:
+                            max_letters+=1
+                if max_letters != 0:
                     hints.add(c, WRONG_POS, pos)
+                    hints.set_max_occurrences(c, max_letters)
         for c in number_of_letters.keys():
             hints.add(c, NUMBER_OF_LETTERS, number_of_letters[c])
         return hints

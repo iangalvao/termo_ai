@@ -1,63 +1,51 @@
 import datetime
+import time
+from solver_tools import WordFilter, HintList
+from common import *
 import random
-import string
-from mygame import Desafio, sort_words, won_the_game, check_valid_word
-import csv
-from unidecode import unidecode
-
-
-# Example usage
-
-# CÒDIGOS PARA CORREÇÂO DE CADA LETRA
-LETRA_DESCONHECIDA = -1
-LETRA_INCORRETA = 0
-POS_INCORRETA = 1
-CERTO = 2
-
-
-################################################################################
-################################################################################
-################################################################################
-#####                                                                      #####
-#####                                                                      #####
-#####                                Solver                                #####
-#####                                                                      #####
-#####                                                                      #####
-################################################################################
-################################################################################
-################################################################################
+from word_checker import WordChecker
 
 
 class Solver:
     def __init__(self, word_list) -> None:
         self.word_list = word_list
         self.possible_words = word_list.copy()
+        self.word_filter = WordFilter()
+        self.chutes = []
+        self.feedbacks = []
 
     def reset(self):
         self.possible_words = self.word_list.copy()
+        self.chutes = []
+        self.feedbacks = []
 
-    def generate_answer(self, chutes):
-        if len(chutes) == 0:
-            return "ricas"
-        if len(chutes) == 1:
-            return "nuvem"
-        if len(chutes) == 2:
-            return "ptdob"
-        if len(chutes) == 3:
-            self.possible_words = self.filter_from_hints(chutes, self.possible_words)
-            palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
-            return palavra
-        if len(chutes) == 4:
-            self.possible_words = self.filter_from_hints(chutes, self.possible_words)
-            palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
-            return palavra
+    def generate_answer(self, feedbacks):
         if len(self.possible_words) == 0:
-            word = self.random_word(self.word_list)
-            return word
+            raise RuntimeError("Empty possible words on Solver.")
+        
+        self.feedbacks = feedbacks
+        self.possible_words = self.word_filter.filter_from_feedback_list(
+            self.chutes, feedbacks, self.possible_words
+            
+        )
+        if len(self.chutes) == 0:
+            res = "ricas"
+        elif len(self.chutes) == 1:
+            res = "nuvem"
+        elif len(self.chutes) == 2:
+            res = "ptdob"
+        elif len(self.chutes) == 3:
+            palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
+            res = palavra
+        elif len(self.chutes) == 4:
+            palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
+            res = palavra
+
         else:
-            self.possible_words = self.filter_from_hints(chutes, self.possible_words)
-            word = self.random_word(self.possible_words)
-            return word
+            res = self.random_word(self.possible_words)
+                
+        self.chutes.append(res)
+        return res
 
     def random_word(self, words):
         if len(words) == 0:
@@ -71,80 +59,15 @@ class Solver:
 
         return word
 
-    def filter_from_hints(self, hints, palavras: list):
-        hint_list = self.get_all_hints(hints)
-        palavras = palavras.copy()
-        for c, hint_dict in hint_list.hints.items():
-            for hint, value_set in hint_dict.items():
-                for val in value_set:
-                    if hint == 1:
-                        palavras = [
-                            w
-                            for w in palavras
-                            if (c.lower() in w and w[val] != c.lower())
-                        ]
-
-                    elif hint == 0:
-                        palavras = [w for w in palavras if c.lower() not in w]
-
-                    elif hint == 2:
-                        palavras = [w for w in palavras if w[val] == c.lower()]
-
-                    elif hint == 3:
-                        palavras = [
-                            w
-                            for w in palavras
-                            if len([l for l in w if l == c.lower()]) >= val
-                        ]
-        return palavras
-
-    def get_hints(self, chute):
-        hints = HintList()
-        pos = 0
-        number_of_letters = {}
-        for c, d in chute:
-            if d == 2:
-                if c not in number_of_letters.keys():
-                    number_of_letters[c] = 0
-                number_of_letters[c] += 1
-                hints.add(c, d, pos)
-            elif d == 1:
-                if c not in number_of_letters.keys():
-                    number_of_letters[c] = 0
-                number_of_letters[c] += 1
-                hints.add(c, d, pos)
-            elif d == 0:
-                do = True
-                for letra, dica in chute:
-                    if letra.lower() == c.lower():
-                        if dica > 0:
-                            do = False
-                if do:
-                    hints.add(c, d, 0)
-                else:
-                    hints.add(c, 1, pos)
-            pos += 1
-        for c in number_of_letters.keys():
-            hints.add(c, 3, number_of_letters[c])
-            
-        return hints
-
-    def get_all_hints(self, chutes):
-        all_hints = HintList()
-        for chute in chutes:
-            all_hints.merge(self.get_hints(chute))
-        return all_hints
-
-    def mean_filter_size(self, word, possible_words):
+    def mean_filter_size(self, word, possible_words, word_checker:WordChecker):
         summation = 0
         for pw in possible_words:
-            desafio = Desafio(pw)
-            hints = [desafio.check_word(word)]
-            
+            feedback = word_checker.check_word_L(word, pw)
             
             remaining_words_size = len(
-                self.filter_from_hints(
-                    hints,
+                self.word_filter.filter_from_feedback(
+                    word,
+                    feedback,
                     possible_words,
                 )
             )
@@ -157,139 +80,31 @@ class Solver:
     def select_word_from_mean_filter_size(self, possible_words):
         best_mean = 1000000
         best_word = self.word_list[0]
+        word_checker = WordChecker()
         # só uma palavra certa
         if len(possible_words) == 1:
             return possible_words[0], 1
-        if len(possible_words) < 12:
+        if len(possible_words) < 16:
             for word in possible_words:
-                mean = self.mean_filter_size(word, possible_words)
+                mean = self.mean_filter_size(
+                    word, possible_words,  word_checker
+                )
                 if mean == 1:
-                    print(word, mean)
                     return word, mean
-
         for word in self.word_list:
-            
-            mean = self.mean_filter_size(word, possible_words)
-
+            mean = self.mean_filter_size(
+                word, possible_words,  word_checker
+            )
             if mean == 1:
-                print(word, mean)
                 return word, mean
             if mean < best_mean:
                 best_mean = mean
                 best_word = word
-        print(best_word, best_mean)
         return best_word, best_mean
 
 
-################################################################################
-################################################################################
-################################################################################
-#####                                                                      #####
-#####                                                                      #####
-#####                           Hints and Checks                           #####
-#####                                                                      #####
-#####                                                                      #####
-################################################################################
-################################################################################
-################################################################################
-
-
-class WordChecker:
-    def __init__(self, word):
-        self.word = word
-
-    def filter_from_hint_list(self, hints, palavras: list):
-        hint_list = self.get_all_hints(hints)
-        palavras = palavras.copy()
-
-        for c, char_hint_dict in hint_list.hints.items():
-            for hint, value_set in char_hint_dict.items():
-                for val in value_set:
-                    palavras = self.filter_from_hint(self, hint, c, val, palavras)
-
-    def filter_from_hint(self, hint, c, val, palavras):
-        if hint == 1:
-            palavras = [w for w in palavras if (c.lower() in w and w[val] != c.lower())]
-
-        elif hint == 0:
-            palavras = [w for w in palavras if c.lower() not in w]
-
-        elif hint == 2:
-            palavras = [w for w in palavras if w[val] == c.lower()]
-
-        elif hint == 3:
-            palavras = [
-                w for w in palavras if len([l for l in w if l == c.lower()]) >= val
-            ]
-        return palavras
-
-    def get_hints(self, chute):
-        hints = HintList()
-        pos = 0
-        number_of_letters = {}
-        for c, d in chute:
-            if d == 2:
-                if c not in number_of_letters.keys():
-                    number_of_letters[c] = 0
-                number_of_letters[c] += 1
-                hints.add(c, d, pos)
-            elif d == 1:
-                if c not in number_of_letters.keys():
-                    number_of_letters[c] = 0
-                number_of_letters[c] += 1
-                hints.add(c, d, pos)
-            elif d == 0:
-                do = True
-                for letra, dica in chute:
-                    if letra.lower() == c.lower():
-                        if dica > 0:
-                            do = False
-                if do:
-                    hints.add(c, d, 0)
-                else:
-                    hints.add(c, 1, pos)
-            pos += 1
-        for c in number_of_letters.keys():
-            hints.add(c, 3, number_of_letters[c])
-        return hints
-
-    def get_all_hints(self, chutes):
-        all_hints = HintList()
-        for chute in chutes:
-            all_hints.merge(self.get_hints(chute))
-        return all_hints
-
-
-class HintList:
-    def __init__(self) -> None:
-        self.hints = {}
-
-    def add(self, c, hint, val):
-        if c not in self.hints.keys():
-            self.hints[c] = {}
-        if hint not in self.hints[c].keys():
-            self.hints[c][hint] = set()
-
-        self.hints[c][hint].add(val)
-
-    def merge(self, other):
-        for c, hint_dict in other.hints.items():
-            for hint, value_set in hint_dict.items():
-                for val in value_set:
-                    self.add(c, hint, val)
-
-
-################################################################################
-################################################################################
-################################################################################
-#####                                                                      #####
-#####                                                                      #####
-#####                           Experiment Setup                           #####
-#####                                                                      #####
-#####                                                                      #####
-################################################################################
-################################################################################
-################################################################################
+from unidecode import unidecode
+import csv
 
 
 def init_game():
@@ -317,78 +132,23 @@ def init_game():
     )
 
 
-def simulate(
-    n_desafios, lim_chutes, palavras_unidecode, palavras, solver, target_words=None
-):
-    # Setup da simulação
-    if target_words:
-        palavras = target_words
-    else:
-        palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
-    for i in range(len(palavras)):
-        palavra = palavras[i]
-        print(f"A {i+1}ª palavra é:", palavra)
-
-    # Setup do Jogo
-    desafios = []
-    for i in range(n_desafios):
-        desafios.append(Desafio(palavras[i]))
-    chute_atual = ""
-    tentativas = 0
-
-    ###########################################################################
-    ################             MAIN LOOP                 ####################
-    ###########################################################################
-
-    while 1:
-        # GANHOU
-        if won_the_game(desafios):
-            print("GANHOU")
-            won()
-            break
-        # PERDEU
-        if tentativas == lim_chutes:
-            print("PERDEU")
-            lose()
-            break
-        # INPUT
-        chute_atual = solver.generate_answer(desafios[0].chutes)
-        print(desafios[0].chutes)
-        if not check_valid_word(chute_atual, palavras_unidecode):
-            raise RuntimeError(f"Invalid solver guess:{chute_atual}")  # sec
-        chute_atual = chute_atual.upper()
-        print(f"CHUTE: {chute_atual.upper()}")
-        tentativas += 1
-        for i in range(len(desafios)):
-            if not desafios[i].solved:
-                chute_corrigido = desafios[i].update(chute_atual)
-                desafios[i].teclado.process_hints(chute_corrigido)
-
-    solver.reset()
-
-
-def won():
-    data[0] += 1
-
-
-def lose():
-    data[1] += 1
-
 if __name__ == "__main__":
     n_desafios, lim_chutes, palavras_unidecode, palavras, solver, palavras_possiveis = (
         init_game()
     )
-    data = [0, 0]
-
+    palavra = "termo"
+    wchecker = WordChecker()
     for i in range(len(palavras_possiveis)):
-        target_words = [unidecode(palavras_possiveis[i]).upper()]
-        simulate(
-            n_desafios,
-            lim_chutes,
-            palavras_unidecode,
-            palavras,
-            solver,
-            target_words=target_words,
-        )
-        print(i, data)
-    print(data)
+        palavra = unidecode(palavras_possiveis[i])
+        feedbacks = []
+        print("A palavra é", palavra)
+        for i in range(6):
+            guess = solver.generate_answer(feedbacks)
+            print(guess)
+            if guess != palavra:
+                fb = wchecker.check_word_L(guess, palavra)
+                feedbacks.append(fb)
+            else:
+                print("Ganhou")
+                break
+        solver.reset()

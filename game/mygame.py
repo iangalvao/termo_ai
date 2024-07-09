@@ -3,7 +3,7 @@ import csv
 import sys
 import random
 from colorama import Fore, Back, Style
-
+from game.word_checker import IWordChecker, WordChecker
 
 ###########################################################################
 ################           ESTILO DO TERMINAL          ####################
@@ -75,60 +75,20 @@ def check_valid_word(palavra, palavras):
 
 
 class Desafio:
-    def __init__(self, palavra) -> None:
+    def __init__(self, palavra, word_checker: IWordChecker) -> None:
         self.chutes = []
+        self.feedbacks = []
         self.teclado = Keyboard()
         self.palavra = palavra
         self.solved = 0
-
-    def count_letters_in_wrong_pos(self, chute, letra):
-        c = self.count_letters(self.palavra, letra)
-        w = self.letters_in_right_pos(self.palavra, chute, letra)
-        return c - w
-
-    def count_letters(self, chute, letra):
-        res = 0
-        for c in unidecode(chute):
-            if unidecode(c) == unidecode(letra):
-                res += 1
-        return res
-
-    def letters_in_right_pos(self, palavra1, palavra2, letra):
-        c_count = 0
-        letra = unidecode(letra)
-        for i in range(len(palavra2)):
-            c1 = unidecode(palavra1[i])
-            c2 = unidecode(palavra2[i])
-            if c1 == letra:
-                if c2 == letra:
-                    c_count += 1
-        return c_count
-
-    def check_word(self, chute):
-        word = []
-
-        for i in range(5):
-            dica = LETRA_INCORRETA
-            if unidecode(chute[i]) == unidecode(self.palavra[i]):
-                dica = CERTO
-            elif unidecode(chute[i]) in unidecode(self.palavra):
-                if self.count_letters_in_wrong_pos(
-                    chute, chute[i]
-                ) + self.letters_in_right_pos(
-                    self.palavra[: i + 1], chute[: i + 1], chute[i]
-                ) >= self.count_letters(
-                    chute[: i + 1], chute[i]
-                ):
-                    dica = POS_INCORRETA
-            word.append((chute[i], dica))
-
-        return word
-
+        self.word_checker:IWordChecker = word_checker
     def update(self, chute):
         if chute == self.palavra:
             self.solved = 1
-        chute_corrigido = self.check_word(chute)
-        self.chutes.append(chute_corrigido)
+        chute_corrigido = self.word_checker.get_feedback_from_guess(unidecode(chute.lower()), unidecode(self.palavra.lower()))
+        self.chutes.append(chute)
+        self.feedbacks.append(chute_corrigido)
+        self.teclado.process_hints(chute, chute_corrigido)
         return chute_corrigido
 
 
@@ -145,8 +105,9 @@ class Keyboard:
             for c in line:
                 self.set_letter_hint(c, LETRA_DESCONHECIDA)
 
-    def process_hints(self, chute):
-        for letra, dica in chute:
+    def process_hints(self, chute, feedbacks):
+        for pos, letra in enumerate(chute):
+            dica = feedbacks[pos]
             dica_atual = self.get_letter_hint(letra)
             if dica > dica_atual:
                 self.set_letter_hint(letra, dica)
@@ -234,7 +195,7 @@ class TerminalPresenter:
 
     def clean_line(self, n):
         s = ""
-        for i in range(80):
+        for i in range(75):
             s += " "
         self.print_at_pos(s, (n, 0))
 
@@ -248,16 +209,18 @@ class TerminalPresenter:
         for i in range(lim_chutes - n):
             self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2))
 
-    def print_chutes(self, chutes):
-        chutes_coloridos = self.colore_lista_chutes(chutes)
+    def print_chutes(self, chutes, feedbacks):
+        chutes_coloridos = self.colore_lista_chutes(chutes, feedbacks)
         for i in range(len(chutes_coloridos)):
             self.print_at_pos(chutes_coloridos[i], (i + 1, 2))
 
-    def colore_lista_chutes(self, chutes):
+    def colore_lista_chutes(self, chutes, feedbacks):
         chutes_coloridos = []
-        for chute in chutes:
+        for i, chute in enumerate(chutes):
             chutes_colorido = ""
-            for letra, dica in chute:
+            feedback = feedbacks[i]
+            for pos, letra in enumerate(chute):
+                dica =feedback[pos]
                 if dica == LETRA_INCORRETA:
                     dica = LETRA_DESCONHECIDA
                 cor = cores_das_dicas[dica]
@@ -287,12 +250,12 @@ class TerminalPresenter:
             linhas_de_teclas_coloridas.append(linha_colorida)
         return linhas_de_teclas_coloridas
 
-    def print_game_at_pos(self, chutes, teclado_com_dicas, pos):
+    def print_game_at_pos(self, chutes, teclado_com_dicas, pos, feedbacks):
         print(self.go_to_pos(pos), end="")
         sys.stdout.flush()
         self.print_keyboard(teclado_com_dicas)
         self.print_tabela(len(chutes))
-        self.print_chutes(chutes)
+        self.print_chutes(chutes, feedbacks)
         print(self.go_to_pos((-pos[0], -pos[1])), end="")
         sys.stdout.flush()
         pass
@@ -398,10 +361,12 @@ if __name__ == "__main__":
     # n_desafios = 2
     lim_chutes = 5 + n_desafios
 
+
+    word_checker = WordChecker()    
     desafios = []
     palavras = sort_words(palavras, n_desafios)
     for i in range(n_desafios):
-        desafios.append(Desafio(palavras[i]))
+        desafios.append(Desafio(palavras[i], word_checker))
 
     presenter = TerminalPresenter()
 
@@ -419,7 +384,7 @@ if __name__ == "__main__":
         for i in range(len(desafios)):
             teclado_linhas = desafios[i].teclado.get_keyboard_lines_with_hints()
             presenter.print_game_at_pos(
-                desafios[i].chutes, teclado_linhas, (0, padding + i * spacing)
+                desafios[i].chutes, teclado_linhas, (0, padding + i * spacing), desafios[i].feedbacks
             )
 
         # GANHOU
@@ -444,5 +409,5 @@ if __name__ == "__main__":
         # CORRIGE
         for i in range(len(desafios)):
             if not desafios[i].solved:
-                chute_corrigido = desafios[i].update(chute_atual)
-                desafios[i].teclado.process_hints(chute_corrigido)
+                desafios[i].update(chute_atual)
+                

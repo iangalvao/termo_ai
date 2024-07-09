@@ -168,7 +168,7 @@ class TreeBuilder:
                     guess = solver.generate_answer(feedbacks)
                 #print(" "+guess)
                 tree.add(feedbacks, guess)
-                fb = wchecker.check_word_L(guess, w)
+                fb = wchecker.get_feedback_from_guess_L(guess, w)
                 feedbacks.append(fb)
                 #print(guess)
                 if guess == w:
@@ -276,7 +276,7 @@ if __name__ == "__main__":
     #         guess = solver.generate_answer(feedbacks)
     #         print(guess)
     #         if guess != palavra:
-    #             fb = wchecker.check_word_L(guess, palavra)
+    #             fb = wchecker.get_feedback_from_guess(guess, palavra)
     #             feedbacks.append(fb)
     #         else:
     #             print("Ganhou")

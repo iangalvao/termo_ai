@@ -59,10 +59,10 @@ class Solver:
 
         return word
 
-    def filter_size_distribution(self,word, possible_words, word_checker):
+    def filter_size_distribution(self,word, possible_words, word_checker:WordChecker):
         results = []
         for pw in possible_words:
-            feedback = word_checker.check_word_L(word, pw)
+            feedback = word_checker.get_feedback_from_guess(word, pw)
             
             remaining_words_size = len(
                 self.word_filter.filter_from_feedback(
@@ -164,7 +164,7 @@ if __name__ == "__main__":
             guess = solver.generate_answer(feedbacks)
             print(guess)
             if guess != palavra:
-                fb = wchecker.check_word_L(guess, palavra)
+                fb = wchecker.get_feedback_from_guess(guess, palavra)
                 feedbacks.append(fb)
             else:
                 print("Ganhou")

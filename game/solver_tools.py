@@ -1,7 +1,7 @@
 from abc import ABC
 import unidecode
 from typeguard import typechecked
-from common import *
+from game.common import *
 
 
 class IHintList(ABC):
@@ -145,3 +145,39 @@ class WordFilter:
             fb = feedbacks[i]
             all_hints.merge(self.get_hints_from_feedback(chute, fb))
         return all_hints
+
+class VocabularyAnalyser():
+    def __init__(self, words) -> None:
+        self.words = words
+    def cluster_letter_by_occurrence(self):
+        words = self.words
+        threshold = min(len(words)/40, 1)
+       # Calculate the occurrences of each letter in the vocabulary
+        letter_occurrences = {}
+        
+
+        result = set()
+        while 1:
+            for word in words:
+                for letter in set(word):
+                    if letter in letter_occurrences:
+                        letter_occurrences[letter] += 1
+                    else:
+                        letter_occurrences[letter] = 1
+        
+            # index of the letter with max occurrences
+            max_letter = max(letter_occurrences.keys(), key=lambda x: letter_occurrences.get(x))
+            result.add(max_letter)
+            words = [w for w in words if max_letter not in w]
+            letter_occurrences = {}
+            if len(words) < threshold:
+                break
+            
+        for letter in list(result):
+            test = self.words
+            for other_letter in result:
+                if other_letter != letter:
+                    test = [w for w in test if other_letter not in w]
+            if len(test) < threshold:
+                result.remove(letter) 
+        return result

@@ -2,7 +2,7 @@ from unidecode import unidecode
 from enum import Enum
 from typeguard import typechecked
 from abc import ABC
-from common import *
+from game.common import *
 
 
 class IWordChecker(ABC):

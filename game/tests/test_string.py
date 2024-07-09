@@ -1,5 +1,5 @@
 import pytest
-from game.game import TerminalPresenter, Desafio
+from game.mygame import TerminalPresenter, Desafio
 
 # test_my_module.py
 

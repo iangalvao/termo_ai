@@ -1,8 +1,8 @@
 from typing import TextIO
-from word_checker import WordChecker
+from game.word_checker import WordChecker
 from abc import ABC
-from common import *
-from solver import Solver
+from game.common import *
+from game.solver import Solver
 
 class ISolver(ABC):
     def generate_answer(self, feedbacks):
@@ -40,12 +40,23 @@ class Tree:
                 node = node.children(k)
             else:
                 node = self.add_children(node, k, guess)
-                
+               
+    
+    def get_node(self, feedbacks):
+        node = self.root
+        for fb in feedbacks:
+            k = self.feedback_to_key(fb)
+            if node.children(k):
+                node = node.children(k)
+            else:
+                return None
+        return node
+                   
+     
     def add_children(self, node, k, guess):
         new_node =  Node(guess)
         node._children[k] = new_node
         
-
 
 
     def feedback_to_key(self, fb):
@@ -145,11 +156,17 @@ class TreeBuilder:
         solver.reset()
 
         for w in self.words:
+            #print(w)
             feedbacks = []
             guess = first_guess
             n = 1        
             while w != guess:
-                guess = solver.generate_answer(feedbacks)
+                node =  tree.get_node(feedbacks)
+                if node:
+                    guess = node.word
+                else: 
+                    guess = solver.generate_answer(feedbacks)
+                #print(" "+guess)
                 tree.add(feedbacks, guess)
                 fb = wchecker.check_word_L(guess, w)
                 feedbacks.append(fb)
@@ -245,7 +262,7 @@ if __name__ == "__main__":
     )
     palavra = "termo"
     wchecker = WordChecker()
-    testes = palavras_possiveis
+    testes = palavras_unidecode
     treebuilder = TreeBuilder(testes)
     solver = Solver(palavras_unidecode)
     tree = treebuilder.make_tree(solver)

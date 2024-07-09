@@ -1,9 +1,9 @@
 import datetime
 import time
-from solver_tools import WordFilter, HintList
-from common import *
+from game.solver_tools import WordFilter, HintList
+from game.common import *
 import random
-from word_checker import WordChecker
+from game.word_checker import WordChecker
 
 
 class Solver:
@@ -40,9 +40,9 @@ class Solver:
         elif len(self.chutes) == 4:
             palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
             res = palavra
-
         else:
-            res = self.random_word(self.possible_words)
+            palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
+            res = palavra
                 
         self.chutes.append(res)
         return res
@@ -59,8 +59,8 @@ class Solver:
 
         return word
 
-    def mean_filter_size(self, word, possible_words, word_checker:WordChecker):
-        summation = 0
+    def filter_size_distribution(self,word, possible_words, word_checker):
+        results = []
         for pw in possible_words:
             feedback = word_checker.check_word_L(word, pw)
             
@@ -71,11 +71,20 @@ class Solver:
                     possible_words,
                 )
             )
-            summation += remaining_words_size
+            results.append(remaining_words_size)
 
-        mean = summation / len(possible_words)
+        return results
 
+
+    def mean_filter_size(self, word, possible_words, word_checker):
+        filter_results =self.filter_size_distribution(word,possible_words,word_checker) 
+        mean = sum(filter_results)/len(possible_words)
         return mean
+
+    def max_filter_size(self, word, possible_words, word_checker:WordChecker):
+        filter_results =self.filter_size_distribution(word,possible_words,word_checker) 
+        max_size = max(filter_results)
+        return max_size
 
     def select_word_from_mean_filter_size(self, possible_words):
         best_mean = 1000000
@@ -86,13 +95,14 @@ class Solver:
             return possible_words[0], 1
         if len(possible_words) < 16:
             for word in possible_words:
-                mean = self.mean_filter_size(
+                mean = self.max_filter_size(
                     word, possible_words,  word_checker
                 )
                 if mean == 1:
                     return word, mean
+                
         for word in self.word_list:
-            mean = self.mean_filter_size(
+            mean = self.max_filter_size(
                 word, possible_words,  word_checker
             )
             if mean == 1:
@@ -102,6 +112,14 @@ class Solver:
                 best_word = word
         return best_word, best_mean
 
+
+    def filter_test_words(self, test_words, possible_guesses):
+        res = set()
+        for pg in list(possible_guesses):
+            for letter in set(pg):
+                filter = {w for w in test_words if letter in w}
+                res = res.union(filter)
+        return res
 
 from unidecode import unidecode
 import csv
@@ -138,7 +156,7 @@ if __name__ == "__main__":
     )
     palavra = "termo"
     wchecker = WordChecker()
-    for i in range(len(palavras_possiveis)):
+    for i in range(len(palavras_possiveis[0:50])):
         palavra = unidecode(palavras_possiveis[i])
         feedbacks = []
         print("A palavra é", palavra)

@@ -1,5 +1,6 @@
 import pytest
-from game.word_checker import WordChecker, Hint
+from game.word_checker import WordChecker
+from game.common import *
 
 # test_my_module.py
 

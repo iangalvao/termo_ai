@@ -4,3 +4,7 @@ draft.py
 draft2.py
 __pycache__
 .pytest_cache
+out*
+test*.txt
+test2.txt
+result*.txt

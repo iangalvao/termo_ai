@@ -72,6 +72,7 @@ class WordFilter:
             filtered_words = self.filter_from_hint(hint, letter, val, filtered_words)
         return filtered_words
 
+    # no feedbacks. thats from other part of the system
     def filter_from_feedback_list(
         self, chutes: list[str], feedbacks: list[int], possible_words: list[str]
     ):
@@ -79,6 +80,7 @@ class WordFilter:
         
         return self.filter_from_hint_list(hint_list, possible_words)
 
+    # no feedbacks. thats from other part of the system
     def filter_from_feedback(
         self, chute: str, feedback:list[int], possible_words: list[str]
     ):
@@ -98,8 +100,6 @@ class WordFilter:
             ]
             case Hint.WRONG_LETTER:
                 filtered_words = [w for w in original_words if letter not in w]
-                
-
             case Hint.NUMBER_OF_LETTERS:
                 filtered_words = [
                     w
@@ -111,16 +111,15 @@ class WordFilter:
 
         return filtered_words
 
+    # no more methods. change the rest to hint class
     def get_hints_from_feedback(self, chute, feedback):
         hints = HintList()
         pos = 0
-        number_of_letters = {c:0 for c in chute}
+        number_of_letters = {c:len([True for i in range(5) if c==chute[i] and feedback[i] != WRONG_LETTER]) for c in set(chute)}
         for pos, (c,d) in enumerate(zip(chute, feedback)):
             if d == RIGHT_POS:
-                number_of_letters[c] += 1
                 hints.add(c, d, pos)
             elif d == WRONG_POS:
-                number_of_letters[c] += 1
                 hints.add(c, d, pos)
             elif d == WRONG_LETTER:
                 max_letters = 0

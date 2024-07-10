@@ -5,6 +5,7 @@ import random
 from colorama import Fore, Back, Style
 from game.common import *
 from game.word_checker import IWordChecker, WordChecker
+from game.attempt import Attempt
 
 ###########################################################################
 ################           ESTILO DO TERMINAL          ####################
@@ -38,7 +39,7 @@ POS_INCORRETA = 1
 CERTO = 2
 
 cores_das_dicas = {
-    UNKOWN_LETTER: ENDC,
+    UNKNOWN_LETTER: ENDC,
     WRONG_LETTER: COR_ERRADO,
     WRONG_POS: COR_POSICAO,
     RIGHT_POS: COR_CERTO,
@@ -110,13 +111,20 @@ class Keyboard:
         self.state = {}
         for line in self.lines:
             for c in line:
-                self.set_letter_hint(c, UNKOWN_LETTER)
+                self.set_letter_hint(c, UNKNOWN_LETTER)
 
     def process_hintsB(self, attempt):
         for letra, dica, in attempt:
             dica_atual = self.get_letter_hint(letra)
             if dica > dica_atual:
                 self.set_letter_hint(letra, dica)
+
+    def set_letter_hint(self, letra, dica):
+        self.state[unidecode(letra)] = dica
+
+    def get_letter_hint(self, letra):
+        return self.state[unidecode(letra)]
+
 
     def process_hints(self, chute, feedbacks):
         for pos, letra in enumerate(chute):
@@ -133,12 +141,6 @@ class Keyboard:
                 linha_com_dicas.append((letra, self.get_letter_hint(letra)))
             res.append(linha_com_dicas)
         return res
-
-    def set_letter_hint(self, letra, dica):
-        self.state[unidecode(letra)] = dica
-
-    def get_letter_hint(self, letra):
-        return self.state[unidecode(letra)]
 
 
 ###########################################################################
@@ -235,7 +237,7 @@ class TerminalPresenter:
             for pos, letra in enumerate(chute):
                 dica =feedback[pos]
                 if dica == WRONG_LETTER:
-                    dica = UNKOWN_LETTER
+                    dica = UNKNOWN_LETTER
                 cor = cores_das_dicas[dica]
                 letra_colorida = f"{cor}{letra}{ENDC}"
                 chutes_colorido += letra_colorida

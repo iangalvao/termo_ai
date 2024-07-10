@@ -1,4 +1,5 @@
 import pytest
+from game.attempt import Attempt
 from game.word_checker import WordChecker
 from game.common import *
 
@@ -6,9 +7,9 @@ from game.common import *
 
 
 def test_get_feedback_from_guess_recebe_chute_sem_letras_certa_e_devolve_correcao_sem_dicas():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "FGHIJ"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         WRONG_LETTER,
@@ -17,15 +18,14 @@ def test_get_feedback_from_guess_recebe_chute_sem_letras_certa_e_devolve_correca
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_todas_letras_na_pos_certa_e_devolve_correcao_com_dicas():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "ABCDE"
+    attempt = Attempt(chute, palavra)
     esperado = [
         RIGHT_POS,
         RIGHT_POS,
@@ -34,15 +34,14 @@ def test_get_feedback_from_guess_recebe_chute_com_todas_letras_na_pos_certa_e_de
         RIGHT_POS,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_todas_letras_na_pos_errada_e_devolve_correcao_com_dicas():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "BCDEA"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_POS,
         WRONG_POS,
@@ -51,15 +50,14 @@ def test_get_feedback_from_guess_recebe_chute_com_todas_letras_na_pos_errada_e_d
         WRONG_POS,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_uma_letras_na_pos_certa_e_devolve_correcao_com_dicas():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "AGHIJ"
+    attempt = Attempt(chute, palavra)
     esperado = [
         RIGHT_POS,
         WRONG_LETTER,
@@ -68,15 +66,14 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letras_na_pos_certa_e_devo
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_uma_letras_na_pos_errada_e_devolve_correcao_com_dicas():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "GAHIJ"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         WRONG_POS,
@@ -85,15 +82,14 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letras_na_pos_errada_e_dev
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_duas_letras_na_pos_certa_e_devolve_correcao_com_dicas():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "ABHIJ"
+    attempt = Attempt(chute, palavra)
     esperado = [
         RIGHT_POS,
         RIGHT_POS,
@@ -102,15 +98,14 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_na_pos_certa_e_dev
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_duas_letras_na_pos_errada_e_devolve_correcao_com_dicas():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "GABIJ"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         WRONG_POS,
@@ -119,15 +114,14 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_na_pos_errada_e_de
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_palavra_com_uma_unica_dessa_letra_devolve_correcao_com_uma_dica_de_posicao():
-    word_checker = WordChecker()
     palavra = "ABCDE"
     chute = "GAAHI"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         WRONG_POS,
@@ -136,15 +130,14 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_iguais_na_pos_erra
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_palavra_com_uma_unica_dessa_letra_depois_da_pos_chutada_devolve_correcao_com_uma_dica_de_posicao():
-    word_checker = WordChecker()
     palavra = "BCDEA"
     chute = "GAAHI"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         WRONG_POS,
@@ -153,15 +146,14 @@ def test_get_feedback_from_guess_recebe_chute_com_duas_letras_iguais_na_pos_erra
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_devolve_correcao_com_uma_dica_de_posicao():
-    word_checker = WordChecker()
     palavra = "AACDE"
     chute = "GAAHI"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         RIGHT_POS,
@@ -170,15 +162,14 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_u
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_com_ocorrencia_depois_da_pos_errada_e_devolve_correcao_com_uma_dicas():
-    word_checker = WordChecker()
     palavra = "BCAAD"
     chute = "GAAHI"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         WRONG_POS,
@@ -187,15 +178,14 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_u
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"
 
 
 def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_com_ocorrencia_entre_a_pos_errada_e__a_certa_e_devolve_correcao_com_uma_dicas():
-    word_checker = WordChecker()
     palavra = "BAFAD"
     chute = "GAAHI"
+    attempt = Attempt(chute, palavra)
     esperado = [
         WRONG_LETTER,
         RIGHT_POS,
@@ -204,6 +194,5 @@ def test_get_feedback_from_guess_recebe_chute_com_uma_letra_na_posicao_certa_e_u
         WRONG_LETTER,
     ]
 
-    check_word = word_checker.get_feedback_from_guess(chute, palavra)
-    for i in range(len(esperado)):
-        assert check_word == esperado
+    check_word = attempt.feedbacks
+    assert check_word == esperado, f"Failed. Expected {esperado} got {check_word}"

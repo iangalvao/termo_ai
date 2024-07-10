@@ -4,7 +4,7 @@ import sys
 from typing import Tuple
 
 
-class IPresenter(ABC):
+class ITerminalManipulator(ABC):
     def __init__(self) -> None:
         super().__init__()
 
@@ -17,7 +17,7 @@ class IPresenter(ABC):
     def clear_line(self, n: int) -> None:
         pass
 
-class TerminalPresenter(IPresenter):
+class TerminalManipulator(ITerminalManipulator):
     def __init__(self, line_length = 75) -> None:
         super().__init__()
         self.line_length = line_length
@@ -43,12 +43,12 @@ class TerminalPresenter(IPresenter):
 
     def string_size(self, s: str) -> int:
         # Regular expression to match ANSI escape sequences
-        ansi_escape = re.compile(r'\033\[[0-9;]*m')
+        ansi_escape = re.compile(r'\033\[[0-9;]*[m,C]')
         
         # Remove ANSI escape sequences from the string
-        clean_string = ansi_escape.sub('', s)
+        clear_string = ansi_escape.sub('', s)
         # Count visible characters (letters, numbers, spaces, and punctuation)
-        count = sum(1 for char in clean_string if char.isprintable())
+        count = sum(1 for char in clear_string if char.isprintable())
         
         return count
 
@@ -59,11 +59,11 @@ class TerminalPresenter(IPresenter):
 
 
     def clear_line_at_pos(self, pos: int) -> str:
-        clean_line_string = " " * self.line_length
-        return self.string_at_pos(clean_line_string, (pos, 0))
+        clear_line_string = " " * self.line_length
+        return self.string_at_pos(clear_line_string, (pos, 0))
 
 
-    def clear_line(self, s: str, pos: int) -> None:
+    def clear_line(self, pos: int) -> None:
         string_to_print = self.clear_line_at_pos(pos)
         print(string_to_print)
         sys.stdout.flush()

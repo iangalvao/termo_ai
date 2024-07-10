@@ -7,7 +7,7 @@ from game.hint import *
 from game.keyboard import Keyboard
 from game.word_checker import IWordChecker, WordChecker
 from game.attempt import Attempt
-
+from game.terminal_manipulator import ITerminalManipulator, TerminalManipulator
 ###########################################################################
 ################           ESTILO DO TERMINAL          ####################
 ###########################################################################
@@ -117,61 +117,9 @@ class Desafio:
 
 
 class TerminalPresenter:
-    def __init__(self) -> None:
+    def __init__(self, tmanipulator: ITerminalManipulator) -> None:
+        self.tmanipulator = tmanipulator
 
-        pass
-
-    def go_to_line(self, n):
-        if n == 0:
-            return ""
-        elif n > 0:
-            return f"\033[{n}B"
-        else:
-            return f"\033[{-n}A"
-
-    def go_to_char(self, n):
-        if n == 0:
-            return ""
-        elif n > 0:
-            return f"\033[{n}C"
-        else:
-            return f"\033[{-n}D"
-
-    def go_to_pos(self, pos):
-        return self.go_to_line(pos[0]) + self.go_to_char(pos[1])
-
-    def tamanho_string(self, s):
-        count = 0
-        n = 0
-        for i in range(len(s)):
-            if i + n >= len(s):
-                break
-            c = s[i + n]
-            if c == "\033":
-                while len(s) > i + n:
-                    n += 1
-                    c = s[i + n]
-                    if c.isalpha():
-                        break
-                continue
-            # print("c:", c)
-            if c.isalnum() or c == " " or c == ":":
-                count += 1
-        return count
-
-    def print_at_pos(self, s, pos):
-        padding = self.go_to_pos(pos)
-        end_v = self.go_to_line(-pos[0])
-        end_h = self.go_to_char(-(pos[1] + self.tamanho_string(s)))
-        end = end_v + end_h
-        print(padding + s, end=end)
-        sys.stdout.flush()
-
-    def clean_line(self, n):
-        s = ""
-        for i in range(75):
-            s += " "
-        self.print_at_pos(s, (n, 0))
 
     ###########################################################################
     ################           TELA PRINCIPAL              ####################
@@ -181,12 +129,12 @@ class TerminalPresenter:
 
     def print_tabela(self, n):
         for i in range(lim_chutes - n):
-            self.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2))
+            self.tmanipulator.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2))
 
     def print_chutes(self, chutes, feedbacks):
         chutes_coloridos = self.colore_lista_chutes(chutes, feedbacks)
         for i in range(len(chutes_coloridos)):
-            self.print_at_pos(chutes_coloridos[i], (i + 1, 2))
+            self.tmanipulator.print_at_pos(chutes_coloridos[i], (i + 1, 2))
 
     def colore_lista_chutes(self, chutes, feedbacks):
         chutes_coloridos = []
@@ -211,7 +159,7 @@ class TerminalPresenter:
             if i == 2:
                 # A última linha começa uma casa depois por escolha de diagramação.
                 linha_colorida = " " + linha_colorida
-            self.print_at_pos(linhas_teclas_coloridas[i], (lim_chutes + 2 + i, 0))
+            self.tmanipulator.print_at_pos(linhas_teclas_coloridas[i], (lim_chutes + 2 + i, 0))
 
     def color_keyboard_lines(self, linhas_de_teclas_com_dicas):
         linhas_de_teclas_coloridas = []
@@ -233,12 +181,12 @@ class TerminalPresenter:
     ###########################################################################
 
     def print_game_at_pos(self, chutes, teclado_com_dicas, pos, feedbacks):
-        print(self.go_to_pos(pos), end="")
+        print(self.tmanipulator.go_to_pos(pos), end="")
         sys.stdout.flush()
         self.print_keyboard(teclado_com_dicas)
         self.print_tabela(len(chutes))
         self.print_chutes(chutes, feedbacks)
-        print(self.go_to_pos((-pos[0], -pos[1])), end="")
+        print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
         sys.stdout.flush()
         pass
 
@@ -247,19 +195,19 @@ class TerminalPresenter:
     ###########################################################################
 
     def message(self, mensagem):
-        self.clean_line(lim_chutes + 6)
-        self.print_at_pos(mensagem, (lim_chutes + 6, 0))
+        self.tmanipulator.clear_line(lim_chutes + 6)
+        self.tmanipulator.print_at_pos(mensagem, (lim_chutes + 6, 0))
 
     def print_won_the_game(self, number_of_tries):
         self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
-        print(self.go_to_pos((lim_chutes + 7, 0)))
+        print(self.tmanipulator.go_to_pos((lim_chutes + 7, 0)))
 
     def print_loss_the_game(self, desafios):
         palavras_sorteadas = ""
         for d in desafios:
             palavras_sorteadas += " " + d.palavra
         self.message(f"\rVocê perdeu. As palavras eram{palavras_sorteadas}.")
-        print(self.go_to_pos((lim_chutes + 7, 0)))
+        print(self.tmanipulator.go_to_pos((lim_chutes + 7, 0)))
 
     def print_word_not_accepted(self, palavra):
         self.message(f"Essa palavra não é aceita:{palavra}")
@@ -287,13 +235,13 @@ class TerminalPresenter:
     ###########################
     def get_input(self, n, padding):
         pos = (0, padding)
-        print(self.go_to_pos(pos), end="")
-        self.clean_line(n + 1)
+        print(self.tmanipulator.go_to_pos(pos), end="")
+        self.tmanipulator.clear_line(n + 1)
         self.print_tabela(n)
-        s = self.go_to_pos((n + 1, 2))
+        s = self.tmanipulator.go_to_pos((n + 1, 2))
         chute_atual = unidecode(input(s)).upper()
-        print(self.go_to_line(-n - 2), end="")
-        # print(self.go_to_pos((-pos[0], -pos[1])), end="")
+        print(self.tmanipulator.go_to_line(-n - 2), end="")
+        # print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
         sys.stdout.flush()
         return chute_atual
 
@@ -349,8 +297,8 @@ if __name__ == "__main__":
     palavras = sort_words(palavras, n_desafios)
     for i in range(n_desafios):
         desafios.append(Desafio(palavras[i], word_checker))
-
-    presenter = TerminalPresenter()
+    tmanipulator = TerminalManipulator()
+    presenter = TerminalPresenter(tmanipulator)
 
     presenter.first_print()
 

@@ -1,7 +1,6 @@
 from typing import Tuple
 import pytest
-from game.terminal_manipulator import TerminalManipulator,IPresenter
-
+from game.terminal_manipulator import TerminalManipulator
 
 # Define a pytest fixture for the presenter
 @pytest.fixture
@@ -83,21 +82,86 @@ def test_string_at_pos_unicode_characters(presenter):
     
 def test_clean_line_at_pos_basic():
     presenter = TerminalManipulator(line_length=75)
-    result = presenter.clean_line_at_pos(1)
+    result = presenter.clear_line_at_pos(1)
     expected = "\033[1B" + " " * 75 + "\033[1A\033[75D"
     assert result == expected
     
 def test_clean_line_at_pos_custom_length():
     presenter = TerminalManipulator(line_length=50)
-    result = presenter.clean_line_at_pos(7)
+    result = presenter.clear_line_at_pos(7)
     expected = "\033[7B" + " " * 50 + "\033[7A\033[50D"
     assert result == expected
     
 def test_clean_line_at_pos_zero_length():
     presenter = TerminalManipulator(line_length=0)
-    result = presenter.clean_line_at_pos(1)
+    result = presenter.clear_line_at_pos(1)
     expected = "\033[1B\033[1A"
     assert result == expected
+
+
+@pytest.mark.parametrize(
+    "string, expected",
+    [("s", 1), ("á", 1), ("sapos", 5), ("     ", 5)],
+)
+def test_string_size_recebe_formatacao_de_posicionamento(string, expected):
+    t = TerminalManipulator()
+    string = "\033[1C" + string
+    tamanho = t.string_size(string)
+    assert tamanho == expected
+
+
+@pytest.mark.parametrize(
+    "string, expected",
+    [("s", 1), ("á", 1), ("sapos", 5), ("     ", 5)],
+)
+def test_string_size_recebe_sem_formatacao(string, expected):
+    t = TerminalManipulator()
+    tamanho = t.string_size(string)
+    assert tamanho == expected
+
+
+@pytest.mark.parametrize(
+    "cor, string, expected",
+    [
+        ("\033[93m", "s", 1),
+        ("\033[93m", "á", 1),
+        ("\033[93m", "sapos", 5),
+        ("\033[93m", "     ", 5),
+    ],
+)
+def test_string_size_recebe_formatacao_de_cor_com_duas_casas_numericas_apos_colchete(
+    cor, string, expected
+):
+    t = TerminalManipulator()
+    string = cor + string
+    tamanho = t.string_size(string)
+    assert tamanho == expected
+
+
+def test_string_size_recebe_linha_de_taclas_coloridas():
+    s = "\033[94mQ\033[0m\033[94mW\033[0m"
+    t = TerminalManipulator()
+    tamanho = t.string_size(s)
+    assert tamanho == 2
+
+
+@pytest.mark.parametrize(
+    "cor, string, expected",
+    [
+        ("\033[101m", "s", 1),
+        ("\033[101m", "á", 1),
+        ("\033[101m", "sapos", 5),
+        ("\033[101m", "     ", 5),
+    ],
+)
+def test_string_size_recebe_formatacao_de_cor_com_tres_casas_numericas_apos_colchete(
+    cor, string, expected
+):
+    t = TerminalManipulator()
+    string = cor + string
+    tamanho = t.string_size(string)
+    assert tamanho == expected
+
 
 if __name__ == "__main__":
     pytest.main()

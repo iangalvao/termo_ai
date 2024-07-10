@@ -1,5 +1,5 @@
 from typing import Iterator, Tuple
-from game.common import *
+from game.hint import *
 from abc import ABC
 
 class IAttempt(ABC):

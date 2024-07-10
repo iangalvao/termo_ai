@@ -1,5 +1,5 @@
 import pytest
-from game.common import Hint
+from game.hint import Hint
 from game.keyboard import Keyboard
 
 # Mock class for IAttempt

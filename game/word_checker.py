@@ -1,6 +1,6 @@
 from unidecode import unidecode
 from abc import ABC
-from game.common import *
+from game.hint import *
 
 
 class IWordChecker(ABC):
@@ -40,6 +40,7 @@ class WordChecker(IWordChecker):
                 
         
         return feedbacks
+
 
 
 

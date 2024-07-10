@@ -1,7 +1,7 @@
 import pytest
 from game.attempt import Attempt
 from game.word_checker import WordChecker
-from game.common import *
+from game.hint import *
 
 # test_my_module.py
 

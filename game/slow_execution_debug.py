@@ -1,6 +1,6 @@
 from time import sleep
 from game.solver_tools import WordFilter
-from game.common import *
+from game.hint import *
 from time import time
 
 def test_f(f, *args):

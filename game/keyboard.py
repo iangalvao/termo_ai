@@ -1,5 +1,5 @@
 from typing import Tuple
-from game.common import *
+from game.hint import *
 class Keyboard:
     def __init__(self) -> None:
         self.lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]

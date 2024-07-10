@@ -1,7 +1,8 @@
 from abc import ABC
 import unidecode
 from typeguard import typechecked
-from game.common import *
+from game.hint import *
+
 
 
 class IHintList(ABC):

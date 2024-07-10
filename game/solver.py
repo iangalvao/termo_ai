@@ -1,7 +1,7 @@
 import datetime
 import time
 from game.solver_tools import WordFilter, HintList
-from game.common import *
+from game.hint import *
 import random
 from game.word_checker import WordChecker
 
@@ -85,38 +85,41 @@ class Solver:
         
         # if there are few remaining possible words, try to use one of them as guess.
         if len(possible_words) < 16:
-            for word in possible_words:
+            for guess in possible_words:
                 filter_sizes = self.filter_size_distribution(
-                    word, possible_words,  word_checker
+                    guess, possible_words,  word_checker
                 )
                 max_value = max(filter_sizes)
-                # it is sure to win on next guess, at most.
                 if max_value == 1:
-                    return word, max_value
+                    # All possible correct words results on remaining words list
+                    # with only one word for the current guess.
+                    # It is sure to win on next try, at most.
+                    return guess, max_value
                 
         #  try to find the guess, among all valid guesses, that minimizes the size of the remaining
         # words. i.e that does the best filtering considering the remaining words. 
-        for word in self.word_list:
+        for guess in self.word_list:
             filter_sizes = self.filter_size_distribution(
-                word, possible_words,  word_checker
+                guess, possible_words,  word_checker
             )
+            
             if len(filter_sizes) == 0:
                 continue
             mean = sum(filter_sizes)/len(filter_sizes)
             max_value = max(filter_sizes)
-            if mean == 1:
-                return word, mean
+            if max_value == 1:
+                return guess, mean
             if max_value <= best_max_value:
                 if mean < best_mean or max_value < best_max_value:
                     best_max_value = max_value
                     best_mean = mean
-                    best_word = word
+                    best_word = guess
                     
         return best_word, best_mean
 
 
 
-from unidecode import unidecode
+from unidecode import unidecode#
 import csv
 
 

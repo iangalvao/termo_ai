@@ -3,7 +3,7 @@ import csv
 import sys
 import random
 from colorama import Fore, Back, Style
-from game.common import *
+from game.hint import *
 from game.word_checker import IWordChecker, WordChecker
 from game.attempt import Attempt
 

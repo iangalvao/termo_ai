@@ -1,7 +1,7 @@
 from typing import TextIO
 from game.word_checker import WordChecker
 from abc import ABC
-from game.common import *
+from game.hint import *
 from game.solver import Solver
 
 class ISolver(ABC):

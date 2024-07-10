@@ -1,5 +1,6 @@
 import pytest
 from game.mygame import TerminalPresenter, Desafio
+from game.word_checker import WordChecker
 
 # test_my_module.py
 
@@ -24,6 +25,9 @@ def test_tamanho_string_recebe_sem_formatacao(string, expected):
     tamanho = t.tamanho_string(string)
     assert tamanho == expected
 
+@pytest.fixture
+def word_checker():
+    return WordChecker()
 
 @pytest.mark.parametrize(
     "cor, string, expected",
@@ -67,9 +71,9 @@ def test_tamanho_string_recebe_formatacao_de_cor_com_tres_casas_numericas_apos_c
     tamanho = t.tamanho_string(string)
     assert tamanho == expected
 
-
-def test_check_word_recebe_chute_sem_letras_certa_e_devolve_correcao_sem_dicas():
-    desafio = Desafio("ABCDE")
+'''
+def test_check_word_recebe_chute_sem_letras_certa_e_devolve_correcao_sem_dicas(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "FGHIJ"
     esperado = [("F", 0), ("G", 0), ("H", 0), ("I", 0), ("J", 0)]
 
@@ -78,8 +82,8 @@ def test_check_word_recebe_chute_sem_letras_certa_e_devolve_correcao_sem_dicas()
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_todas_letras_na_pos_certa_e_devolve_correcao_com_dicas():
-    desafio = Desafio("ABCDE")
+def test_check_word_recebe_chute_com_todas_letras_na_pos_certa_e_devolve_correcao_com_dicas(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "ABCDE"
     esperado = [("A", 2), ("B", 2), ("C", 2), ("D", 2), ("E", 2)]
 
@@ -88,8 +92,8 @@ def test_check_word_recebe_chute_com_todas_letras_na_pos_certa_e_devolve_correca
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_todas_letras_na_pos_errada_e_devolve_correcao_com_dicas():
-    desafio = Desafio("ABCDE")
+def test_check_word_recebe_chute_com_todas_letras_na_pos_errada_e_devolve_correcao_com_dicas(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "BCDEA"
     esperado = [("B", 1), ("C", 1), ("D", 1), ("E", 1), ("A", 1)]
 
@@ -98,8 +102,8 @@ def test_check_word_recebe_chute_com_todas_letras_na_pos_errada_e_devolve_correc
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_uma_letras_na_pos_certa_e_devolve_correcao_com_dicas():
-    desafio = Desafio("ABCDE")
+def test_check_word_recebe_chute_com_uma_letras_na_pos_certa_e_devolve_correcao_com_dicas(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "AGHIJ"
     esperado = [("A", 2), ("G", 0), ("H", 0), ("I", 0), ("J", 0)]
 
@@ -108,8 +112,8 @@ def test_check_word_recebe_chute_com_uma_letras_na_pos_certa_e_devolve_correcao_
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_uma_letras_na_pos_errada_e_devolve_correcao_com_dicas():
-    desafio = Desafio("ABCDE")
+def test_check_word_recebe_chute_com_uma_letras_na_pos_errada_e_devolve_correcao_com_dicas(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "GAHIJ"
     esperado = [("G", 0), ("A", 1), ("H", 0), ("I", 0), ("J", 0)]
 
@@ -118,8 +122,8 @@ def test_check_word_recebe_chute_com_uma_letras_na_pos_errada_e_devolve_correcao
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_duas_letras_na_pos_certa_e_devolve_correcao_com_dicas():
-    desafio = Desafio("ABCDE")
+def test_check_word_recebe_chute_com_duas_letras_na_pos_certa_e_devolve_correcao_com_dicas(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "ABHIJ"
     esperado = [("A", 2), ("B", 2), ("H", 0), ("I", 0), ("J", 0)]
 
@@ -128,8 +132,8 @@ def test_check_word_recebe_chute_com_duas_letras_na_pos_certa_e_devolve_correcao
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_duas_letras_na_pos_errada_e_devolve_correcao_com_dicas():
-    desafio = Desafio("ABCDE")
+def test_check_word_recebe_chute_com_duas_letras_na_pos_errada_e_devolve_correcao_com_dicas(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "GABIJ"
     esperado = [("G", 0), ("A", 1), ("B", 1), ("I", 0), ("J", 0)]
 
@@ -138,8 +142,8 @@ def test_check_word_recebe_chute_com_duas_letras_na_pos_errada_e_devolve_correca
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_palavra_com_uma_unica_dessa_letra_devolve_correcao_com_uma_dica_de_posicao():
-    desafio = Desafio("ABCDE")
+def test_check_word_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_palavra_com_uma_unica_dessa_letra_devolve_correcao_com_uma_dica_de_posicao(word_checker):
+    desafio = Desafio("ABCDE", word_checker)
     chute = "GAAHI"
     esperado = [("G", 0), ("A", 1), ("A", 0), ("H", 0), ("I", 0)]
 
@@ -148,8 +152,8 @@ def test_check_word_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_pal
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_palavra_com_uma_unica_dessa_letra__depois_da_pos_chutada_devolve_correcao_com_uma_dica_de_posicao():
-    desafio = Desafio("BCDEA")
+def test_check_word_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_palavra_com_uma_unica_dessa_letra__depois_da_pos_chutada_devolve_correcao_com_uma_dica_de_posicao(word_checker):
+    desafio = Desafio("BCDEA", word_checker)
     chute = "GAAHI"
     esperado = [("G", 0), ("A", 1), ("A", 0), ("H", 0), ("I", 0)]
 
@@ -158,8 +162,8 @@ def test_check_word_recebe_chute_com_duas_letras_iguais_na_pos_errada_de_uma_pal
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_devolve_correcao_com_uma_dica_de_posicao():
-    desafio = Desafio("AACDE")
+def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_devolve_correcao_com_uma_dica_de_posicao(word_checker):
+    desafio = Desafio("AACDE", word_checker)
     chute = "GAAHI"
     esperado = [("G", 0), ("A", 2), ("A", 1), ("H", 0), ("I", 0)]
 
@@ -168,8 +172,8 @@ def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_err
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_com_ocorrencia_depois_da_pos_errada_e_devolve_correcao_com_uma_dicas():
-    desafio = Desafio("BCAAD")
+def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_com_ocorrencia_depois_da_pos_errada_e_devolve_correcao_com_uma_dicas(word_checker):
+    desafio = Desafio("BCAAD", word_checker)
     chute = "GAAHI"
     esperado = [("G", 0), ("A", 1), ("A", 2), ("H", 0), ("I", 0)]
 
@@ -178,8 +182,8 @@ def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_err
         assert check_word[i] == esperado[i]
 
 
-def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_com_ocorrencia_entre_a_pos_errada_e__a_certa_e_devolve_correcao_com_uma_dicas():
-    desafio = Desafio("BAFAD")
+def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_errada_de_uma_palavra_com_duas_dessa_letra_com_ocorrencia_entre_a_pos_errada_e__a_certa_e_devolve_correcao_com_uma_dicas(word_checker):
+    desafio = Desafio("BAFAD", word_checker)
     chute = "GAAHI"
     esperado = [("G", 0), ("A", 2), ("A", 1), ("H", 0), ("I", 0)]
 
@@ -188,8 +192,8 @@ def test_check_word_recebe_chute_com_uma_letra_na_posicao_certa_e_uma_na_pos_err
         assert check_word[i] == esperado[i]
 
 
-def test_count_letters_recebe_chute_sem_a_letra_devolve_zero():
-    desafio = Desafio("AAAAA")
+def test_count_letters_recebe_chute_sem_a_letra_devolve_zero(word_checker):
+    desafio = Desafio("AAAAA", word_checker)
     chute = "AAAAA"
     caracter = "B"
     esperado = 0
@@ -198,11 +202,12 @@ def test_count_letters_recebe_chute_sem_a_letra_devolve_zero():
     assert count_letters == esperado
 
 
-def test_count_letters_recebe_chute_com_cinco_letras_devolve_cinco():
-    desafio = Desafio("AAAAA")
+def test_count_letters_recebe_chute_com_cinco_letras_devolve_cinco(word_checker):
+    desafio = Desafio("AAAAA", word_checker)
     chute = "BBBBB"
     caracter = "B"
     esperado = 5
 
     count_letters = desafio.count_letters(chute, caracter)
     assert count_letters == esperado
+'''

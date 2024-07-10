@@ -76,6 +76,7 @@ class WordFilter:
         self, chutes: list[str], feedbacks: list[int], possible_words: list[str]
     ):
         hint_list = self.get_hints_from_feedback_list(chutes, feedbacks)
+        
         return self.filter_from_hint_list(hint_list, possible_words)
 
     def filter_from_feedback(
@@ -87,28 +88,26 @@ class WordFilter:
 
     def filter_from_hint(
         self, hint: int, letter: str, val: int, original_words: list[str]
-    ):
-        if hint == RIGHT_POS:
-            filtered_words = [w for w in original_words if w[val] == letter]
-        elif hint == WRONG_POS:
-            filtered_words = [
+    ):  
+        match hint:
+            case Hint.RIGHT_POS:
+                filtered_words = [w for w in original_words if w[val] == letter]
+            case  Hint.WRONG_POS:
+                filtered_words = [
                 w for w in original_words if (letter in w and w[val] != letter)
             ]
-        elif hint == WRONG_LETTER:
-            filtered_words = [w for w in original_words if letter not in w]
-
-        elif hint == NUMBER_OF_LETTERS:
-            if val == 0:
+            case Hint.WRONG_LETTER:
                 filtered_words = [w for w in original_words if letter not in w]
+                
 
-            else:
+            case Hint.NUMBER_OF_LETTERS:
                 filtered_words = [
                     w
                     for w in original_words
                     if len([l for l in w if l == letter]) >= val
                 ]
-        else:
-            filtered_words = [w for w in original_words if len([l for l in w if l == letter]) == val]
+            case Hint.MAX_LETTERS:
+                filtered_words = [w for w in original_words if len([l for l in w if l == letter]) == val]
 
         return filtered_words
 

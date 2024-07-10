@@ -3,6 +3,7 @@ import csv
 import sys
 import random
 from colorama import Fore, Back, Style
+from game.common import *
 from game.word_checker import IWordChecker, WordChecker
 
 ###########################################################################
@@ -37,10 +38,10 @@ POS_INCORRETA = 1
 CERTO = 2
 
 cores_das_dicas = {
-    LETRA_DESCONHECIDA: ENDC,
-    LETRA_INCORRETA: COR_ERRADO,
-    POS_INCORRETA: COR_POSICAO,
-    CERTO: COR_CERTO,
+    UNKOWN_LETTER: ENDC,
+    WRONG_LETTER: COR_ERRADO,
+    WRONG_POS: COR_POSICAO,
+    RIGHT_POS: COR_CERTO,
 }
 
 
@@ -78,6 +79,7 @@ class Desafio:
     def __init__(self, palavra, word_checker: IWordChecker) -> None:
         self.chutes = []
         self.feedbacks = []
+        self.attempts:list[Attempt] = []
         self.teclado = Keyboard()
         self.palavra = palavra
         self.solved = 0
@@ -85,9 +87,14 @@ class Desafio:
     def update(self, chute):
         if chute == self.palavra:
             self.solved = 1
+        attempt = Attempt(chute, self.palavra)
+        self.attempts.append(attempt)
+        
         chute_corrigido = self.word_checker.get_feedback_from_guess(unidecode(chute.lower()), unidecode(self.palavra.lower()))
-        self.chutes.append(chute)
+        self.chutes.append(chute)        
         self.feedbacks.append(chute_corrigido)
+        
+        # self.teclado.process_hints(attempt)
         self.teclado.process_hints(chute, chute_corrigido)
         return chute_corrigido
 
@@ -103,7 +110,13 @@ class Keyboard:
         self.state = {}
         for line in self.lines:
             for c in line:
-                self.set_letter_hint(c, LETRA_DESCONHECIDA)
+                self.set_letter_hint(c, UNKOWN_LETTER)
+
+    def process_hintsB(self, attempt):
+        for letra, dica, in attempt:
+            dica_atual = self.get_letter_hint(letra)
+            if dica > dica_atual:
+                self.set_letter_hint(letra, dica)
 
     def process_hints(self, chute, feedbacks):
         for pos, letra in enumerate(chute):
@@ -221,8 +234,8 @@ class TerminalPresenter:
             feedback = feedbacks[i]
             for pos, letra in enumerate(chute):
                 dica =feedback[pos]
-                if dica == LETRA_INCORRETA:
-                    dica = LETRA_DESCONHECIDA
+                if dica == WRONG_LETTER:
+                    dica = UNKOWN_LETTER
                 cor = cores_das_dicas[dica]
                 letra_colorida = f"{cor}{letra}{ENDC}"
                 chutes_colorido += letra_colorida
@@ -245,10 +258,18 @@ class TerminalPresenter:
             linha_colorida = ""
             for letra, dica in linha:
                 cor = cores_das_dicas[dica]
-                letra_colorida = f"{cor}{letra}{ENDC}"
+                if cor == cores_das_dicas[WRONG_LETTER]:
+                    letra_colorida = " "
+                else:
+                    letra_colorida = f"{cor}{letra}{ENDC}"
                 linha_colorida += letra_colorida
             linhas_de_teclas_coloridas.append(linha_colorida)
         return linhas_de_teclas_coloridas
+
+
+    ###########################################################################
+    ################                  GAME                 ####################
+    ###########################################################################
 
     def print_game_at_pos(self, chutes, teclado_com_dicas, pos, feedbacks):
         print(self.go_to_pos(pos), end="")

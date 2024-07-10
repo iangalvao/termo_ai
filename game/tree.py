@@ -159,7 +159,6 @@ class TreeBuilder:
             #print(w)
             feedbacks = []
             guess = first_guess
-            n = 1        
             while w != guess:
                 node =  tree.get_node(feedbacks)
                 if node:
@@ -168,13 +167,12 @@ class TreeBuilder:
                     guess = solver.generate_answer(feedbacks)
                 #print(" "+guess)
                 tree.add(feedbacks, guess)
-                fb = wchecker.get_feedback_from_guess_L(guess, w)
+                fb = wchecker.get_feedback_from_guess(guess, w)
                 feedbacks.append(fb)
                 #print(guess)
                 if guess == w:
                     #print(f"Ganhou. Palavra: {w} número de tentativas: {n}")
                     break
-                n += 1
             solver.reset()
         return tree
     

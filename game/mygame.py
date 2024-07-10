@@ -4,6 +4,7 @@ import sys
 import random
 from colorama import Fore, Back, Style
 from game.hint import *
+from game.keyboard import Keyboard
 from game.word_checker import IWordChecker, WordChecker
 from game.attempt import Attempt
 
@@ -95,52 +96,10 @@ class Desafio:
         self.chutes.append(chute)        
         self.feedbacks.append(chute_corrigido)
         
-        # self.teclado.process_hints(attempt)
-        self.teclado.process_hints(chute, chute_corrigido)
+        self.teclado.process_hints(attempt)
+        #self.teclado.process_hints(chute, chute_corrigido)
         return chute_corrigido
 
-
-###########################################################################
-################                 TECLADO               ####################
-###########################################################################
-
-
-class Keyboard:
-    def __init__(self) -> None:
-        self.lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
-        self.state = {}
-        for line in self.lines:
-            for c in line:
-                self.set_letter_hint(c, UNKNOWN_LETTER)
-
-    def process_hintsB(self, attempt):
-        for letra, dica, in attempt:
-            dica_atual = self.get_letter_hint(letra)
-            if dica > dica_atual:
-                self.set_letter_hint(letra, dica)
-
-    def set_letter_hint(self, letra, dica):
-        self.state[unidecode(letra)] = dica
-
-    def get_letter_hint(self, letra):
-        return self.state[unidecode(letra)]
-
-
-    def process_hints(self, chute, feedbacks):
-        for pos, letra in enumerate(chute):
-            dica = feedbacks[pos]
-            dica_atual = self.get_letter_hint(letra)
-            if dica > dica_atual:
-                self.set_letter_hint(letra, dica)
-
-    def get_keyboard_lines_with_hints(self):
-        res = []
-        for linha in self.lines:
-            linha_com_dicas = []
-            for letra in linha:
-                linha_com_dicas.append((letra, self.get_letter_hint(letra)))
-            res.append(linha_com_dicas)
-        return res
 
 
 ###########################################################################

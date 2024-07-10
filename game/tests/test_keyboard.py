@@ -10,10 +10,10 @@ class MockAttempt:
 
     def __iter__(self):
         return iter([
-            ('A', Hint.RIGHT_POS),
-            ('B', Hint.WRONG_POS),
-            ('C', Hint.WRONG_LETTER),
-            ('D', Hint.UNKNOWN_LETTER),
+            ('A', Hint.RIGHT_POS, 0),
+            ('B', Hint.WRONG_POS, 1),
+            ('C', Hint.WRONG_LETTER, 2),
+            ('D', Hint.UNKNOWN_LETTER, 3),
         ])
 
 # Test for process_hints

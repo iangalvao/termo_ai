@@ -1,4 +1,5 @@
 from typing import Tuple
+from game.attempt import Attempt
 from game.hint import *
 class Keyboard:
     def __init__(self) -> None:
@@ -8,8 +9,8 @@ class Keyboard:
             for c in line:
                 self.set_letter_hint(c, UNKNOWN_LETTER)
 
-    def process_hints(self, attempt):
-        for letra, dica, in attempt:
+    def process_hints(self, attempt:Attempt):
+        for letra, dica, _ in attempt:
             dica_atual = self.get_letter_hint(letra)
             if dica > dica_atual:
                 self.set_letter_hint(letra, dica)

@@ -8,7 +8,7 @@ class IPresenter(ABC):
     def __init__(self) -> None:
         super().__init__()
 
-    def go_to_pos(self, pos: Tuple[int,int]):
+    def go_to_pos(self, pos: Tuple[int,int]) -> str:
         pass
 
     def print_at_pos(self, s: str, pos: Tuple[int, int]) -> None:
@@ -58,13 +58,13 @@ class TerminalPresenter(IPresenter):
         return forward + s + backward
 
 
-    def clean_line_at_pos(self, pos: int) -> str:
+    def clear_line_at_pos(self, pos: int) -> str:
         clean_line_string = " " * self.line_length
         return self.string_at_pos(clean_line_string, (pos, 0))
 
 
     def clear_line(self, s: str, pos: int) -> None:
-        string_to_print = self.clean_line_at_pos(pos)
+        string_to_print = self.clear_line_at_pos(pos)
         print(string_to_print)
         sys.stdout.flush()
     

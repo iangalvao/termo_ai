@@ -1,12 +1,12 @@
 from typing import Tuple
 import pytest
-from game.terminal_presenter import TerminalPresenter,IPresenter
+from game.terminal_manipulator import TerminalManipulator,IPresenter
 
 
 # Define a pytest fixture for the presenter
 @pytest.fixture
 def presenter():
-    return TerminalPresenter()
+    return TerminalManipulator()
 
 # Test for go_to_line method
 def test_go_to_line_positive(presenter):
@@ -74,27 +74,27 @@ def test_string_at_pos_empty_string(presenter):
 def test_string_at_pos_long_string(presenter):
     result = presenter.string_at_pos("This is a long string", (1, 10))
     expected = "\033[1B\033[10CThis is a long string\033[1A\033[31D"
-    assert result == expected#, #f"Expected: {expected}, but got: {result}"
+    assert result == expected
 
 def test_string_at_pos_unicode_characters(presenter):
     result = presenter.string_at_pos("Unicode: 😊🚀", (2, 3))
     expected = "\033[2B\033[3CUnicode: 😊🚀\033[2A\033[14D"
-    assert result == expected#, #f"Expected: {expected}, but got: {result}"
+    assert result == expected
     
 def test_clean_line_at_pos_basic():
-    presenter = TerminalPresenter(line_length=75)
+    presenter = TerminalManipulator(line_length=75)
     result = presenter.clean_line_at_pos(1)
     expected = "\033[1B" + " " * 75 + "\033[1A\033[75D"
     assert result == expected
     
 def test_clean_line_at_pos_custom_length():
-    presenter = TerminalPresenter(line_length=50)
+    presenter = TerminalManipulator(line_length=50)
     result = presenter.clean_line_at_pos(7)
     expected = "\033[7B" + " " * 50 + "\033[7A\033[50D"
     assert result == expected
     
 def test_clean_line_at_pos_zero_length():
-    presenter = TerminalPresenter(line_length=0)
+    presenter = TerminalManipulator(line_length=0)
     result = presenter.clean_line_at_pos(1)
     expected = "\033[1B\033[1A"
     assert result == expected

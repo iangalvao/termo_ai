@@ -8,6 +8,7 @@ from game.keyboard import Keyboard
 from game.word_checker import IWordChecker, WordChecker
 from game.attempt import Attempt
 from game.terminal_manipulator import ITerminalManipulator, TerminalManipulator
+
 ###########################################################################
 ################           ESTILO DO TERMINAL          ####################
 ###########################################################################
@@ -81,25 +82,27 @@ class Desafio:
     def __init__(self, palavra, word_checker: IWordChecker) -> None:
         self.chutes = []
         self.feedbacks = []
-        self.attempts:list[Attempt] = []
+        self.attempts: list[Attempt] = []
         self.teclado = Keyboard()
         self.palavra = palavra
         self.solved = 0
-        self.word_checker:IWordChecker = word_checker
+        self.word_checker: IWordChecker = word_checker
+
     def update(self, chute):
         if chute == self.palavra:
             self.solved = 1
         attempt = Attempt(chute, self.palavra)
         self.attempts.append(attempt)
-        
-        chute_corrigido = self.word_checker.get_feedback_from_guess(unidecode(chute.lower()), unidecode(self.palavra.lower()))
-        self.chutes.append(chute)        
-        self.feedbacks.append(chute_corrigido)
-        
-        self.teclado.process_hints(attempt)
-        #self.teclado.process_hints(chute, chute_corrigido)
-        return chute_corrigido
 
+        chute_corrigido = self.word_checker.get_feedback_from_guess(
+            unidecode(chute.lower()), unidecode(self.palavra.lower())
+        )
+        self.chutes.append(chute)
+        self.feedbacks.append(chute_corrigido)
+
+        self.teclado.process_hints(attempt)
+        # self.teclado.process_hints(chute, chute_corrigido)
+        return chute_corrigido
 
 
 ###########################################################################
@@ -120,7 +123,6 @@ class TerminalPresenter:
     def __init__(self, tmanipulator: ITerminalManipulator) -> None:
         self.tmanipulator = tmanipulator
 
-
     ###########################################################################
     ################           TELA PRINCIPAL              ####################
     ###########################################################################
@@ -129,7 +131,9 @@ class TerminalPresenter:
 
     def print_tabela(self, n):
         for i in range(lim_chutes - n):
-            self.tmanipulator.print_at_pos(UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2))
+            self.tmanipulator.print_at_pos(
+                UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2)
+            )
 
     def print_chutes(self, chutes, feedbacks):
         chutes_coloridos = self.colore_lista_chutes(chutes, feedbacks)
@@ -142,7 +146,7 @@ class TerminalPresenter:
             chutes_colorido = ""
             feedback = feedbacks[i]
             for pos, letra in enumerate(chute):
-                dica =feedback[pos]
+                dica = feedback[pos]
                 if dica == WRONG_LETTER:
                     dica = UNKNOWN_LETTER
                 cor = cores_das_dicas[dica]
@@ -159,7 +163,9 @@ class TerminalPresenter:
             if i == 2:
                 # A última linha começa uma casa depois por escolha de diagramação.
                 linha_colorida = " " + linha_colorida
-            self.tmanipulator.print_at_pos(linhas_teclas_coloridas[i], (lim_chutes + 2 + i, 0))
+            self.tmanipulator.print_at_pos(
+                linhas_teclas_coloridas[i], (lim_chutes + 2 + i, 0)
+            )
 
     def color_keyboard_lines(self, linhas_de_teclas_com_dicas):
         linhas_de_teclas_coloridas = []
@@ -174,7 +180,6 @@ class TerminalPresenter:
                 linha_colorida += letra_colorida
             linhas_de_teclas_coloridas.append(linha_colorida)
         return linhas_de_teclas_coloridas
-
 
     ###########################################################################
     ################                  GAME                 ####################
@@ -291,13 +296,12 @@ if __name__ == "__main__":
     # n_desafios = 2
     lim_chutes = 5 + n_desafios
 
-
-    word_checker = WordChecker()    
+    word_checker = WordChecker()
     desafios = []
-    palavras = sort_words(palavras, n_desafios)
+    palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
     for i in range(n_desafios):
         desafios.append(Desafio(palavras[i], word_checker))
-    tmanipulator = TerminalManipulator()
+    tmanipulator = TerminalManipulator(None)
     presenter = TerminalPresenter(tmanipulator)
 
     presenter.first_print()
@@ -314,7 +318,10 @@ if __name__ == "__main__":
         for i in range(len(desafios)):
             teclado_linhas = desafios[i].teclado.get_keyboard_lines_with_hints()
             presenter.print_game_at_pos(
-                desafios[i].chutes, teclado_linhas, (0, padding + i * spacing), desafios[i].feedbacks
+                desafios[i].chutes,
+                teclado_linhas,
+                (0, padding + i * spacing),
+                desafios[i].feedbacks,
             )
 
         # GANHOU
@@ -334,10 +341,9 @@ if __name__ == "__main__":
             continue
         chute_atual = palavras_unidecode[chute_atual.lower()].upper()
         tentativas += 1
-        presenter.clean_line(12)  # Apaga mensagens.
+        presenter.tmanipulator.clear_line(12)  # Apaga mensagens.
 
         # CORRIGE
         for i in range(len(desafios)):
             if not desafios[i].solved:
-                desafios[i].update(chute_atual)
-                
+                desafios[i].update(unidecode(chute_atual))

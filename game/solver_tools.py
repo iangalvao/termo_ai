@@ -4,7 +4,6 @@ from typeguard import typechecked
 from game.hint import *
 
 
-
 class IHintList(ABC):
     def add(self, c, h, v):
         pass
@@ -38,20 +37,18 @@ class HintList(IHintList):
         if self.check_hint(c, NUMBER_OF_LETTERS):
             if n <= list(self.hints[c][NUMBER_OF_LETTERS])[0]:
                 return
-        
-        self.hints[c][NUMBER_OF_LETTERS] = {n}
 
+        self.hints[c][NUMBER_OF_LETTERS] = {n}
 
     def set_max_occurrences(self, c: str, n: int):
         self.hints[c][MAX_LETTERS] = {n}
         if self.check_hint(c, NUMBER_OF_LETTERS):
             del self.hints[c][NUMBER_OF_LETTERS]
-        
+
     def get_char_occurrences(self, c: str):
         if self.check_hint(c, NUMBER_OF_LETTERS):
             return self.hints[c][NUMBER_OF_LETTERS]
         return 0
-    
 
     def check_hint(self, c: str, hint: int):
         if c in self.hints:
@@ -78,27 +75,26 @@ class WordFilter:
         self, chutes: list[str], feedbacks: list[int], possible_words: list[str]
     ):
         hint_list = self.get_hints_from_feedback_list(chutes, feedbacks)
-        
+
         return self.filter_from_hint_list(hint_list, possible_words)
 
     # no feedbacks. thats from other part of the system
     def filter_from_feedback(
-        self, chute: str, feedback:list[int], possible_words: list[str]
+        self, chute: str, feedback: list[int], possible_words: list[str]
     ):
         hint_list = self.get_hints_from_feedback(chute, feedback)
         return self.filter_from_hint_list(hint_list, possible_words)
 
-
     def filter_from_hint(
         self, hint: int, letter: str, val: int, original_words: list[str]
-    ):  
+    ):
         match hint:
             case Hint.RIGHT_POS:
                 filtered_words = [w for w in original_words if w[val] == letter]
-            case  Hint.WRONG_POS:
+            case Hint.WRONG_POS:
                 filtered_words = [
-                w for w in original_words if (letter in w and w[val] != letter)
-            ]
+                    w for w in original_words if (letter in w and w[val] != letter)
+                ]
             case Hint.WRONG_LETTER:
                 filtered_words = [w for w in original_words if letter not in w]
             case Hint.NUMBER_OF_LETTERS:
@@ -108,7 +104,11 @@ class WordFilter:
                     if len([l for l in w if l == letter]) >= val
                 ]
             case Hint.MAX_LETTERS:
-                filtered_words = [w for w in original_words if len([l for l in w if l == letter]) == val]
+                filtered_words = [
+                    w
+                    for w in original_words
+                    if len([l for l in w if l == letter]) == val
+                ]
 
         return filtered_words
 
@@ -116,8 +116,17 @@ class WordFilter:
     def get_hints_from_feedback(self, chute, feedback):
         hints = HintList()
         pos = 0
-        number_of_letters = {c:len([True for i in range(5) if c==chute[i] and feedback[i] != WRONG_LETTER]) for c in set(chute)}
-        for pos, (c,d) in enumerate(zip(chute, feedback)):
+        number_of_letters = {
+            c: len(
+                [
+                    True
+                    for i in range(5)
+                    if c == chute[i] and feedback[i] != WRONG_LETTER
+                ]
+            )
+            for c in set(chute)
+        }
+        for pos, (c, d) in enumerate(zip(chute, feedback)):
             if d == RIGHT_POS:
                 hints.add(c, d, pos)
             elif d == WRONG_POS:
@@ -129,10 +138,12 @@ class WordFilter:
                     dica = feedback[i]
                     if letra.lower() == c.lower():
                         if dica == WRONG_POS or dica == RIGHT_POS:
-                            max_letters+=1
+                            max_letters += 1
                 if max_letters != 0:
                     hints.add(c, WRONG_POS, pos)
                     hints.set_max_occurrences(c, max_letters)
+                else:
+                    hints.add(c, MAX_LETTERS, 0)
         for c in number_of_letters.keys():
             hints.add(c, NUMBER_OF_LETTERS, number_of_letters[c])
         return hints
@@ -145,15 +156,16 @@ class WordFilter:
             all_hints.merge(self.get_hints_from_feedback(chute, fb))
         return all_hints
 
-class VocabularyAnalyser():
+
+class VocabularyAnalyser:
     def __init__(self, words) -> None:
         self.words = words
+
     def cluster_letter_by_occurrence(self):
         words = self.words
-        threshold = min(len(words)/40, 1)
-       # Calculate the occurrences of each letter in the vocabulary
+        threshold = min(len(words) / 40, 1)
+        # Calculate the occurrences of each letter in the vocabulary
         letter_occurrences = {}
-        
 
         result = set()
         while 1:
@@ -163,20 +175,22 @@ class VocabularyAnalyser():
                         letter_occurrences[letter] += 1
                     else:
                         letter_occurrences[letter] = 1
-        
+
             # index of the letter with max occurrences
-            max_letter = max(letter_occurrences.keys(), key=lambda x: letter_occurrences.get(x))
+            max_letter = max(
+                letter_occurrences.keys(), key=lambda x: letter_occurrences.get(x)
+            )
             result.add(max_letter)
             words = [w for w in words if max_letter not in w]
             letter_occurrences = {}
             if len(words) < threshold:
                 break
-            
+
         for letter in list(result):
             test = self.words
             for other_letter in result:
                 if other_letter != letter:
                     test = [w for w in test if other_letter not in w]
             if len(test) < threshold:
-                result.remove(letter) 
+                result.remove(letter)
         return result

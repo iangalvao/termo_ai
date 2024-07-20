@@ -49,73 +49,11 @@ cores_das_dicas = {
 
 
 ###########################################################################
-################                                       ####################
-################                 JOGO                  ####################
-################                                       ####################
-###########################################################################
-
-
-def won_the_game(desafios):
-    for desafio in desafios:
-        if not desafio.solved:
-            return 0
-    return 1
-
-
-def check_valid_word(palavra, palavras):
-    return palavra.lower() in palavras.keys()
-
-
-###########################################################################
-################                                       ####################
-################                LÓGICA                 ####################
-################                                       ####################
-###########################################################################
-
-
-###########################################################################
-################            CHECAGEM DE LETRAS         ####################
-###########################################################################
-
-
-class Desafio:
-    def __init__(self, palavra, word_checker: IWordChecker) -> None:
-        self.chutes = []
-        self.feedbacks = []
-        self.attempts: list[Attempt] = []
-        self.teclado = Keyboard()
-        self.palavra = palavra
-        self.solved = 0
-        self.word_checker: IWordChecker = word_checker
-
-    def update(self, chute):
-        if chute == self.palavra:
-            self.solved = 1
-        attempt = Attempt(chute, self.palavra)
-        self.attempts.append(attempt)
-
-        chute_corrigido = self.word_checker.get_feedback_from_guess(
-            unidecode(chute.lower()), unidecode(self.palavra.lower())
-        )
-        self.chutes.append(chute)
-        self.feedbacks.append(chute_corrigido)
-
-        self.teclado.process_hints(attempt)
-        # self.teclado.process_hints(chute, chute_corrigido)
-        return chute_corrigido
-
-
-###########################################################################
 ###########################################################################
 ################                                       ####################
 ################             VISUALIZAÇÂO              ####################
 ################                                       ####################
 ###########################################################################
-###########################################################################
-
-
-###########################################################################
-################          MANIPULAÇÂO DO CURSOR        ####################
 ###########################################################################
 
 
@@ -252,12 +190,53 @@ class TerminalPresenter:
 
 
 ###########################################################################
+################                  DESAFIO              ####################
+###########################################################################
+
+
+class Desafio:
+    def __init__(self, palavra, word_checker: IWordChecker) -> None:
+        self.chutes = []
+        self.feedbacks = []
+        self.attempts: list[Attempt] = []
+        self.teclado = Keyboard()
+        self.palavra = palavra
+        self.solved = 0
+        self.word_checker: IWordChecker = word_checker
+
+    def update(self, chute):
+        if chute == self.palavra:
+            self.solved = 1
+        attempt = Attempt(chute, self.palavra)
+        self.attempts.append(attempt)
+
+        chute_corrigido = self.word_checker.get_feedback_from_guess(
+            unidecode(chute.lower()), unidecode(self.palavra.lower())
+        )
+        self.chutes.append(chute)
+        self.feedbacks.append(chute_corrigido)
+
+        self.teclado.process_hints(attempt)
+        # self.teclado.process_hints(chute, chute_corrigido)
+        return chute_corrigido
+
+
 ###########################################################################
 ################                                       ####################
-################                INÍCIO                 ####################
+################                 JOGO                  ####################
 ################                                       ####################
 ###########################################################################
-###########################################################################
+
+
+def won_the_game(desafios):
+    for desafio in desafios:
+        if not desafio.solved:
+            return 0
+    return 1
+
+
+def check_valid_word(palavra, palavras):
+    return palavra.lower() in palavras.keys()
 
 
 def sort_words(lista, n):
@@ -272,6 +251,14 @@ def sort_words(lista, n):
 
     return palavras_sorteadas
 
+
+###########################################################################
+###########################################################################
+################                                       ####################
+################                INÍCIO                 ####################
+################                                       ####################
+###########################################################################
+###########################################################################
 
 # ABRE LISTA DE PALAVRAS E REMOVE ACENTUAÇÂO
 

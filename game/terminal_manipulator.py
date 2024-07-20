@@ -61,6 +61,9 @@ class ITerminalManipulator(ABC):
     def print_at_pos(self, s: str, pos: Tuple[int, int]) -> None:
         pass
 
+    def print_colored_string(self, colored_string: ColoredString, pos: Tuple[int, int]):
+        pass
+
     def clear_line(self, n: int) -> None:
         pass
 

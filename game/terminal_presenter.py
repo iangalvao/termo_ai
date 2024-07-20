@@ -1,8 +1,10 @@
+from abc import ABC
 import sys
-from typing import Tuple
+from typing import List, Tuple
 from colorama import Back
 from game.attempt import Attempt
-from game.terminal_manipulator import ITerminalManipulator
+from game.keyboard import Keyboard
+from game.terminal_manipulator import ColoredString, ITerminalManipulator
 from game.hint import *
 from unidecode import unidecode
 
@@ -40,6 +42,84 @@ cores_das_dicas = {
 }
 
 lim_chutes = 6
+
+
+class IKeyboard(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+
+
+class Message:
+    def __init__(self) -> None:
+        pass
+
+
+class IChallenge:
+    def __init__(self) -> None:
+        pass
+
+    def get_attempts(self) -> List[Attempt]:
+        pass
+
+    def get_keyboard(self) -> IKeyboard:
+        pass
+
+
+class IGameDisplay(ABC):
+    def __init__(self, tmanipulator: ITerminalManipulator) -> None:
+        super().__init__()
+
+    def display_challenge(self, challenge: IChallenge, pos: Tuple[int]) -> None:
+        pass
+
+    def display_intro(self) -> None:
+        pass
+
+    def display_message(self, message: Message) -> None:
+        pass
+
+
+class TerminalPresenter(IGameDisplay):
+    def __init__(self, tmanipulator: ITerminalManipulator) -> None:
+        super().__init__(tmanipulator)
+        self.tmanipulator = tmanipulator
+
+    def display_challenge(self, challenge: IChallenge, offset: Tuple[int]) -> None:
+        attempts = challenge.get_attempts()
+        keyboard = challenge.get_keyboard()
+        self.display_attempts_table(attempts, offset)
+        self.display_keyboard(keyboard, offset)
+
+    def display_attempts_table(self, attempts: List[Attempt], offset: Tuple[int]):
+        pos = self.get_section_pos("attempts", displace=pos)
+        for line, attempt in enumerate(attempts):
+            self.display_attempt(attempt, line, pos)
+
+    def dislplay_attempt(self, attempt: Attempt, line: int, pos: Tuple[int]):
+        guess = attempt.get_guess()
+        hints = attempt.get_feedbacks()
+        colored_attempt = self.format_attempt(guess, hints)
+        self.display(colored_attempt, (pos[0] + line, pos[1]))
+
+    def format_attempt(self, string: str, hints: List[Hint]):
+        colors = self.colors_from_hints(hints)
+        colored_string = ColoredString(string, colors)
+        return colored_string
+
+    def display_keyboard(self, keyboard: Keyboard, offset: Tuple[int, int]):
+        pos = self.get_section_pos("keyboard", offset=offset)
+        for line, line_number in keyboard:
+            colored_line = self.format_keyboard_line(line)
+            self.display(colored_line, (pos[0] + line_number, pos[1]))
+
+    def format_keyboard_line(self, key_line: List[Tuple[str, Hint]]):
+        string = ""
+        hints = ""
+        for char, hint in key_line:
+            string += char
+            hints += hint
+        colored_string = self.format_attempt(string, hints)
+        return colored_string
 
 
 class TerminalPresenter:

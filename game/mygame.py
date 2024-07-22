@@ -204,6 +204,9 @@ class Desafio:
         self.solved = 0
         self.word_checker: IWordChecker = word_checker
 
+    def get_attempts(self):
+        return self.attempts
+
     def update(self, chute):
         if chute == self.palavra:
             self.solved = 1

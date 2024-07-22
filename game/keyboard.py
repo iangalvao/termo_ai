@@ -1,6 +1,8 @@
 from typing import Tuple
 from game.attempt import Attempt
 from game.hint import *
+
+
 class Keyboard:
     def __init__(self) -> None:
         self.lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
@@ -9,7 +11,7 @@ class Keyboard:
             for c in line:
                 self.set_letter_hint(c, UNKNOWN_LETTER)
 
-    def process_hints(self, attempt:Attempt):
+    def process_hints(self, attempt: Attempt):
         for letra, dica, _ in attempt:
             dica_atual = self.get_letter_hint(letra)
             if dica > dica_atual:
@@ -21,7 +23,6 @@ class Keyboard:
     def get_letter_hint(self, letra):
         return self.state[letra]
 
-
     def get_keyboard_lines_with_hints(self):
         res = []
         for linha in self.lines:
@@ -30,8 +31,8 @@ class Keyboard:
                 linha_com_dicas.append((letra, self.get_letter_hint(letra)))
             res.append(linha_com_dicas)
         return res
-    
-    def __iter__(self)->Tuple[str,Hint]:
+
+    def __iter__(self):
         for keyline in self.keylines:
             for c in keyline:
-                return c, self.get_letter_hint(c) 
+                yield c, self.get_letter_hint(c)

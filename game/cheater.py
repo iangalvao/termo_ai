@@ -13,17 +13,8 @@ def find_all_word_differences(letter_count, words, target=2.5):
 
     for word in words:
         # Calculate the sum of the letter counts for the word
-        total = sum(
-            letter_count.get(char, 0)
-            for char in set(word)
-            if letter_count[char] not in [0, 1]
-        )
-
-        # Calculate the difference from the target
-        difference = abs(total - target)
-
-        # Append the word and its difference to the list
-        word_differences.append((word, difference))
+        total = sum(letter_count.get(char, 0) for char in set(word))
+        word_differences.append((word, total))
 
     return word_differences
 
@@ -42,17 +33,19 @@ if __name__ == "__main__":
             guess, feedbacks, palavras_restantes
         )
         contagem_letras = {
-            c: len([w for w in palavras_restantes if c in w]) / len(palavras_restantes)
+            c: 0.5
+            - abs(
+                len([w for w in palavras_restantes if c in w]) / len(palavras_restantes)
+                - 0.5
+            )
             for c in string.ascii_lowercase
         }
 
-        formatted_data = {
-            key: f"{value:.2f}" for key, value in contagem_letras.items() if value != 0
-        }
+        formatted_data = {key: f"{value:.2f}" for key, value in contagem_letras.items()}
         print(formatted_data)
         good_guesses = find_all_word_differences(contagem_letras, palavras_possiveis)
 
-        good_guesses = sorted(good_guesses, key=lambda item: item[1])[0:10]
+        good_guesses = sorted(good_guesses, key=lambda item: -item[1])[0:10]
         formatted_data = {key: f"{value:.2f}" for key, value in good_guesses}
 
         print("Good Guesses:\n", formatted_data)

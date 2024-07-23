@@ -5,28 +5,12 @@ from typing import Tuple
 
 from colorama import Back
 from game.attempt import Attempt
+from game.colored_string import ColoredString
 from game.hint import *
-
-bcolors = {
-    "HEADER": "\033[95m",
-    "OKBLUE": "\033[94m",
-    "OKCYAN": "\033[96m",
-    "OKGREEN": "\033[92m",
-    "WARNING": "\033[93m",
-    "FAIL": "\033[91m",
-    "ENDC": "\033[0m",
-    "BOLD": "\033[1m",
-    "UNDERLINE": "\033[4m",
-}
-
-# CÒDIGOS PARA CORREÇÂO DE CADA LETRA
-LETRA_DESCONHECIDA = -1
-LETRA_INCORRETA = 0
-POS_INCORRETA = 1
-CERTO = 2
+from game.screen import IScreen, Screen
 
 
-UNDERLINE = "\033[4m"
+UNDERLINE = 3
 ENDC = Back.RESET
 COR_ERRADO = 0
 COR_CERTO = 1
@@ -38,31 +22,8 @@ color_dict = {
     COR_CERTO: Back.GREEN,
     COR_POSICAO: Back.YELLOW,
     ENDC: Back.RESET,
+    UNDERLINE: "\033[4m",
 }
-
-
-class ColoredString:
-    def __init__(self, string, colors) -> None:
-        self.str = string
-        self.colors = colors
-
-    def __iter__(self):
-        for pos, letter_and_color in enumerate(zip(self.str, self.colors)):
-            yield letter_and_color[0], letter_and_color[1], pos
-
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, self.__class__):
-            for valuesA, valuesB in zip(self, other):
-                letterA = valuesA[0]
-                letterB = valuesB[0]
-                if letterA != letterB:
-                    return False
-                colorA = valuesA[1]
-                colorB = valuesB[1]
-                if colorA != colorB:
-                    return False
-            return True
-        return False
 
 
 class ITerminalManipulator(ABC):
@@ -79,6 +40,9 @@ class ITerminalManipulator(ABC):
         pass
 
     def clear_line(self, n: int) -> None:
+        pass
+
+    def print_screen(self, screen: IScreen):
         pass
 
 
@@ -137,10 +101,21 @@ class TerminalManipulator(ITerminalManipulator):
         print(string_to_print, end="")
         sys.stdout.flush()
 
+    def print_colored_string_at_pos(
+        self, colored_string: ColoredString, pos: Tuple[int]
+    ):
+        formatted_string = self.colored_string_at_pos(colored_string, pos)
+        print(formatted_string, end="")
+        sys.stdout.flush
+
     def colored_string_at_pos(self, colored_string: ColoredString, pos):
         formatted_string = self.color_string(colored_string)
         formatted_string = self.string_at_pos(formatted_string, pos)
         return formatted_string
+
+    def print_screen(self, screen: Screen):
+        for colored_string, pos in screen:
+            self.print_colored_string_at_pos(colored_string, pos)
 
     def color_string(self, colored_string: ColoredString):
         formatted_string = ""

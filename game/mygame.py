@@ -5,188 +5,11 @@ import random
 from colorama import Fore, Back, Style
 from game.hint import *
 from game.keyboard import Keyboard
+from game.terminal_presenter import TerminalPresenter
+from game.terminal_manipulator import color_dict
 from game.word_checker import IWordChecker, WordChecker
 from game.attempt import Attempt
 from game.terminal_manipulator import ITerminalManipulator, TerminalManipulator
-
-###########################################################################
-################           ESTILO DO TERMINAL          ####################
-###########################################################################
-
-
-# CORES PARA VISUALIZAÇÂO NO TERMINAL
-bcolors = {
-    "HEADER": "\033[95m",
-    "OKBLUE": "\033[94m",
-    "OKCYAN": "\033[96m",
-    "OKGREEN": "\033[92m",
-    "WARNING": "\033[93m",
-    "FAIL": "\033[91m",
-    "ENDC": "\033[0m",
-    "BOLD": "\033[1m",
-    "UNDERLINE": "\033[4m",
-}
-
-UNDERLINE = "\033[4m"
-END_UNDERLINE = "\033[0m"
-COR_ERRADO = Back.LIGHTRED_EX
-COR_CERTO = Back.GREEN
-COR_POSICAO = Back.YELLOW
-ENDC = Back.RESET
-
-# CÒDIGOS PARA CORREÇÂO DE CADA LETRA
-LETRA_DESCONHECIDA = -1
-LETRA_INCORRETA = 0
-POS_INCORRETA = 1
-CERTO = 2
-
-cores_das_dicas = {
-    UNKNOWN_LETTER: ENDC,
-    WRONG_LETTER: COR_ERRADO,
-    WRONG_POS: COR_POSICAO,
-    RIGHT_POS: COR_CERTO,
-}
-
-
-###########################################################################
-###########################################################################
-################                                       ####################
-################             VISUALIZAÇÂO              ####################
-################                                       ####################
-###########################################################################
-###########################################################################
-
-
-class TerminalPresenter:
-    def __init__(self, tmanipulator: ITerminalManipulator) -> None:
-        self.tmanipulator = tmanipulator
-
-    ###########################################################################
-    ################           TELA PRINCIPAL              ####################
-    ###########################################################################
-
-    ################               CHUTES                  ####################
-
-    def print_tabela(self, n):
-        for i in range(lim_chutes - n):
-            self.tmanipulator.print_at_pos(
-                UNDERLINE + "     " + END_UNDERLINE, (i + n + 1, 2)
-            )
-
-    def print_chutes(self, chutes, feedbacks):
-        chutes_coloridos = self.colore_lista_chutes(chutes, feedbacks)
-        for i in range(len(chutes_coloridos)):
-            self.tmanipulator.print_at_pos(chutes_coloridos[i], (i + 1, 2))
-
-    def colore_lista_chutes(self, chutes, feedbacks):
-        chutes_coloridos = []
-        for i, chute in enumerate(chutes):
-            chutes_colorido = ""
-            feedback = feedbacks[i]
-            for pos, letra in enumerate(chute):
-                dica = feedback[pos]
-                if dica == WRONG_LETTER:
-                    dica = UNKNOWN_LETTER
-                cor = cores_das_dicas[dica]
-                letra_colorida = f"{cor}{letra}{ENDC}"
-                chutes_colorido += letra_colorida
-            chutes_coloridos.append(chutes_colorido)
-        return chutes_coloridos
-
-    #################                TECLADO                  ####################
-    def print_keyboard(self, linhas_teclado_dicas):
-        linhas_teclas_coloridas = self.color_keyboard_lines(linhas_teclado_dicas)
-        for i in range(3):
-            linha_colorida = linhas_teclas_coloridas[i]
-            if i == 2:
-                # A última linha começa uma casa depois por escolha de diagramação.
-                linha_colorida = " " + linha_colorida
-            self.tmanipulator.print_at_pos(
-                linhas_teclas_coloridas[i], (lim_chutes + 2 + i, 0)
-            )
-
-    def color_keyboard_lines(self, linhas_de_teclas_com_dicas):
-        linhas_de_teclas_coloridas = []
-        for linha in linhas_de_teclas_com_dicas:
-            linha_colorida = ""
-            for letra, dica in linha:
-                cor = cores_das_dicas[dica]
-                if cor == cores_das_dicas[WRONG_LETTER]:
-                    letra_colorida = " "
-                else:
-                    letra_colorida = f"{cor}{letra}{ENDC}"
-                linha_colorida += letra_colorida
-            linhas_de_teclas_coloridas.append(linha_colorida)
-        return linhas_de_teclas_coloridas
-
-    ###########################################################################
-    ################                  GAME                 ####################
-    ###########################################################################
-
-    def print_game_at_pos(self, chutes, teclado_com_dicas, pos, feedbacks):
-        print(self.tmanipulator.go_to_pos(pos), end="")
-        sys.stdout.flush()
-        self.print_keyboard(teclado_com_dicas)
-        self.print_tabela(len(chutes))
-        self.print_chutes(chutes, feedbacks)
-        print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
-        sys.stdout.flush()
-        pass
-
-    ###########################################################################
-    ################               MENSAGENS               ####################
-    ###########################################################################
-
-    def message(self, mensagem):
-        self.tmanipulator.clear_line(lim_chutes + 6)
-        self.tmanipulator.print_at_pos(mensagem, (lim_chutes + 6, 0))
-
-    def print_won_the_game(self, number_of_tries):
-        self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
-        print(self.tmanipulator.go_to_pos((lim_chutes + 7, 0)))
-
-    def print_loss_the_game(self, desafios):
-        palavras_sorteadas = ""
-        for d in desafios:
-            palavras_sorteadas += " " + d.palavra
-        self.message(f"\rVocê perdeu. As palavras eram{palavras_sorteadas}.")
-        print(self.tmanipulator.go_to_pos((lim_chutes + 7, 0)))
-
-    def print_word_not_accepted(self, palavra):
-        self.message(f"Essa palavra não é aceita:{palavra}")
-
-    def first_print(self):
-        print("-------------O TERMO TERMINAL--------------")
-        print("versão para terminal de https://www.term.ooo")
-        # Limpa a tela
-        s = ""
-        for i in range(80):
-            s += " "
-        for i in range(lim_chutes + 7):
-            print(s)
-        print(f"\033[{lim_chutes + 7}A", end="")
-        sys.stdout.flush()
-
-        ###########################################################################
-        ###########################################################################
-        ################                                       ####################
-        ################                INPUTS                 ####################
-        ################                                       ####################
-        ###########################################################################
-        ###########################################################################
-
-    ###########################
-    def get_input(self, n, padding):
-        pos = (0, padding)
-        print(self.tmanipulator.go_to_pos(pos), end="")
-        self.tmanipulator.clear_line(n + 1)
-        self.print_tabela(n)
-        s = self.tmanipulator.go_to_pos((n + 1, 2))
-        chute_atual = unidecode(input(s)).upper()
-        print(self.tmanipulator.go_to_line(-n - 2), end="")
-        # print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
-        sys.stdout.flush()
-        return chute_atual
 
 
 ###########################################################################
@@ -207,6 +30,9 @@ class Desafio:
 
     def get_lim_guesses(self):
         return self.lim_guesses
+
+    def get_keyboard(self):
+        return self.teclado
 
     def get_attempts(self):
         return self.attempts
@@ -295,10 +121,10 @@ if __name__ == "__main__":
     palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
     for i in range(n_desafios):
         desafios.append(Desafio(palavras[i], word_checker))
-    tmanipulator = TerminalManipulator(None)
+    tmanipulator = TerminalManipulator(color_dict)
     presenter = TerminalPresenter(tmanipulator)
-
     presenter.first_print()
+    presenter.display_game_screen(desafios)
 
     ###########################################################################
     ################             MAIN LOOP                 ####################
@@ -309,14 +135,15 @@ if __name__ == "__main__":
     spacing = 16
     while 1:
         # VISUALIZA
-        for i in range(len(desafios)):
-            teclado_linhas = desafios[i].teclado.get_keyboard_lines_with_hints()
-            presenter.print_game_at_pos(
-                desafios[i].chutes,
-                teclado_linhas,
-                (0, padding + i * spacing),
-                desafios[i].feedbacks,
-            )
+        presenter.display_game_screen(desafios)
+        # for i in range(len(desafios)):
+        #     teclado_linhas = desafios[i].teclado.get_keyboard_lines_with_hints()
+        #     presenter.print_game_at_pos(
+        #         desafios[i].chutes,
+        #         teclado_linhas,
+        #         (0, padding + i * spacing),
+        #         desafios[i].feedbacks,
+        #     )
 
         # GANHOU
         if won_the_game(desafios):

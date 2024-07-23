@@ -115,16 +115,12 @@ def qwerty_only_keyboard(keyboard: Keyboard):
 def expected_qwerty_keyboard_screen():
     screen = Screen()
     first_line = ColoredString(
-        "QWERTYUIOP", [COR_CERTO for c in "QWERTY"] + [COR_ERRADO for c in "UIOP"]
+        "QWERTY    ", [COR_CERTO for c in "QWERTY"] + [COR_ERRADO for c in "UIOP"]
     )
     second_line_chars = "ASDFGHJKL"
-    second_line = ColoredString(
-        second_line_chars, [COR_ERRADO for c in second_line_chars]
-    )
+    second_line = ColoredString("         ", [COR_ERRADO for c in second_line_chars])
     third_line_chards = "ZXCVBNM"
-    third_line = ColoredString(
-        third_line_chards, [COR_ERRADO for c in third_line_chards]
-    )
+    third_line = ColoredString("       ", [COR_ERRADO for c in third_line_chards])
     screen.add(first_line, (0, 0))
     screen.add(second_line, (1, 0))
     screen.add(third_line, (2, 0))

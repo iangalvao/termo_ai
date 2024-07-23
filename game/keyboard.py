@@ -33,6 +33,8 @@ class Keyboard:
         return res
 
     def __iter__(self):
-        for keyline in self.keylines:
+        for i, keyline in enumerate(self.lines):
+            res = []
             for c in keyline:
-                yield c, self.get_letter_hint(c)
+                res.append((c, self.get_letter_hint(c)))
+            yield res, i

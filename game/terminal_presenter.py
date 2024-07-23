@@ -65,6 +65,11 @@ class Screen(IScreen):
     def add(self, colored_string: ColoredString, pos: Tuple[int, int]) -> None:
         self.strings.append((colored_string, pos))
 
+    def merge(self, other):
+        if isinstance(other, self.__class__):
+            for string, pos in other:
+                self.add(string, pos)
+
     def __iter__(self) -> Iterator[Tuple[ColoredString, Tuple[int, int]]]:
         for string, pos in self.strings:
             yield string, pos
@@ -124,16 +129,29 @@ class IGameDisplay(ABC):
 
 
 class TerminalPresenter(IGameDisplay):
-    def __init__(self, tmanipulator: ITerminalManipulator) -> None:
+    def __init__(
+        self, tmanipulator: ITerminalManipulator, grid=None, offsets=None
+    ) -> None:
         super().__init__(tmanipulator)
         self.tmanipulator = tmanipulator
-        self.grid = [(0, 0)]
-        self.offsets = {"table": (0, 2), "keyboard": (10, 0)}
+        if not grid:
+            self.grid = [(0, 0)]
+        else:
+            if isinstance(grid, int):
+                self.grid = [(x, 0) for x in range(0, grid, 25)]
+            else:
+                self.grid = grid
+        if offsets:
+            self.offsets = offsets
+        else:
+            self.offsets = {"table": (0, 2), "keyboard": (10, 0)}
 
     def format_attempt(self, attempt: Attempt):
         string = attempt.get_guess()
         hints = attempt.get_feedbacks()
+        return self.format_string_hints(string, hints)
 
+    def format_string_hints(self, string: str, hints: List[Hint]):
         colors = self.colors_from_hints(hints)
         colored_string = ColoredString(string, colors)
         return colored_string
@@ -146,43 +164,53 @@ class TerminalPresenter(IGameDisplay):
             cores.append(dica)
         return cores
 
-    def display_keyboard(self, keyboard: Keyboard, offset: Tuple[int, int]):
-        pos = self.get_section_pos("keyboard", offset=offset)
-        for line, line_number in keyboard:
-            colored_line = self.format_keyboard_line(line)
-            self.display(colored_line, (pos[0] + line_number, pos[1]))
-
-    def format_keyboard_line(self, key_line: List[Tuple[str, Hint]]):
-        string = ""
-        hints = ""
-        for char, hint in key_line:
-            string += char
-            hints += hint
-        colored_string = self.format_attempt(string, hints)
-        return colored_string
+    def table_screen(self, challenge: IChallenge, challenge_number, lim_guesses):
+        # table_offset = self.grid[challenge_number] + table_offset
+        n = 0
+        table_screen = Screen()
+        for attempt in challenge.get_attempts():
+            # pos = table_offset + (n, 0)
+            pos = (n, 0)
+            table_screen.add(self.format_attempt(attempt), pos)
+            n += 1
+        for i in range(n, lim_guesses):
+            pos = self.grid[challenge_number]
+            pos = (pos[0] + i, pos[1])
+            table_screen.add(self.table_line(), pos)
+        return table_screen
 
     def game_screen(self, challenges: List[IChallenge], lim_guesses=6) -> IScreen:
 
         game_screen = Screen()
         # table_offset = self.offsets["table"]
         for challenge_number, challenge in enumerate(challenges):
-            # table_offset = self.grid[challenge_number] + table_offset
-            n = 0
-            for attempt in challenge.get_attempts():
-                # pos = table_offset + (n, 0)
-                pos = (n, 0)
-                game_screen.add(self.format_attempt(attempt), pos)
-                n += 1
-            for i in range(n, lim_guesses):
-                pos = self.grid[challenge_number]
-                pos = (pos[0] + i, pos[1])
-                game_screen.add(self.table_line(), pos)
+            game_screen.merge(
+                self.table_screen(challenge, challenge_number, lim_guesses)
+            )
+
             # pos = 0
-            # game_screen.add(self.display_keyboard(challenge.get_keyboard()), pos)
+            # game_screen.merge(self.keyboard(challenge.get_keyboard()), pos)
         return game_screen
 
     def table_line(self):
         return ColoredString("     ", [UNDERLINE for i in range(6)])
+
+    def keyboard(self, keyboard: Keyboard, offset: Tuple[int, int]):
+        keyboard_screen = Screen()
+        pos = self.get_section_pos("keyboard", offset=offset)
+        for line, line_number in keyboard:
+            colored_line = self.format_keyboard_line(line)
+            keyboard_screen.add(colored_line, (pos[0] + line_number, pos[1]))
+        return keyboard_screen
+
+    def format_keyboard_line(self, key_line: List[Tuple[str, Hint]]):
+        string = ""
+        hints = ""
+        for char, hint in key_line:
+            string += char
+            hints.append(hint)
+        colored_string = self.format_string_hints(string, hints)
+        return colored_string
 
     def display_game_screen(self, challenges: List[IChallenge]):
         game_screen = self.game_screen(challenges)

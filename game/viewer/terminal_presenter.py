@@ -2,11 +2,11 @@ from abc import ABC
 import sys
 from typing import Iterator, List, Tuple
 from colorama import Back
-from game.attempt import Attempt
-from game.keyboard import Keyboard
-from game.screen import IScreen, Screen
-from game.terminal_manipulator import *
-from game.hint import *
+from game.model.attempt import Attempt
+from game.model.keyboard import Keyboard
+from game.viewer.screen import IScreen, Screen
+from game.viewer.terminal_manipulator import *
+from game.model.hint import *
 from unidecode import unidecode
 
 # CORES PARA VISUALIZAÇÂO NO TERMINAL

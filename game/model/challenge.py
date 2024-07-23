@@ -4,8 +4,8 @@
 
 
 import unidecode
-from game.attempt import Attempt
-from game.keyboard import Keyboard
+from game.model.attempt import Attempt
+from game.model.keyboard import Keyboard
 
 
 class Challenge:

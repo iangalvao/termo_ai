@@ -1,6 +1,6 @@
 from typing import Tuple
-from game.attempt import Attempt
-from game.hint import *
+from game.model.attempt import Attempt
+from game.model.hint import *
 
 
 class Keyboard:
@@ -17,20 +17,11 @@ class Keyboard:
             if dica > dica_atual:
                 self.set_letter_hint(letra, dica)
 
-    def set_letter_hint(self, letra, dica):
+    def set_letter_hint(self, letra: str, dica: Hint) -> None:
         self.state[letra] = dica
 
-    def get_letter_hint(self, letra):
+    def get_letter_hint(self, letra: str) -> Hint:
         return self.state[letra]
-
-    def get_keyboard_lines_with_hints(self):
-        res = []
-        for linha in self.lines:
-            linha_com_dicas = []
-            for letra in linha:
-                linha_com_dicas.append((letra, self.get_letter_hint(letra)))
-            res.append(linha_com_dicas)
-        return res
 
     def __iter__(self):
         for i, keyline in enumerate(self.lines):

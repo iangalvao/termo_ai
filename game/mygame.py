@@ -3,14 +3,14 @@ import csv
 import sys
 import random
 from colorama import Fore, Back, Style
-from game.challenge import Challenge
-from game.hint import *
-from game.keyboard import Keyboard
-from game.terminal_presenter import TerminalPresenter
-from game.terminal_manipulator import color_dict
-from game.word_checker import IWordChecker, WordChecker
-from game.attempt import Attempt
-from game.terminal_manipulator import ITerminalManipulator, TerminalManipulator
+from game.model.challenge import Challenge
+from game.model.hint import *
+from game.model.keyboard import Keyboard
+from game.viewer.terminal_presenter import TerminalPresenter
+from game.viewer.terminal_manipulator import color_dict
+from game.solver.word_checker import IWordChecker, WordChecker
+from game.model.attempt import Attempt
+from game.viewer.terminal_manipulator import ITerminalManipulator, TerminalManipulator
 
 
 ###########################################################################

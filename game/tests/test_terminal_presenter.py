@@ -1,17 +1,17 @@
 import pytest
 
-from game.attempt import Attempt
-from game.hint import RIGHT_POS, WRONG_LETTER, WRONG_POS, UNKNOWN_LETTER
-from game.keyboard import Keyboard
-from game.challenge import Challenge
-from game.terminal_manipulator import (
+from game.model.attempt import Attempt
+from game.model.hint import RIGHT_POS, WRONG_LETTER, WRONG_POS, UNKNOWN_LETTER
+from game.model.keyboard import Keyboard
+from game.model.challenge import Challenge
+from game.viewer.terminal_manipulator import (
     COR_CERTO,
     ENDC,
     COR_POSICAO,
     COR_ERRADO,
     ColoredString,
 )
-from game.terminal_presenter import UNDERLINE, Screen, TerminalPresenter
+from game.viewer.terminal_presenter import UNDERLINE, Screen, TerminalPresenter
 
 
 @pytest.fixture

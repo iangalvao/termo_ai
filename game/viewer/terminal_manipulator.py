@@ -4,10 +4,10 @@ import sys
 from typing import Tuple
 
 from colorama import Back
-from game.attempt import Attempt
-from game.colored_string import ColoredString
-from game.hint import *
-from game.screen import IScreen, Screen
+from game.model.attempt import Attempt
+from game.viewer.colored_string import ColoredString
+from game.model.hint import *
+from game.viewer.screen import IScreen, Screen
 
 
 UNDERLINE = 3

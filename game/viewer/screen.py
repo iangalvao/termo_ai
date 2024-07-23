@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Iterator, List, Tuple
 
-from game.colored_string import ColoredString
+from game.viewer.colored_string import ColoredString
 
 
 class IScreen(ABC):

@@ -1,8 +1,8 @@
 import string
-from game.solver_tools import WordFilter
-from game.attempt import Attempt
-from game.hint import Hint
-from game.tree import init_game
+from game.solver.solver_tools import WordFilter
+from game.model.attempt import Attempt
+from game.model.hint import Hint
+from game.solver.tree import init_game
 
 
 def find_all_word_differences(letter_count, words, target=2.5):

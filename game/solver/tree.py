@@ -1,8 +1,9 @@
 from typing import TextIO
-from game.word_checker import WordChecker
+from game.solver.word_checker import WordChecker
 from abc import ABC
-from game.hint import *
-from game.solver import Solver
+from game.model.hint import *
+from game.solver.solver import Solver
+
 
 class ISolver(ABC):
     def generate_answer(self, feedbacks):
@@ -24,7 +25,7 @@ class Node:
         self.word = w
 
     def print(self):
-        for k,n in self._children.keys():
+        for k, n in self._children.keys():
             print(k)
 
 
@@ -40,8 +41,7 @@ class Tree:
                 node = node.children(k)
             else:
                 node = self.add_children(node, k, guess)
-               
-    
+
     def get_node(self, feedbacks):
         node = self.root
         for fb in feedbacks:
@@ -51,13 +51,10 @@ class Tree:
             else:
                 return None
         return node
-                   
-     
-    def add_children(self, node, k, guess):
-        new_node =  Node(guess)
-        node._children[k] = new_node
-        
 
+    def add_children(self, node, k, guess):
+        new_node = Node(guess)
+        node._children[k] = new_node
 
     def feedback_to_key(self, fb):
         s = ""
@@ -69,7 +66,7 @@ class Tree:
             elif i == WRONG_LETTER:
                 s += "0"
         return s
-    
+
     def print(self):
         node = self.root
         children = node._children.keys()
@@ -81,31 +78,30 @@ class Tree:
                 print(c.word)
 
     def print_rec(self):
-        self.print_node(self.root,0)
+        self.print_node(self.root, 0)
 
-    def print_node(self, node:Node, depth):
+    def print_node(self, node: Node, depth):
         if not node:
             return
         padding = "    " * depth
-        
+
         if node.word:
-            print(padding+node.word)
+            print(padding + node.word)
         else:
             print("node without word")
 
         children = set()
         for n in node._children.values():
             children.add(n)
-        for i ,(n) in enumerate(children):
+        for i, (n) in enumerate(children):
 
-            self.print_node(n, depth+1)
-        
-    
-    def print_d_node(self, node:Node, depth):
+            self.print_node(n, depth + 1)
+
+    def print_d_node(self, node: Node, depth):
         padding = "   "
         if len(node.keys() == 0):
             if node.word:
-                print(padding+node.word)
+                print(padding + node.word)
             else:
                 print("node without word")
             return
@@ -113,17 +109,17 @@ class Tree:
         children = set()
         for n in node.values():
             children.add(n)
-        for i ,(k, n) in enumerate(node.items()):
+        for i, (k, n) in enumerate(node.items()):
             if k != "word":
-                self.print_d_node(n, depth+1)
-        
+                self.print_d_node(n, depth + 1)
+
     def print_nodes_and_keys(self):
-        self.print_node_and_keys_rec(self.root,0)
-        
+        self.print_node_and_keys_rec(self.root, 0)
+
     def print_nodes_and_keys_padding(self, padding):
-        self.print_node_and_keys_rec(self.root,0, padding)
-        
-    def print_node_and_keys_rec(self,node, depth, padding_arg = None):
+        self.print_node_and_keys_rec(self.root, 0, padding)
+
+    def print_node_and_keys_rec(self, node, depth, padding_arg=None):
         if not node:
             return
         if padding_arg == None:
@@ -131,58 +127,59 @@ class Tree:
         else:
             padding = padding_arg * depth
         if node.word:
-            print(padding+node.word+str(depth))
+            print(padding + node.word + str(depth))
         else:
             print("node without word")
 
         children = set()
         for n in node._children.values():
             children.add(n)
-        
+
         for n in children:
             keys = [key for key, value in node._children.items() if value == n]
             for k in keys:
-                print(padding+k+str(depth))
-            self.print_node_and_keys_rec(n, depth+1, padding_arg)
+                print(padding + k + str(depth))
+            self.print_node_and_keys_rec(n, depth + 1, padding_arg)
+
 
 class TreeBuilder:
     def __init__(self, words) -> None:
         self.word_checker = WordChecker()
         self.words = words
+
     def make_tree(self, solver: ISolver):
-        
+
         first_guess = solver.generate_answer([])
         tree = Tree(root_word=first_guess)
         solver.reset()
 
         for w in self.words:
-            #print(w)
+            # print(w)
             feedbacks = []
             guess = first_guess
             while w != guess:
-                node =  tree.get_node(feedbacks)
+                node = tree.get_node(feedbacks)
                 if node:
                     guess = node.word
-                else: 
+                else:
                     guess = solver.generate_answer(feedbacks)
-                #print(" "+guess)
+                # print(" "+guess)
                 tree.add(feedbacks, guess)
                 fb = wchecker.get_feedback_from_guess(guess, w)
                 feedbacks.append(fb)
-                #print(guess)
+                # print(guess)
                 if guess == w:
-                    #print(f"Ganhou. Palavra: {w} número de tentativas: {n}")
+                    # print(f"Ganhou. Palavra: {w} número de tentativas: {n}")
                     break
             solver.reset()
         return tree
-    
-    def read_from_string(self, string:str):
+
+    def read_from_string(self, string: str):
         pass
-    
-    
+
     # leu string, cria node com string (ou só retorna ele, se não existir) e adiciona no pai com a chave
     # leu numero chama recursivo (parent = node, key)
-    def read_from_string_rec(self, parent:Node, key:str, file:TextIO, d:int):
+    def read_from_string_rec(self, parent: Node, key: str, file: TextIO, d: int):
         line = file.readline()
         if line:
             val, depth = line.split()
@@ -191,20 +188,18 @@ class TreeBuilder:
         if any([l for l in val if l.isalpha()]):
             node = Node(val)
             parent._children[key] = node
-            line = file.readline()    
+            line = file.readline()
         elif self.is_feedback(val):
             pass
             d = self.read_from_string_rec(node, val, depth)
         if d > depth:
             return d
-        
+
     pass
 
-    
-    
     # leu string, cria node com string (ou só retorna ele, se não existir) e adiciona no pai com a chave
     # leu numero chama recursivo (parent = node, key)
-    def read_from_string(self, file:TextIO, d:int):
+    def read_from_string(self, file: TextIO, d: int):
         tree = Tree()
         last_nodes: list[Node] = [None for i in range(50)]
         for line in file:
@@ -218,16 +213,17 @@ class TreeBuilder:
                         node.set_word(val)
                     else:
                         node = Node(val)
-                        last_nodes[depth-1]._children[key] = node
+                        last_nodes[depth - 1]._children[key] = node
                     last_nodes[depth] = node
                 else:
                     key = val
-        
+
         return tree
-       
-        
+
+
 from unidecode import unidecode
 import csv
+
 
 def init_game():
     # Check if an argument is passed
@@ -265,8 +261,7 @@ if __name__ == "__main__":
     solver = Solver(palavras_unidecode)
     tree = treebuilder.make_tree(solver)
     tree.print_nodes_and_keys_padding("")
-    
-    
+
     # for i in range(len(palavras_possiveis)):
     #     palavra = unidecode(palavras_possiveis[i])
     #     feedbacks = []

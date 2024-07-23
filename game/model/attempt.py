@@ -1,5 +1,5 @@
 from typing import Iterator, Tuple
-from game.hint import *
+from game.model.hint import *
 from abc import ABC
 
 

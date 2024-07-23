@@ -1,7 +1,7 @@
 from typing import Tuple
 import pytest
-from game.terminal_manipulator import *
-from game.hint import *
+from game.viewer.terminal_manipulator import *
+from game.model.hint import *
 
 from colorama import Back
 

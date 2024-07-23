@@ -1,6 +1,6 @@
 import pytest
-from game.hint import Hint
-from game.keyboard import Keyboard
+from game.model.hint import Hint
+from game.model.keyboard import Keyboard
 
 
 # Mock class for IAttempt

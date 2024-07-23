@@ -20,3 +20,6 @@ class ColoredString:
                     return False
             return True
         return False
+
+    def __str__(self) -> str:
+        return "" + self.str + str(self.colors)

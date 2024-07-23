@@ -3,6 +3,7 @@ import csv
 import sys
 import random
 from colorama import Fore, Back, Style
+from game.challenge import Challenge
 from game.hint import *
 from game.keyboard import Keyboard
 from game.terminal_presenter import TerminalPresenter
@@ -10,48 +11,6 @@ from game.terminal_manipulator import color_dict
 from game.word_checker import IWordChecker, WordChecker
 from game.attempt import Attempt
 from game.terminal_manipulator import ITerminalManipulator, TerminalManipulator
-
-
-###########################################################################
-################                  DESAFIO              ####################
-###########################################################################
-
-
-class Desafio:
-    def __init__(self, palavra, word_checker: IWordChecker, lim_guesses=6) -> None:
-        self.chutes = []
-        self.feedbacks = []
-        self.attempts: list[Attempt] = []
-        self.teclado = Keyboard()
-        self.palavra = palavra
-        self.solved = 0
-        self.word_checker: IWordChecker = word_checker
-        self.lim_guesses = 6
-
-    def get_lim_guesses(self):
-        return self.lim_guesses
-
-    def get_keyboard(self):
-        return self.teclado
-
-    def get_attempts(self):
-        return self.attempts
-
-    def update(self, chute):
-        if chute == self.palavra:
-            self.solved = 1
-        attempt = Attempt(chute, self.palavra)
-        self.attempts.append(attempt)
-
-        chute_corrigido = self.word_checker.get_feedback_from_guess(
-            unidecode(chute.lower()), unidecode(self.palavra.lower())
-        )
-        self.chutes.append(chute)
-        self.feedbacks.append(chute_corrigido)
-
-        self.teclado.process_hints(attempt)
-        # self.teclado.process_hints(chute, chute_corrigido)
-        return chute_corrigido
 
 
 ###########################################################################
@@ -116,11 +75,10 @@ if __name__ == "__main__":
     # n_desafios = 2
     lim_chutes = 5 + n_desafios
 
-    word_checker = WordChecker()
     desafios = []
     palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
     for i in range(n_desafios):
-        desafios.append(Desafio(palavras[i], word_checker))
+        desafios.append(Challenge(palavras[i]))
     tmanipulator = TerminalManipulator(color_dict)
     presenter = TerminalPresenter(tmanipulator)
     presenter.first_print()
@@ -136,14 +94,6 @@ if __name__ == "__main__":
     while 1:
         # VISUALIZA
         presenter.display_game_screen(desafios)
-        # for i in range(len(desafios)):
-        #     teclado_linhas = desafios[i].teclado.get_keyboard_lines_with_hints()
-        #     presenter.print_game_at_pos(
-        #         desafios[i].chutes,
-        #         teclado_linhas,
-        #         (0, padding + i * spacing),
-        #         desafios[i].feedbacks,
-        #     )
 
         # GANHOU
         if won_the_game(desafios):

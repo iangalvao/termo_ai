@@ -30,8 +30,6 @@ cores_das_dicas = {
     RIGHT_POS: COR_CERTO,
 }
 
-lim_chutes = 6
-
 
 class IKeyboard(ABC):
     def __init__(self) -> None:
@@ -76,10 +74,11 @@ class IGameDisplay(ABC):
 
 class TerminalPresenter(IGameDisplay):
     def __init__(
-        self, tmanipulator: ITerminalManipulator, grid=None, offsets=None
+        self, tmanipulator: ITerminalManipulator, lim_chutes=6, grid=None, offsets=None
     ) -> None:
         super().__init__(tmanipulator)
         self.tmanipulator = tmanipulator
+        self.lim_chutes = 6
         if not grid:
             self.grid = [(0, 0)]
         else:
@@ -168,12 +167,12 @@ class TerminalPresenter(IGameDisplay):
     ###########################################################################
 
     def message(self, mensagem):
-        self.tmanipulator.clear_line(lim_chutes + 6)
-        self.tmanipulator.print_at_pos(mensagem, (lim_chutes + 6, 0))
+        self.tmanipulator.clear_line(self.lim_chutes + 6)
+        self.tmanipulator.print_at_pos(mensagem, (self.lim_chutes + 6, 0))
 
     def print_won_the_game(self, number_of_tries):
         self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
-        print(self.tmanipulator.go_to_pos((lim_chutes + 7, 0)))
+        print(self.tmanipulator.go_to_pos((self.lim_chutes + 7, 0)))
 
     def print_loss_the_game(self, desafios):
         if len(desafios) == 1:
@@ -183,7 +182,7 @@ class TerminalPresenter(IGameDisplay):
             for d in desafios:
                 palavras_sorteadas += " " + d.palavra
             self.message(f"\rVocê perdeu. As palavras eram{palavras_sorteadas}.")
-            print(self.tmanipulator.go_to_pos((lim_chutes + 7, 0)))
+        print(self.tmanipulator.go_to_pos((self.lim_chutes + 7, 0)))
 
     def print_word_not_accepted(self, palavra):
         self.message(f"Essa palavra não é aceita:{palavra}")
@@ -195,9 +194,9 @@ class TerminalPresenter(IGameDisplay):
         s = ""
         for i in range(80):
             s += " "
-        for i in range(lim_chutes + 7):
+        for i in range(self.lim_chutes + 7):
             print(s)
-        print(f"\033[{lim_chutes + 7}A", end="")
+        print(f"\033[{self.lim_chutes + 7}A", end="")
         sys.stdout.flush()
 
         ###########################################################################

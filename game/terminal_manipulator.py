@@ -11,7 +11,7 @@ from game.screen import IScreen, Screen
 
 
 UNDERLINE = 3
-ENDC = Back.RESET
+ENDC = 4
 COR_ERRADO = 0
 COR_CERTO = 1
 COR_POSICAO = 2
@@ -21,7 +21,7 @@ color_dict = {
     COR_ERRADO: Back.LIGHTRED_EX,
     COR_CERTO: Back.GREEN,
     COR_POSICAO: Back.YELLOW,
-    ENDC: Back.RESET,
+    ENDC: "\033[0m",
     UNDERLINE: "\033[4m",
 }
 
@@ -121,6 +121,6 @@ class TerminalManipulator(ITerminalManipulator):
         formatted_string = ""
         for letter, color, _ in colored_string:
             color_ansi_code = self.color_dict[color]
-            letra_colorida = f"{color_ansi_code}{letter}{ENDC}"
+            letra_colorida = f"{color_ansi_code}{letter}{self.color_dict[ENDC]}"
             formatted_string += letra_colorida
         return formatted_string

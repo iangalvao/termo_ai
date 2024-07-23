@@ -1,30 +1,20 @@
 from typing import Tuple
 import pytest
-from game.terminal_manipulator import TerminalManipulator, ColoredString
+from game.terminal_manipulator import *
 from game.hint import *
 
 from colorama import Back
 
-COR_ERRADO = 0
-COR_CERTO = 1
-COR_POSICAO = 2
-ENDC = 3
-
 
 @pytest.fixture
-def color_dict():
-    return {
-        COR_ERRADO: Back.LIGHTRED_EX,
-        COR_CERTO: Back.GREEN,
-        COR_POSICAO: Back.YELLOW,
-        ENDC: Back.RESET,
-    }
+def test_color_dict():
+    return color_dict
 
 
 # Define a pytest fixture for the presenter
 @pytest.fixture
-def presenter(color_dict):
-    return TerminalManipulator(color_dict)
+def presenter(test_color_dict):
+    return TerminalManipulator(test_color_dict)
 
 
 # Test for go_to_line method
@@ -135,22 +125,22 @@ def test_string_at_pos_unicode_characters(presenter):
     assert result == expected
 
 
-def test_clean_line_at_pos_basic(color_dict):
-    presenter = TerminalManipulator(color_dict, line_length=75)
+def test_clean_line_at_pos_basic(test_color_dict):
+    presenter = TerminalManipulator(test_color_dict, line_length=75)
     result = presenter.clear_line_at_pos(1)
     expected = "\033[1B" + " " * 75 + "\033[1A\033[75D"
     assert result == expected
 
 
-def test_clean_line_at_pos_custom_length(color_dict):
-    presenter = TerminalManipulator(color_dict, line_length=50)
+def test_clean_line_at_pos_custom_length(test_color_dict):
+    presenter = TerminalManipulator(test_color_dict, line_length=50)
     result = presenter.clear_line_at_pos(7)
     expected = "\033[7B" + " " * 50 + "\033[7A\033[50D"
     assert result == expected
 
 
-def test_clean_line_at_pos_zero_length(color_dict):
-    presenter = TerminalManipulator(color_dict, line_length=0)
+def test_clean_line_at_pos_zero_length(test_color_dict):
+    presenter = TerminalManipulator(test_color_dict, line_length=0)
     result = presenter.clear_line_at_pos(1)
     expected = "\033[1B\033[1A"
     assert result == expected
@@ -216,14 +206,6 @@ def test_string_size_recebe_formatacao_de_cor_com_tres_casas_numericas_apos_colc
     assert tamanho == expected
 
 
-from colorama import Back
-
-COR_ERRADO = Back.LIGHTRED_EX
-COR_CERTO = Back.GREEN
-COR_POSICAO = Back.YELLOW
-ENDC = Back.RESET
-
-
 def test_colored_string_iter():
     word = "WoRd"
     colors = [COR_CERTO, COR_ERRADO, COR_POSICAO, ENDC]
@@ -242,7 +224,7 @@ def test_colored_string_iter():
 def test_color_string(presenter):
     word = "W"
     colors = [COR_CERTO]
-    excepted = "\033[42mW\033[49m"
+    excepted = "\033[42mW\033[0m"
     colored_word = ColoredString(word, colors)
     results = presenter.color_string(colored_word)
 

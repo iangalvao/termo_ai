@@ -3,8 +3,14 @@ import pytest
 from game.attempt import Attempt
 from game.hint import RIGHT_POS, WRONG_LETTER, WRONG_POS, UNKNOWN_LETTER
 from game.keyboard import Keyboard
-from game.mygame import Desafio
-from game.terminal_manipulator import ColoredString
+from game.challenge import Challenge
+from game.terminal_manipulator import (
+    COR_CERTO,
+    ENDC,
+    COR_POSICAO,
+    COR_ERRADO,
+    ColoredString,
+)
 from game.terminal_presenter import UNDERLINE, Screen, TerminalPresenter
 
 
@@ -20,46 +26,46 @@ def attempts(words):
 
 @pytest.fixture
 def challenge_full(attempts):
-    d = Desafio("arame", None)
+    d = Challenge("arame", None)
     d.attempts = attempts
     return [d]
 
 
 @pytest.fixture
 def challenge_half(attempts):
-    d = Desafio("arame", None)
+    d = Challenge("arame", None)
     d.attempts = attempts[:3]
     return [d]
 
 
 @pytest.fixture
 def challenge_empty():
-    d = Desafio("arame", None)
+    d = Challenge("arame", None)
     return [d]
 
 
 @pytest.fixture
 def colors():
     return [
-        [RIGHT_POS, UNKNOWN_LETTER, RIGHT_POS, UNKNOWN_LETTER, UNKNOWN_LETTER],
-        [RIGHT_POS, RIGHT_POS, RIGHT_POS, UNKNOWN_LETTER, UNKNOWN_LETTER],
-        [RIGHT_POS, UNKNOWN_LETTER, RIGHT_POS, UNKNOWN_LETTER, RIGHT_POS],
-        [UNKNOWN_LETTER, UNKNOWN_LETTER, WRONG_POS, WRONG_POS, UNKNOWN_LETTER],
+        [COR_CERTO, COR_ERRADO, COR_CERTO, COR_ERRADO, COR_ERRADO],
+        [COR_CERTO, COR_CERTO, COR_CERTO, COR_ERRADO, COR_ERRADO],
+        [COR_CERTO, COR_ERRADO, COR_CERTO, COR_ERRADO, COR_CERTO],
+        [COR_ERRADO, COR_ERRADO, COR_POSICAO, COR_POSICAO, COR_ERRADO],
         [
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
+            COR_ERRADO,
+            COR_ERRADO,
+            COR_ERRADO,
+            COR_ERRADO,
+            COR_ERRADO,
         ],
         [
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
-            UNKNOWN_LETTER,
+            COR_ERRADO,
+            COR_ERRADO,
+            COR_ERRADO,
+            COR_ERRADO,
+            COR_ERRADO,
         ],
-        [RIGHT_POS, RIGHT_POS, RIGHT_POS, RIGHT_POS, RIGHT_POS],
+        [COR_CERTO, COR_CERTO, COR_CERTO, COR_CERTO, COR_CERTO],
     ]
 
 
@@ -67,7 +73,7 @@ def colors():
 def expected_screen_full(words, colors):
     s = Screen()
     for n, (word, color) in enumerate(zip(words, colors)):
-        s.add(ColoredString(word, color), (n, 0))
+        s.add(ColoredString(word, color), (n + 1, 6))
     return s
 
 
@@ -75,9 +81,9 @@ def expected_screen_full(words, colors):
 def expected_screen_half(words, colors):
     s = Screen()
     for n, (word, color) in enumerate(zip(words[:3], colors[:3])):
-        s.add(ColoredString(word, color), (n, 0))
+        s.add(ColoredString(word, color), (n + 1, 6))
     for i in range(3, 6):
-        s.add(ColoredString("     ", [UNDERLINE for i in range(6)]), (i, 0))
+        s.add(ColoredString("_____", [ENDC for i in range(6)]), (i + 1, 6))
     return s
 
 
@@ -85,7 +91,7 @@ def expected_screen_half(words, colors):
 def expected_screen_empty(words, colors):
     s = Screen()
     for i in range(6):
-        s.add(ColoredString("     ", [UNDERLINE for i in range(6)]), (i, 0))
+        s.add(ColoredString("_____", [ENDC for i in range(6)]), (i + 1, 6))
     return s
 
 
@@ -109,19 +115,19 @@ def qwerty_only_keyboard(keyboard: Keyboard):
 def expected_qwerty_keyboard_screen():
     screen = Screen()
     first_line = ColoredString(
-        "QWERTYUIOP", [RIGHT_POS for c in "QWERTY"] + [UNKNOWN_LETTER for c in "UIOP"]
+        "QWERTYUIOP", [COR_CERTO for c in "QWERTY"] + [COR_ERRADO for c in "UIOP"]
     )
     second_line_chars = "ASDFGHJKL"
     second_line = ColoredString(
-        second_line_chars, [UNKNOWN_LETTER for c in second_line_chars]
+        second_line_chars, [COR_ERRADO for c in second_line_chars]
     )
     third_line_chards = "ZXCVBNM"
     third_line = ColoredString(
-        third_line_chards, [UNKNOWN_LETTER for c in third_line_chards]
+        third_line_chards, [COR_ERRADO for c in third_line_chards]
     )
-    screen.add(first_line, (10, 0))
-    screen.add(second_line, (11, 0))
-    screen.add(third_line, (12, 0))
+    screen.add(first_line, (0, 0))
+    screen.add(second_line, (1, 0))
+    screen.add(third_line, (2, 0))
     return screen
 
 
@@ -129,20 +135,14 @@ def expected_qwerty_keyboard_screen():
 def expected_empty_keyboard_screen():
     screen = Screen()
     first_line_chars = "QWERTYUIOP"
-    first_line = ColoredString(
-        first_line_chars, [UNKNOWN_LETTER for c in first_line_chars]
-    )
+    first_line = ColoredString(first_line_chars, [ENDC for c in first_line_chars])
     second_line_chars = "ASDFGHJKL"
-    second_line = ColoredString(
-        second_line_chars, [UNKNOWN_LETTER for c in second_line_chars]
-    )
+    second_line = ColoredString(second_line_chars, [ENDC for c in second_line_chars])
     third_line_chards = "ZXCVBNM"
-    third_line = ColoredString(
-        third_line_chards, [UNKNOWN_LETTER for c in third_line_chards]
-    )
-    screen.add(first_line, (10, 0))
-    screen.add(second_line, (11, 0))
-    screen.add(third_line, (12, 0))
+    third_line = ColoredString(third_line_chards, [ENDC for c in third_line_chards])
+    screen.add(first_line, (0, 0))
+    screen.add(second_line, (1, 0))
+    screen.add(third_line, (2, 0))
     return screen
 
 
@@ -151,7 +151,7 @@ def test_keyboard_screen_empty(keyboard, expected_empty_keyboard_screen):
     screen = tPresenter.keyboard(keyboard, (0, 0))
     assert (
         screen == expected_empty_keyboard_screen
-    ), f"\nEXPECTED SCREEN: {expected_empty_keyboard_screen}\nGOT: {screen}"
+    ), f"\nEXPECTED SCREEN:\n{expected_empty_keyboard_screen}\nGOT:\n{screen}"
 
 
 def test_keyboard_screen_qwerty(qwerty_only_keyboard, expected_qwerty_keyboard_screen):
@@ -159,19 +159,23 @@ def test_keyboard_screen_qwerty(qwerty_only_keyboard, expected_qwerty_keyboard_s
     screen = tPresenter.keyboard(qwerty_only_keyboard, (0, 0))
     assert (
         screen == expected_qwerty_keyboard_screen
-    ), f"\nEXPECTED SCREEN: {expected_qwerty_keyboard_screen}\nGOT: {screen}"
+    ), f"\nEXPECTED SCREEN:\n{expected_qwerty_keyboard_screen}\nGOT:\n{screen}"
 
 
 def test_game_screen_full(challenge_full, expected_screen_full):
     tPresenter = TerminalPresenter(None)
-    screen = tPresenter.game_screen(challenge_full)
+    challenge_number = 0
+    lim_guesses = 6
+    screen = tPresenter.table_screen(challenge_full[0], challenge_number, lim_guesses)
 
     assert screen == expected_screen_full
 
 
 def test_game_screen_half(challenge_half, expected_screen_half):
     tPresenter = TerminalPresenter(None)
-    screen = tPresenter.game_screen(challenge_half)
+    challenge_number = 0
+    lim_guesses = 6
+    screen = tPresenter.table_screen(challenge_half[0], challenge_number, lim_guesses)
 
     assert len(list(screen)) == len(list((expected_screen_half)))
     for (stringA, posA), (stringB, posB) in zip(screen, expected_screen_half):

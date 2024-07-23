@@ -18,7 +18,7 @@ COR_POSICAO = 2
 
 
 color_dict = {
-    COR_ERRADO: Back.LIGHTRED_EX,
+    COR_ERRADO: "\033[0m",
     COR_CERTO: Back.GREEN,
     COR_POSICAO: Back.YELLOW,
     ENDC: "\033[0m",
@@ -26,7 +26,7 @@ color_dict = {
 }
 
 
-class ITerminalManipulator(ABC):
+class IDisplayCore(ABC):
     def __init__(self) -> None:
         super().__init__()
 
@@ -46,7 +46,7 @@ class ITerminalManipulator(ABC):
         pass
 
 
-class TerminalManipulator(ITerminalManipulator):
+class TerminalCore(IDisplayCore):
     def __init__(self, color_dict, line_length=75) -> None:
         super().__init__()
         self.color_dict = color_dict

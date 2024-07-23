@@ -6,11 +6,12 @@ from colorama import Fore, Back, Style
 from game.model.challenge import Challenge
 from game.model.hint import *
 from game.model.keyboard import Keyboard
+from game.viewer.pygame_presenter import PygameCore
 from game.viewer.terminal_presenter import TerminalPresenter
 from game.viewer.terminal_manipulator import color_dict
 from game.solver.word_checker import IWordChecker, WordChecker
 from game.model.attempt import Attempt
-from game.viewer.terminal_manipulator import ITerminalManipulator, TerminalManipulator
+from game.viewer.terminal_manipulator import IDisplayCore, TerminalCore
 
 
 ###########################################################################
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
     for i in range(n_desafios):
         desafios.append(Challenge(palavras[i]))
-    tmanipulator = TerminalManipulator(color_dict)
+    tmanipulator = TerminalCore(color_dict)
     grid = [(0, 16 * i) for i in range(n_desafios)]
     presenter = TerminalPresenter(tmanipulator, grid=grid, lim_chutes=lim_chutes)
     presenter.first_print()

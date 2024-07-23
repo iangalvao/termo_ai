@@ -14,7 +14,7 @@ def test_color_dict():
 # Define a pytest fixture for the presenter
 @pytest.fixture
 def presenter(test_color_dict):
-    return TerminalManipulator(test_color_dict)
+    return TerminalCore(test_color_dict)
 
 
 # Test for go_to_line method
@@ -126,21 +126,21 @@ def test_string_at_pos_unicode_characters(presenter):
 
 
 def test_clean_line_at_pos_basic(test_color_dict):
-    presenter = TerminalManipulator(test_color_dict, line_length=75)
+    presenter = TerminalCore(test_color_dict, line_length=75)
     result = presenter.clear_line_at_pos(1)
     expected = "\033[1B" + " " * 75 + "\033[1A\033[75D"
     assert result == expected
 
 
 def test_clean_line_at_pos_custom_length(test_color_dict):
-    presenter = TerminalManipulator(test_color_dict, line_length=50)
+    presenter = TerminalCore(test_color_dict, line_length=50)
     result = presenter.clear_line_at_pos(7)
     expected = "\033[7B" + " " * 50 + "\033[7A\033[50D"
     assert result == expected
 
 
 def test_clean_line_at_pos_zero_length(test_color_dict):
-    presenter = TerminalManipulator(test_color_dict, line_length=0)
+    presenter = TerminalCore(test_color_dict, line_length=0)
     result = presenter.clear_line_at_pos(1)
     expected = "\033[1B\033[1A"
     assert result == expected

@@ -56,7 +56,7 @@ class IChallenge:
 
 
 class IGameDisplay(ABC):
-    def __init__(self, tmanipulator: ITerminalManipulator) -> None:
+    def __init__(self, tmanipulator: IDisplayCore) -> None:
         super().__init__()
 
     def display_challenge(self, challenge: IChallenge, pos: Tuple[int]) -> None:
@@ -74,7 +74,7 @@ class IGameDisplay(ABC):
 
 class TerminalPresenter(IGameDisplay):
     def __init__(
-        self, tmanipulator: ITerminalManipulator, lim_chutes=6, grid=None, offsets=None
+        self, tmanipulator: IDisplayCore, lim_chutes=6, grid=None, offsets=None
     ) -> None:
         super().__init__(tmanipulator)
         self.tmanipulator = tmanipulator
@@ -153,8 +153,12 @@ class TerminalPresenter(IGameDisplay):
         string = ""
         hints = []
         for char, hint in key_line:
-            string += char
             hints.append(hint)
+            if hint == WRONG_LETTER:
+                string += " "
+            else:
+                string += char
+
         colored_string = self.format_string_hints(string, hints)
         return colored_string
 

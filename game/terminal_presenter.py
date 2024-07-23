@@ -78,7 +78,7 @@ class TerminalPresenter(IGameDisplay):
     ) -> None:
         super().__init__(tmanipulator)
         self.tmanipulator = tmanipulator
-        self.lim_chutes = 6
+        self.lim_chutes = lim_chutes
         if not grid:
             self.grid = [(0, 0)]
         else:
@@ -89,7 +89,7 @@ class TerminalPresenter(IGameDisplay):
         if offsets:
             self.offsets = offsets
         else:
-            self.offsets = {"table": (1, 6), "keyboard": (8, 4)}
+            self.offsets = {"table": (1, 6), "keyboard": (2 + lim_chutes, 4)}
 
     def format_attempt(self, attempt: Attempt):
         string = attempt.get_guess()
@@ -117,7 +117,7 @@ class TerminalPresenter(IGameDisplay):
             pos = (table_offset[0] + n, table_offset[1])
             table_screen.add(self.format_attempt(attempt), pos)
             n += 1
-        for i in range(n, lim_guesses):
+        for i in range(n, self.lim_chutes):
             pos = (table_offset[0] + i, table_offset[1])
             table_screen.add(self.table_line(), pos)
         return table_screen

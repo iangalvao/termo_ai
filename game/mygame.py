@@ -80,7 +80,8 @@ if __name__ == "__main__":
     for i in range(n_desafios):
         desafios.append(Challenge(palavras[i]))
     tmanipulator = TerminalManipulator(color_dict)
-    presenter = TerminalPresenter(tmanipulator)
+    grid = [(0, 16 * i) for i in range(n_desafios)]
+    presenter = TerminalPresenter(tmanipulator, grid=grid, lim_chutes=lim_chutes)
     presenter.first_print()
     presenter.display_game_screen(desafios)
 

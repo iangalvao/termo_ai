@@ -195,7 +195,7 @@ class TerminalPresenter:
 
 
 class Desafio:
-    def __init__(self, palavra, word_checker: IWordChecker) -> None:
+    def __init__(self, palavra, word_checker: IWordChecker, lim_guesses=6) -> None:
         self.chutes = []
         self.feedbacks = []
         self.attempts: list[Attempt] = []
@@ -203,6 +203,10 @@ class Desafio:
         self.palavra = palavra
         self.solved = 0
         self.word_checker: IWordChecker = word_checker
+        self.lim_guesses = 6
+
+    def get_lim_guesses(self):
+        return self.lim_guesses
 
     def get_attempts(self):
         return self.attempts

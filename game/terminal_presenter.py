@@ -99,6 +99,9 @@ class IChallenge:
     def get_attempts(self) -> List[Attempt]:
         pass
 
+    def get_lim_guesses(self) -> int:
+        pass
+
     def get_keyboard(self) -> IKeyboard:
         pass
 
@@ -124,23 +127,8 @@ class TerminalPresenter(IGameDisplay):
     def __init__(self, tmanipulator: ITerminalManipulator) -> None:
         super().__init__(tmanipulator)
         self.tmanipulator = tmanipulator
-
-    def display_challenge(self, challenge: IChallenge, offset: Tuple[int]) -> None:
-        attempts = challenge.get_attempts()
-        keyboard = challenge.get_keyboard()
-        self.display_attempts_table(attempts, offset)
-        self.display_keyboard(keyboard, offset)
-
-    def display_attempts_table(self, attempts: List[Attempt], offset: Tuple[int]):
-        pos = self.get_section_pos("attempts", displace=pos)
-        for line, attempt in enumerate(attempts):
-            self.display_attempt(attempt, line, pos)
-
-    def dislplay_attempt(self, attempt: Attempt, line: int, pos: Tuple[int]):
-        guess = attempt.get_guess()
-        hints = attempt.get_feedbacks()
-        colored_attempt = self.format_attempt(guess, hints)
-        self.display(colored_attempt, (pos[0] + line, pos[1]))
+        self.grid = [(0, 0)]
+        self.offsets = {"table": (0, 2), "keyboard": (10, 0)}
 
     def format_attempt(self, attempt: Attempt):
         string = attempt.get_guess()
@@ -173,22 +161,28 @@ class TerminalPresenter(IGameDisplay):
         colored_string = self.format_attempt(string, hints)
         return colored_string
 
-    def game_screen(self, challenges: List[IChallenge]) -> IScreen:
+    def game_screen(self, challenges: List[IChallenge], lim_guesses=6) -> IScreen:
 
         game_screen = Screen()
         # table_offset = self.offsets["table"]
         for challenge_number, challenge in enumerate(challenges):
             # table_offset = self.grid[challenge_number] + table_offset
-            for n, attempt in enumerate(challenge.get_attempts()):
+            n = 0
+            for attempt in challenge.get_attempts():
                 # pos = table_offset + (n, 0)
                 pos = (n, 0)
                 game_screen.add(self.format_attempt(attempt), pos)
-            # for i in range(n):
-            #    pos = self.grid[pos] + (i, 0)
-            #    game_screen.add(self.table_line(), pos)
+                n += 1
+            for i in range(n, lim_guesses):
+                pos = self.grid[challenge_number]
+                pos = (pos[0] + i, pos[1])
+                game_screen.add(self.table_line(), pos)
             # pos = 0
             # game_screen.add(self.display_keyboard(challenge.get_keyboard()), pos)
         return game_screen
+
+    def table_line(self):
+        return ColoredString("     ", [UNDERLINE for i in range(6)])
 
     def display_game_screen(self, challenges: List[IChallenge]):
         game_screen = self.game_screen(challenges)

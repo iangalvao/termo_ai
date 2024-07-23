@@ -2,6 +2,7 @@ import pytest
 
 from game.attempt import Attempt
 from game.hint import RIGHT_POS, WRONG_LETTER, WRONG_POS, UNKNOWN_LETTER
+from game.keyboard import Keyboard
 from game.mygame import Desafio
 from game.terminal_manipulator import ColoredString
 from game.terminal_presenter import UNDERLINE, Screen, TerminalPresenter
@@ -86,6 +87,79 @@ def expected_screen_empty(words, colors):
     for i in range(6):
         s.add(ColoredString("     ", [UNDERLINE for i in range(6)]), (i, 0))
     return s
+
+
+@pytest.fixture
+def keyboard():
+    return Keyboard()
+
+
+@pytest.fixture
+def qwerty_only_keyboard(keyboard: Keyboard):
+    for keyline, pos in keyboard:
+        for char, hint in keyline:
+            if char not in "QWERTY":
+                keyboard.set_letter_hint(char, WRONG_LETTER)
+            else:
+                keyboard.set_letter_hint(char, RIGHT_POS)
+    return keyboard
+
+
+@pytest.fixture
+def expected_qwerty_keyboard_screen():
+    screen = Screen()
+    first_line = ColoredString(
+        "QWERTYUIOP", [RIGHT_POS for c in "QWERTY"] + [UNKNOWN_LETTER for c in "UIOP"]
+    )
+    second_line_chars = "ASDFGHJKL"
+    second_line = ColoredString(
+        second_line_chars, [UNKNOWN_LETTER for c in second_line_chars]
+    )
+    third_line_chards = "ZXCVBNM"
+    third_line = ColoredString(
+        third_line_chards, [UNKNOWN_LETTER for c in third_line_chards]
+    )
+    screen.add(first_line, (10, 0))
+    screen.add(second_line, (11, 0))
+    screen.add(third_line, (12, 0))
+    return screen
+
+
+@pytest.fixture
+def expected_empty_keyboard_screen():
+    screen = Screen()
+    first_line_chars = "QWERTYUIOP"
+    first_line = ColoredString(
+        first_line_chars, [UNKNOWN_LETTER for c in first_line_chars]
+    )
+    second_line_chars = "ASDFGHJKL"
+    second_line = ColoredString(
+        second_line_chars, [UNKNOWN_LETTER for c in second_line_chars]
+    )
+    third_line_chards = "ZXCVBNM"
+    third_line = ColoredString(
+        third_line_chards, [UNKNOWN_LETTER for c in third_line_chards]
+    )
+    screen.add(first_line, (10, 0))
+    screen.add(second_line, (11, 0))
+    screen.add(third_line, (12, 0))
+    return screen
+
+
+def test_keyboard_screen_empty(keyboard, expected_empty_keyboard_screen):
+    tPresenter = TerminalPresenter(None)
+    screen = tPresenter.keyboard(keyboard, (0, 0))
+    assert (
+        screen == expected_empty_keyboard_screen
+    ), f"\nEXPECTED SCREEN: {expected_empty_keyboard_screen}\nGOT: {screen}"
+
+
+def test_keyboard_screen_qwerty(qwerty_only_keyboard, expected_qwerty_keyboard_screen):
+    tPresenter = TerminalPresenter(None)
+    screen = tPresenter.keyboard(qwerty_only_keyboard, (0, 0))
+    assert (
+        screen == expected_qwerty_keyboard_screen
+    ), f"\nEXPECTED SCREEN: {expected_qwerty_keyboard_screen}\nGOT: {screen}"
 
 
 def test_game_screen_full(challenge_full, expected_screen_full):

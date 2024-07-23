@@ -57,18 +57,20 @@ class IScreen(ABC):
     def __eq__(self, value: object) -> bool:
         pass
 
+    def __str__(self) -> str:
+        pass
+
 
 class Screen(IScreen):
     def __init__(self) -> None:
-        self.strings = []
+        self.strings: List[ColoredString] = []
 
     def add(self, colored_string: ColoredString, pos: Tuple[int, int]) -> None:
         self.strings.append((colored_string, pos))
 
     def merge(self, other):
         if isinstance(other, self.__class__):
-            for string, pos in other:
-                self.add(string, pos)
+            self.strings += other.strings
 
     def __iter__(self) -> Iterator[Tuple[ColoredString, Tuple[int, int]]]:
         for string, pos in self.strings:
@@ -85,6 +87,12 @@ class Screen(IScreen):
                     return False
             return True
         return False
+
+    def __str__(self) -> str:
+        res = ""
+        for colored_string, pos in self.strings:
+            res += colored_string.str + " " + str(colored_string.colors)
+        return res
 
 
 class IKeyboard(ABC):
@@ -195,6 +203,10 @@ class TerminalPresenter(IGameDisplay):
     def table_line(self):
         return ColoredString("     ", [UNDERLINE for i in range(6)])
 
+    def get_section_pos(self, section: str, offset: Tuple[int, int]):
+        section_offset = self.offsets[section]
+        return (section_offset[0] + offset[0], section_offset[1] + offset[1])
+
     def keyboard(self, keyboard: Keyboard, offset: Tuple[int, int]):
         keyboard_screen = Screen()
         pos = self.get_section_pos("keyboard", offset=offset)
@@ -205,7 +217,7 @@ class TerminalPresenter(IGameDisplay):
 
     def format_keyboard_line(self, key_line: List[Tuple[str, Hint]]):
         string = ""
-        hints = ""
+        hints = []
         for char, hint in key_line:
             string += char
             hints.append(hint)

@@ -8,6 +8,7 @@ from game.model.hint import *
 from game.model.keyboard import Keyboard
 from game.viewer.pygame_presenter import PygameCore
 from game.viewer.terminal_presenter import TerminalPresenter
+from game.viewer.pygame_presenter import pygame_color_dict
 from game.viewer.terminal_manipulator import color_dict
 from game.solver.word_checker import IWordChecker, WordChecker
 from game.model.attempt import Attempt
@@ -67,6 +68,12 @@ if __name__ == "__main__":
     else:
         n_desafios = 1
 
+    pygame = False
+    if len(sys.argv) > 2:
+        display_engine = sys.argv[2]
+        if display_engine == "pygame":
+            pygame = True
+
     with open("palavras.csv") as csvfile:
         myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
         palavras = next(myreader)
@@ -80,7 +87,10 @@ if __name__ == "__main__":
     palavras = sort_words(list(palavras_unidecode.keys()), n_desafios)
     for i in range(n_desafios):
         desafios.append(Challenge(palavras[i]))
-    tmanipulator = TerminalCore(color_dict)
+    if pygame:
+        tmanipulator = PygameCore(pygame_color_dict)
+    else:
+        tmanipulator = TerminalCore(color_dict)
     grid = [(0, 16 * i) for i in range(n_desafios)]
     presenter = TerminalPresenter(tmanipulator, grid=grid, lim_chutes=lim_chutes)
     presenter.first_print()

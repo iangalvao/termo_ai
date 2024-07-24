@@ -12,10 +12,10 @@ COR_CERTO = 1
 COR_POSICAO = 2
 
 
-color_dict = {
-    COR_ERRADO: (255, 102, 102),  # Light Red
-    COR_CERTO: (0, 255, 0),  # Green
-    COR_POSICAO: (255, 255, 0),  # Yellow
+pygame_color_dict = {
+    COR_ERRADO: (0, 0, 0),  # Light Red
+    COR_CERTO: (20, 180, 20),  # Green
+    COR_POSICAO: (180, 180, 0),  # Yellow
     ENDC: (0, 0, 0),  # White (used for resetting color in terminal)
     UNDERLINE: (
         0,
@@ -27,7 +27,7 @@ color_dict = {
 
 class PygameCore(IDisplayCore):
     def __init__(
-        self, color_dict, screen_size=(800, 600), font_size=64, bg_color=(0, 0, 0)
+        self, color_dict, screen_size=(800, 800), font_size=64, bg_color=(0, 0, 0)
     ) -> None:
         super().__init__()
         pygame.init()

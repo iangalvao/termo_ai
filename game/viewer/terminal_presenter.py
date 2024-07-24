@@ -214,12 +214,23 @@ class TerminalPresenter(IGameDisplay):
     ###########################
     def get_input(self, n, padding):
         pos = (0, padding)
-        print(self.tmanipulator.go_to_pos(pos), end="")
+        # print(self.tmanipulator.go_to_pos(pos), end="")
         self.tmanipulator.clear_line(n + 1)
         # self.print_tabela(n)
         s = self.tmanipulator.go_to_pos((n + 1, 2))
         chute_atual = unidecode(input(s)).upper()
-        print(self.tmanipulator.go_to_line(-n - 2), end="")
+        # print(self.tmanipulator.go_to_line(-n - 2), end="")
+        # print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
+        sys.stdout.flush()
+        return chute_atual
+
+    def get_input_inplace(self, n, padding):
+        pos = (0, padding)
+        # print(self.tmanipulator.go_to_pos(pos), end="")
+        self.tmanipulator.clear_line(n + 1)
+        # self.print_tabela(n)
+        chute_atual = unidecode(input()).upper()
+        # print(self.tmanipulator.go_to_line(-n - 2), end="")
         # print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
         sys.stdout.flush()
         return chute_atual

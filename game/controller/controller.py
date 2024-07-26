@@ -1,86 +1,82 @@
 from abc import ABC
 import curses
+import random
+from re import Match
+from time import sleep
+from typing import List
+
+from game.model.challenge import Challenge
+from game.model.match import IMatch
+from game.viewer.terminal_presenter import IGameDisplay
 
 
-class IControllerCore(ABC):
+class IMatchController(ABC):
     def __init__(self) -> None:
         super().__init__()
+        self.match: IMatch = None
 
-    def get_input(self):
+    def proccess_key(self, key: str) -> None:
         pass
 
 
-class IController(ABC):
-    def __init__(self) -> None:
+class MatchController(IMatchController):
+    def __init__(self, accepted_words, presenter: IGameDisplay) -> None:
         super().__init__()
+        self.match: IMatch = None
+        self.presenter: IGameDisplay = presenter
+        self.accepted_words = accepted_words
 
-    def process_input(self, key: str):
+    def proccess_key(self, key):
         pass
 
-    def get_input(self):
-        pass
+    def add_letter(self, key: str):
+        if not key.isalpha():
+            return
+        res = self.match.input_letter(key)
+        if res:
+            self.presenter.display_game_screen(self.match.get_challenges)
 
-    def get_buffer(self):
-        pass
+    def submit_guess(self):
+        guess = self.match.submit_guess()
+        if not guess:
+            return
+        if not self.check_valid_word(guess, self.accepted_words):
+            self.presenter.print_word_not_accepted(guess)
+            return
 
-    def get_cursor(self):
-        pass
+        end_match = self.match.update(guess)
+        self.presenter.display_game_screen(self.match.get_challenges)
+        if end_match:
+            self.end_match()
 
+    def sort_words(self, n: int) -> List[str]:
+        sorted_words = []
+        for i in range(n):
+            word = ""
+            while word not in sorted_words:
+                random_number = random.randint(1, len(self.accepted_words) - 1 - 9147)
+                palavra = self.accepted_words[9147 + random_number].upper()
+                if palavra not in sorted_words:
+                    sorted_words.append(palavra)
 
-class Controller(IController):
-    def __init__(self, stdscr):
-        self.stdscr = stdscr
-        self.buffer = [""] * 5
-        self.cursor_pos = 0
-        curses.curs_set(0)  # Hide cursor
-        self.stdscr.keypad(True)
-        self.run()
+        return sorted_words
 
-    def run(self):
-        while True:
-            self.stdscr.clear()
-            self.display_buffer()
-            self.stdscr.refresh()
+    def new_match(self, n_challenges):
 
-    def get_input(self):
-        key = self.stdscr.getch()
-        return self.process_input(key)
+        challenges = []
+        # n_challenges = 2
 
-    def process_input(self, key):
-        if key == curses.KEY_LEFT:
-            self.move_cursor_left()
-        elif key == curses.KEY_RIGHT:
-            self.move_cursor_right()
-        elif key == curses.KEY_ENTER or key in [10, 13]:
-            return self.submit_buffer()
-        elif ord("a") <= key <= ord("z"):
-            self.add_letter(chr(key))
-        elif key == ord("q"):
-            self.quit()
+        palavras = self.sort_words(list(self.accepted_words.keys()), n_challenges)
+        for i in range(n_challenges):
+            challenges.append(Challenge(palavras[i]))
+        sorted_words = self.sort_words(self, n_challenges)
+        self.match = Match(challenges, sorted_words)
+        self.presenter.first_print()
+        self.presenter.display_game_screen(challenges)
 
-    def move_cursor_left(self):
-        if self.cursor_pos > 0:
-            self.cursor_pos -= 1
-        return self.buffer, self.cursor_pos
-
-    def move_cursor_right(self):
-        if self.cursor_pos < 5:
-            self.cursor_pos += 1
-
-    def add_letter(self, letter):
-        if self.cursor_pos < 5:
-            self.buffer[self.cursor_pos] = letter
-            self.move_cursor_right()
-
-    def submit_buffer(self):
-        if all(self.buffer):
-            self.buffer = [""] * 5
-            self.cursor_pos = 0
-
-
-def main(stdscr):
-    controller = Controller(stdscr)
-
-
-if __name__ == "__main__":
-    curses.wrapper(main)
+    def end_match(self):
+        if self.match.won():
+            self.presenter.print_won_the_game(self.match.tentativas)
+        else:
+            self.presenter.print_loss_the_game(self.challenges)
+        return self.screen_manager.end_match_screen(self.match)

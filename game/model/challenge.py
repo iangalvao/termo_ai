@@ -3,9 +3,27 @@
 ###########################################################################
 
 
+from abc import ABC
 import unidecode
 from game.model.attempt import Attempt
 from game.model.keyboard import Keyboard
+
+
+class IChallenge(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def get_lim_guesses(self) -> int:
+        pass
+
+    def get_attempts(self) -> list[Attempt]:
+        pass
+
+    def get_keyboard(self) -> Keyboard:
+        pass
+
+    def update(self) -> Attempt:
+        pass
 
 
 class Challenge:

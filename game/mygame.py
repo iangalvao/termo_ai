@@ -49,12 +49,13 @@ class Game:
         self, input_listener: IInputListener, screen_manager: IScreenManager
     ) -> None:
         self.input_listener: IInputListener = input_listener
-        self.screen_manager = screen_manager
+        self.screen_manager: IScreenManager = screen_manager
 
     def run(self) -> None:
+        self.screen_manager.match_screen(n_desafios)
         while 1:
             key = self.input_listener.get_input()
-            self.screen_manager.proccess_input(key)
+            self.screen_manager.process_input(key)
 
             # self.presenter.tmanipulator.clear_line(12)  # Apaga mensagens.
             # self.presenter.display_game_screen(self.challenges)
@@ -109,11 +110,13 @@ if __name__ == "__main__":
     grid = [(0, 16 * i) for i in range(n_desafios)]
     presenter = TerminalPresenter(tmanipulator, grid=grid)
 
-    match_controller = MatchController(presenter)
-    end_match_controller = EndMatchController()
-    screenmanager = ScreenManager(match_controller, end_match_controller)
+    screen_manager = ScreenManager()
+    match_controller = MatchController(
+        {"pt-br": palavras_unidecode}, presenter, screen_manager
+    )
+    end_match_controller = EndMatchController(screen_manager)
 
-    game = Game(input_listener=input_listener)
+    game = Game(input_listener=input_listener, screen_manager=screen_manager)
 
     ###########################################################################
     ################             MAIN LOOP                 ####################

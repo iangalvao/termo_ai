@@ -106,7 +106,7 @@ class TerminalCore(IDisplayCore):
     ):
         formatted_string = self.colored_string_at_pos(colored_string, pos)
         print(formatted_string, end="")
-        sys.stdout.flush
+        sys.stdout.flush()
 
     def colored_string_at_pos(self, colored_string: ColoredString, pos):
         formatted_string = self.color_string(colored_string)

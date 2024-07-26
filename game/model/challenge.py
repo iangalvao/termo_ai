@@ -22,6 +22,9 @@ class IChallenge(ABC):
     def get_keyboard(self) -> Keyboard:
         pass
 
+    def get_word(self) -> str:
+        pass
+
     def update(self) -> Attempt:
         pass
 
@@ -44,6 +47,9 @@ class Challenge:
 
     def get_attempts(self):
         return self.attempts
+
+    def get_word(self):
+        return self.palavra
 
     def update(self, chute):
         if chute == self.palavra:

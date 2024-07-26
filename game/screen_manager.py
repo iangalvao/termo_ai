@@ -12,45 +12,38 @@ from abc import ABC
 from game.controller.controller import IMatchController
 from game.controller.end_game_controller import IEndMatchController
 from game.controller.icontroller import IController
+from game.iscreen_manager import IScreenManager
 from game.model.match import IMatch
 
 
-class IScreenManager(ABC):
+class ScreenManager(IScreenManager):
     def __init__(self) -> None:
         super().__init__()
+        self.active_controller: IController = None
+        self.controllers = {}
 
-    def new_match(self, match: IMatch):
-        pass
+    def match_screen(self, n_challenges) -> None:
+        match_controller: IMatchController = self.get_controller("match_controller")
+        self.set_active_screen(match_controller)
+        match_controller.new_match(n_challenges)
 
-    def menu_screen(self):
-        pass
+    def get_controller(self, controller_id) -> IController:
+        return self.controllers[controller_id]
 
-    def ingame_menu(self):
-        pass
-
-    def end_match_screen(self, match: IMatch):
-        pass
-
-    def get_match_controller(self, n_challenges):
-        pass
-
-
-class ScreenManager(IScreenManager):
-    def __init__(
-        self,
-        match_controller: IMatchController,
-        end_match_controller: IEndMatchController,
-    ) -> None:
-        super().__init__()
-        self.match_controller: IMatchController = match_controller
-        self.end_match_controller: IEndMatchController = end_match_controller
-        self.active_controller: IController = self.match_controller
-
-    def end_match_screen(self, match: IMatch):
-        self.end_match_controller.set_result(
-            match.won, match.n_attempts, match.get_words()
+    def end_match_screen(self, match: IMatch) -> None:
+        end_match_controller: IEndMatchController = self.get_controller(
+            "end_match_controller"
         )
-        self.set_active_screen(self.end_match_controller)
+        self.set_active_screen(end_match_controller)
+        end_match_controller.set_result(
+            match.won(), match.get_n_attempts(), match.get_words()
+        )
 
-    def process_input(self, key):
+    def bind_controller(self, controller: IController, controller_id: str) -> None:
+        self.controllers[controller_id] = controller
+
+    def set_active_screen(self, controller: IController) -> None:
+        self.active_controller = controller
+
+    def process_input(self, key) -> None:
         self.active_controller.process_key(key)

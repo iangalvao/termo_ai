@@ -1,5 +1,6 @@
 from typing import List
 from game.controller.icontroller import IController
+from game.iscreen_manager import IScreenManager
 
 
 class IEndMatchController(IController):
@@ -11,16 +12,18 @@ class IEndMatchController(IController):
 
 
 class EndMatchController(IEndMatchController):
-    def __init__(self) -> None:
+    def __init__(self, screen_manager: IScreenManager) -> None:
         super().__init__()
+        self.screen_manager = screen_manager
+        screen_manager.bind_controller(self, "end_match_controller")
 
     def set_result(self, won: bool, n_attempts: int, words: List[str]):
         print(
             f"""END MATCH CONTROLLER SET RESULTS:
-                WON: {won}, 
-                N_ATTEMPTS: {n_attempts}, 
-                WORDS: {words},\nPress any key to quit!"""
+                \nWON: {won}, 
+                \nN_ATTEMPTS: {n_attempts}, 
+                \nWORDS: {words},\nPress any key to quit!"""
         )
 
-    def process_input(self, key: str) -> None:
+    def process_key(self, key: str) -> None:
         exit(0)

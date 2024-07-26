@@ -21,10 +21,10 @@ class TerminalInputListener(IInputListener):
     def __init__(self):
         pass
 
-    def isData():
+    def isData(self):
         return select.select([sys.stdin], [], []) == ([sys.stdin], [], [])
 
-    def listen(self):
+    def get_input(self):
         old_settings = termios.tcgetattr(sys.stdin)
         try:
             tty.setcbreak(sys.stdin.fileno())
@@ -32,7 +32,7 @@ class TerminalInputListener(IInputListener):
             while 1:
                 if self.isData():
                     k = sys.stdin.read(1)
-                    if k == "q":
+                    if k == "Q":
                         break
                     elif k == "\x1b":
                         kk = sys.stdin.read(2)
@@ -40,17 +40,8 @@ class TerminalInputListener(IInputListener):
                             return RIGHTARROW
                         elif kk == "[D":
                             return LEFTARROW
-                        else:
-                            print(
-                                "unidecode escape char pressed -->",
-                                kk.encode("unicode_escape"),
-                            )
-                    elif ord("a") <= ord(k) <= ord("z"):
-                        yield k
-                    elif ord(k) == 10 or ord(k) == 13:
-                        return ENTER
                     else:
-                        print("unknown char pressed: ", k)
+                        return k.upper()
 
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)

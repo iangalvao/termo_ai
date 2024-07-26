@@ -18,12 +18,13 @@ class EndMatchController(IEndMatchController):
         screen_manager.bind_controller(self, "end_match_controller")
 
     def set_result(self, won: bool, n_attempts: int, words: List[str]):
-        print(
-            f"""END MATCH CONTROLLER SET RESULTS:
-                \nWON: {won}, 
-                \nN_ATTEMPTS: {n_attempts}, 
-                \nWORDS: {words},\nPress any key to quit!"""
-        )
+        # print(
+        #     f"""END MATCH CONTROLLER SET RESULTS:
+        #         \nWON: {won},
+        #         \nN_ATTEMPTS: {n_attempts},
+        #         \nWORDS: {words},\nPress any key to quit!"""
+        # )
+        exit(0)
 
     def process_key(self, key: str) -> None:
         exit(0)

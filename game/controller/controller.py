@@ -41,9 +41,21 @@ class MatchController(IMatchController):
     def process_key(self, key):
         if key == LEFTARROW:
             self.match.move_cursor_left()
+            self.presenter.display_buffer(
+                "".join(self.match.input_buffer),
+                self.match.get_n_attempts(),
+                self.match.get_challenges(),
+                self.match.cursor,
+            )
         if key == RIGHTARROW:
             self.match.move_cursor_right()
-        if ord("a") <= ord(key) <= ord("z") or ord("A") <= ord(key) <= ord("Z"):
+            self.presenter.display_buffer(
+                "".join(self.match.input_buffer),
+                self.match.get_n_attempts(),
+                self.match.get_challenges(),
+                self.match.cursor,
+            )
+        if ord("A") <= ord(key) <= ord("Z"):
             self.add_letter(key)
         if ord(key) in [10, 13]:
             self.submit_guess()
@@ -52,7 +64,15 @@ class MatchController(IMatchController):
     def add_letter(self, key: str):
         res = self.match.input_letter(key)
         if res:
-            self.presenter.display_game_screen(self.match.get_challenges())
+            self.presenter.display_game_screen(
+                self.match.get_challenges(), self.match.lim_guesses
+            )
+            self.presenter.display_buffer(
+                "".join(self.match.input_buffer),
+                self.match.get_n_attempts(),
+                self.match.get_challenges(),
+                self.match.cursor,
+            )
 
     def submit_guess(self):
         guess = self.match.submit_guess()
@@ -60,11 +80,22 @@ class MatchController(IMatchController):
             return
         if not self.match.check_valid_word(guess):
             self.presenter.print_word_not_accepted(guess)
-            self.presenter.display_game_screen(self.match.get_challenges())
+            self.presenter.display_game_screen(
+                self.match.get_challenges(), self.match.lim_guesses
+            )
             return
 
         end_match = self.match.update(guess)
-        self.presenter.display_game_screen(self.match.get_challenges())
+        self.presenter.display_game_screen(
+            self.match.get_challenges(), lim_guesses=self.match.lim_guesses
+        )
+        self.presenter.display_buffer(
+            "".join(self.match.input_buffer),
+            self.match.get_n_attempts(),
+            self.match.get_challenges(),
+            self.match.cursor,
+        )
+
         if end_match:
             self.end_match()
 
@@ -89,8 +120,18 @@ class MatchController(IMatchController):
         for word in selected_words:
             challenges.append(Challenge(word))
         self.match = Match(challenges, self.accepted_words[language])
+        self.presenter.lim_guesses = 5 + n_challenges
         self.presenter.first_print()
-        self.presenter.display_game_screen(challenges)
+
+        self.presenter.display_game_screen(
+            challenges, lim_guesses=self.match.lim_guesses
+        )
+        self.presenter.display_buffer(
+            "".join(self.match.input_buffer),
+            self.match.get_n_attempts(),
+            self.match.get_challenges(),
+            self.match.cursor,
+        )
 
     def end_match(self):
         if self.match.won():

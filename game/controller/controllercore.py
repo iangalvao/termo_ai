@@ -5,8 +5,8 @@ import tty
 import termios
 
 ENTER = 0
-LEFTARROW = 1
-RIGHTARROW = 2
+LEFTARROW = "l"
+RIGHTARROW = "r"
 
 
 class IInputListener(ABC):
@@ -33,7 +33,7 @@ class TerminalInputListener(IInputListener):
                 if self.isData():
                     k = sys.stdin.read(1)
                     if k == "Q":
-                        break
+                        exit(0)
                     elif k == "\x1b":
                         kk = sys.stdin.read(2)
                         if kk == "[C":

@@ -78,7 +78,7 @@ class TerminalPresenter(IGameDisplay):
     ) -> None:
         super().__init__(tmanipulator)
         self.tmanipulator = tmanipulator
-        self.lim_chutes = lim_chutes
+        self.lim_guesses = lim_chutes
         if not grid:
             self.grid = [(0, 0)]
         else:
@@ -89,7 +89,7 @@ class TerminalPresenter(IGameDisplay):
         if offsets:
             self.offsets = offsets
         else:
-            self.offsets = {"table": (1, 6), "keyboard": (2 + lim_chutes, 4)}
+            self.offsets = {"table": (1, 6), "keyboard": (2, 4)}
 
     def format_attempt(self, attempt: Attempt):
         string = attempt.get_guess()
@@ -117,12 +117,12 @@ class TerminalPresenter(IGameDisplay):
             pos = (table_offset[0] + n, table_offset[1])
             table_screen.add(self.format_attempt(attempt), pos)
             n += 1
-        for i in range(n, self.lim_chutes):
+        for i in range(n, lim_guesses):
             pos = (table_offset[0] + i, table_offset[1])
             table_screen.add(self.table_line(), pos)
         return table_screen
 
-    def game_screen(self, challenges: List[IChallenge], lim_guesses=6) -> IScreen:
+    def game_screen(self, challenges: List[IChallenge], lim_guesses) -> IScreen:
 
         game_screen = Screen()
         # table_offset = self.offsets["table"]
@@ -131,7 +131,9 @@ class TerminalPresenter(IGameDisplay):
                 self.table_screen(challenge, challenge_number, lim_guesses)
             )
             game_pos = self.grid[challenge_number]
-            keyboard_pos = self.get_section_pos("keyboard", game_pos)
+            keyboard_pos = self.get_section_pos(
+                "keyboard", (game_pos[0] + lim_guesses, game_pos[1])
+            )
             game_screen.merge(self.keyboard(challenge.get_keyboard(), keyboard_pos))
         return game_screen
 
@@ -162,21 +164,34 @@ class TerminalPresenter(IGameDisplay):
         colored_string = self.format_string_hints(string, hints)
         return colored_string
 
-    def display_game_screen(self, challenges: List[IChallenge]):
-        game_screen = self.game_screen(challenges)
+    def display_game_screen(self, challenges: List[IChallenge], lim_guesses=6):
+        game_screen = self.game_screen(challenges, lim_guesses)
         self.tmanipulator.print_screen(game_screen)
+
+    def display_buffer(self, buffer, line, challenges, cursor):
+        for challenge_number, challenge in enumerate(challenges):
+            buffer += " "
+            game_pos = self.grid[challenge_number]
+            table_offset = self.get_section_pos("table", game_pos)
+            pos = (table_offset[0] + line, table_offset[1])
+            colors = [ENDC for i in buffer]
+            colors[cursor] = COR_CERTO
+            colored_string = ColoredString(buffer, colors)
+            buffer_screen = Screen()
+            buffer_screen.add(colored_string, pos)
+            self.tmanipulator.print_screen(buffer_screen)
 
     ###########################################################################
     ################               MENSAGENS               ####################
     ###########################################################################
 
     def message(self, mensagem):
-        self.tmanipulator.clear_line(self.lim_chutes + 6)
-        self.tmanipulator.print_at_pos(mensagem, (self.lim_chutes + 6, 0))
+        self.tmanipulator.clear_line(self.lim_guesses + 6)
+        self.tmanipulator.print_at_pos(mensagem, (self.lim_guesses + 6, 0))
 
     def print_won_the_game(self, number_of_tries):
         self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
-        print(self.tmanipulator.go_to_pos((self.lim_chutes + 7, 0)))
+        print(self.tmanipulator.go_to_pos((self.lim_guesses + 7, 0)))
 
     def print_loss_the_game(self, desafios):
         if len(desafios) == 1:
@@ -186,7 +201,7 @@ class TerminalPresenter(IGameDisplay):
             for d in desafios:
                 palavras_sorteadas += " " + d.palavra
             self.message(f"\rVocê perdeu. As palavras eram{palavras_sorteadas}.")
-        print(self.tmanipulator.go_to_pos((self.lim_chutes + 7, 0)))
+        print(self.tmanipulator.go_to_pos((self.lim_guesses + 7, 0)))
 
     def print_word_not_accepted(self, palavra):
         self.message(f"Essa palavra não é aceita:{palavra}")
@@ -198,9 +213,9 @@ class TerminalPresenter(IGameDisplay):
         s = ""
         for i in range(80):
             s += " "
-        for i in range(self.lim_chutes + 7):
+        for i in range(self.lim_guesses + 7):
             print(s)
-        print(f"\033[{self.lim_chutes + 7}A", end="")
+        print(f"\033[{self.lim_guesses + 7}A", end="")
         sys.stdout.flush()
 
         ###########################################################################

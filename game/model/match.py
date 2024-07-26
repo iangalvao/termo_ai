@@ -109,11 +109,11 @@ class Match(IMatch):
             if not self.challenges[i].solved:
                 self.challenges[i].update(unidecode.unidecode(guess))
 
+        self.n_attempts += 1
         if self.won_the_game():
             self._won = 1
             return 1
         # PERDEU
-        self.n_attempts += 1
         if self.n_attempts == self.lim_guesses:
             return 1
         return 0

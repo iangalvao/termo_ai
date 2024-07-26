@@ -27,6 +27,8 @@ class TerminalInputListener(IInputListener):
     def get_input(self):
         old_settings = termios.tcgetattr(sys.stdin)
         try:
+            print("\033[?25l", end="")
+            sys.stdout.flush()
             tty.setcbreak(sys.stdin.fileno())
 
             while 1:
@@ -44,4 +46,6 @@ class TerminalInputListener(IInputListener):
                         return k.upper()
 
         finally:
+
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+            sys.stdout.write("\033[?25h")

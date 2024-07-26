@@ -15,7 +15,7 @@ ENDC = 4
 COR_ERRADO = 0
 COR_CERTO = 1
 COR_POSICAO = 2
-
+COR_INVERTIDA = 5
 
 color_dict = {
     COR_ERRADO: "\033[0m",
@@ -23,6 +23,7 @@ color_dict = {
     COR_POSICAO: Back.YELLOW,
     ENDC: "\033[0m",
     UNDERLINE: "\033[4m",
+    COR_INVERTIDA: "\033[47m\033[30m",
 }
 
 

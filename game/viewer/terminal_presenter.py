@@ -138,7 +138,7 @@ class TerminalPresenter(IGameDisplay):
         return game_screen
 
     def table_line(self):
-        return ColoredString("_____", [ENDC for i in range(6)])
+        return ColoredString("     ", [UNDERLINE for i in range(6)])
 
     def get_section_pos(self, section: str, offset: Tuple[int, int]):
         section_offset = self.offsets[section]
@@ -169,14 +169,17 @@ class TerminalPresenter(IGameDisplay):
         self.tmanipulator.print_screen(game_screen)
 
     def display_buffer(self, buffer, line, challenges, cursor):
+        if line >= self.lim_guesses:
+            return
         for challenge_number, challenge in enumerate(challenges):
-            buffer += " "
+            tmp_buffer = buffer + " "
             game_pos = self.grid[challenge_number]
             table_offset = self.get_section_pos("table", game_pos)
             pos = (table_offset[0] + line, table_offset[1])
-            colors = [ENDC for i in buffer]
-            colors[cursor] = COR_CERTO
-            colored_string = ColoredString(buffer, colors)
+            colors = [UNDERLINE for i in tmp_buffer]
+            colors[-1] = ENDC
+            colors[cursor] = COR_INVERTIDA
+            colored_string = ColoredString(tmp_buffer, colors)
             buffer_screen = Screen()
             buffer_screen.add(colored_string, pos)
             self.tmanipulator.print_screen(buffer_screen)

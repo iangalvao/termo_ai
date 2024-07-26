@@ -89,22 +89,23 @@ class MatchController(IMatchController):
         self.presenter.display_game_screen(
             self.match.get_challenges(), lim_guesses=self.match.lim_guesses
         )
-        self.presenter.display_buffer(
-            "".join(self.match.input_buffer),
-            self.match.get_n_attempts(),
-            self.match.get_challenges(),
-            self.match.cursor,
-        )
 
         if end_match:
             self.end_match()
+        else:
+            self.presenter.display_buffer(
+                "".join(self.match.input_buffer),
+                self.match.get_n_attempts(),
+                self.match.get_challenges(),
+                self.match.cursor,
+            )
 
     def sort_words(self, word_list: str, n: int) -> List[str]:
         sorted_words = []
         for i in range(n):
             word = ""
             while word not in sorted_words:
-                random_number = random.randint(0, len(word_list) - 1)
+                random_number = random.randint(9147, len(word_list) - 1)
                 word = word_list[random_number].upper()
                 if word not in sorted_words:
                     sorted_words.append(word)

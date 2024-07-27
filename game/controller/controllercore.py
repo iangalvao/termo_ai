@@ -13,7 +13,7 @@ class IInputListener(ABC):
     def __init__(self) -> None:
         super().__init__()
 
-    def listen(self) -> str:
+    def get_input(self) -> str:
         pass
 
 

@@ -18,13 +18,16 @@ class IMatch(ABC):
     def __init__(self, tmanipulator: IDisplayCore) -> None:
         super().__init__()
 
-    def update(self, guess: str) -> None:
-        pass
-
     def won(self) -> bool:
         pass
 
     def get_n_attempts(self) -> int:
+        pass
+
+    def get_challenges(self) -> List[IChallenge]:
+        pass
+
+    def get_words(self) -> List[str]:
         pass
 
     def input_letter(self) -> str:
@@ -39,7 +42,10 @@ class IMatch(ABC):
     def submit_guess(self) -> str:
         pass
 
-    def get_words(self) -> List[str]:
+    def check_valid_word(self, word: str) -> bool:
+        pass
+
+    def update(self, guess: str) -> None:
         pass
 
 

@@ -1,38 +1,20 @@
-from abc import ABC
-from typing import Dict, List, Tuple
 from unidecode import unidecode
 import csv
 import sys
-import random
-from colorama import Fore, Back, Style
-from game.controller.controller import MatchController
+
 from game.controller.controllercore import IInputListener, TerminalInputListener
-from game.controller.end_game_controller import EndMatchController
 from game.controller.pygame_input_listener import PygameInputListener
-from game.model.challenge import Challenge
-from game.model.hint import *
-from game.model.keyboard import Keyboard
+
+from game.controller.controller import MatchController
+from game.controller.end_game_controller import EndMatchController
+
 from game.screen_manager import IScreenManager, ScreenManager
+
+from game.viewer.terminal_presenter import TerminalPresenter
 from game.viewer.pygame_presenter import PygameCore
-from game.viewer.terminal_presenter import (
-    IChallenge,
-    IGameDisplay,
-    Message,
-    TerminalPresenter,
-)
+from game.viewer.terminal_manipulator import TerminalCore
 from game.viewer.pygame_presenter import pygame_color_dict
 from game.viewer.terminal_manipulator import color_dict
-from game.solver.word_checker import IWordChecker, WordChecker
-from game.model.attempt import Attempt
-from game.viewer.terminal_manipulator import IDisplayCore, TerminalCore
-
-###########################################################################
-###########################################################################
-################                                       ####################
-################                 MENU                  ####################
-################                                       ####################
-###########################################################################
-###########################################################################
 
 
 ###########################################################################
@@ -57,15 +39,6 @@ class Game:
             key = self.input_listener.get_input()
             self.screen_manager.process_input(key)
 
-            # self.presenter.tmanipulator.clear_line(12)  # Apaga mensagens.
-            # self.presenter.display_game_screen(self.challenges)
-
-
-###########################################################################
-################                                       ####################
-################                 INIT                  ####################
-################                                       ####################
-###########################################################################
 
 if __name__ == "__main__":
 
@@ -74,7 +47,6 @@ if __name__ == "__main__":
     ###########################################################################
     if len(sys.argv) > 1:
         try:
-            # Convert the argument to an integer and store it in a variable
             n_desafios = int(sys.argv[1])
         except ValueError:
             print("Please pass a valid integer as argument.")
@@ -123,7 +95,3 @@ if __name__ == "__main__":
     ###########################################################################
 
     game.run()
-
-
-#    padding = 4
-#    spacing = 16

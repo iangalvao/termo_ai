@@ -1,6 +1,21 @@
+from abc import ABC
 from typing import Tuple
 from game.model.attempt import Attempt
 from game.model.hint import *
+
+
+class IKeyboard(ABC):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def process_hints(self, attempt: Attempt) -> None:
+        pass
+
+    def get_letter_hint(self, letter: str) -> Hint:
+        pass
+
+    def __iter__(self):
+        pass
 
 
 class Keyboard:

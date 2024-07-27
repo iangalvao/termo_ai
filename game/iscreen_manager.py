@@ -16,14 +16,14 @@ class IScreenManager(ABC):
     def ingame_menu(self):
         pass
 
-    def end_match_screen(self, match: IMatch):
-        pass
-
-    def get_match_controller(self):
-        pass
-
-    def end_match_screen(self, match: IMatch):
+    def end_match_screen(self, match: IMatch) -> None:
         pass
 
     def bind_controller(self, controller: IController, controller_id: str) -> None:
+        pass
+
+    def get_controller(self, controller_id) -> IController:
+        pass
+
+    def process_input(self, key) -> None:
         pass

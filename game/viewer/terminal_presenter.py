@@ -4,6 +4,7 @@ from typing import Iterator, List, Tuple
 from colorama import Back
 from game.model.attempt import Attempt
 from game.model.keyboard import Keyboard
+from game.model.challenge import IChallenge
 from game.viewer.screen import IScreen, Screen
 from game.viewer.terminal_manipulator import *
 from game.model.hint import *
@@ -54,6 +55,21 @@ class IChallenge:
     def get_keyboard(self) -> IKeyboard:
         pass
 
+    def message(self, mensagem: str) -> None:
+        pass
+
+    def print_won_the_game(self, number_of_tries: int) -> None:
+        pass
+
+    def print_loss_the_game(self, challenges: List[IChallenge]) -> None:
+        pass
+
+    def print_word_not_accepted(self, palavra: str) -> None:
+        pass
+
+    def first_print(self) -> None:
+        pass
+
 
 class IGameDisplay(ABC):
     def __init__(self, tmanipulator: IDisplayCore) -> None:
@@ -68,7 +84,7 @@ class IGameDisplay(ABC):
     def display_message(self, message: Message) -> None:
         pass
 
-    def display_game_screen(self, challenges: List[IChallenge]):
+    def display_game_screen(self, challenges: List[IChallenge]) -> None:
         pass
 
 

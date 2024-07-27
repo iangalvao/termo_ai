@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Iterator, List, Tuple
+from typing import Any, Iterator, List, Tuple
 
 from game.viewer.colored_string import ColoredString
 
@@ -9,6 +9,9 @@ class IScreen(ABC):
         pass
 
     def add(self, colored_string: ColoredString, pos: Tuple[int, int]):
+        pass
+
+    def merge(self, other: object):
         pass
 
     def __iter__(self):

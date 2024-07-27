@@ -11,7 +11,7 @@ class IEndMatchController(IController):
         pass
 
 
-class EndMatchController(IEndMatchController):
+class EndMatchScreen(IEndMatchController):
     def __init__(self, screen_manager: IScreenManager) -> None:
         super().__init__()
         self.screen_manager = screen_manager

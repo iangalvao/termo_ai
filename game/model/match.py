@@ -15,7 +15,7 @@ from game.viewer.terminal_manipulator import IDisplayCore
 
 
 class IMatch(ABC):
-    def __init__(self, tmanipulator: IDisplayCore) -> None:
+    def __init__(self, challenges: List[IChallenge], accepted_words: List[str]) -> None:
         super().__init__()
 
     def won(self) -> bool:
@@ -28,6 +28,9 @@ class IMatch(ABC):
         pass
 
     def get_words(self) -> List[str]:
+        pass
+
+    def delete_letter(self, pos: int) -> None:
         pass
 
     def input_letter(self) -> str:
@@ -78,8 +81,14 @@ class Match(IMatch):
         return self.challenges
 
     def move_cursor_right(self) -> None:
-        if self.cursor < 4:
+        if self.cursor < 5:
             self.cursor += 1
+
+    def delete_letter(self, pos: int) -> None:
+        if 0 <= pos <= 4:
+            self.input_buffer[pos] = " "
+        if pos != self.cursor:
+            self.cursor -= 1
 
     def move_cursor_left(self) -> None:
         if self.cursor > 0:

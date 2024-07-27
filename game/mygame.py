@@ -5,8 +5,8 @@ import sys
 from game.controller.controllercore import IInputListener, TerminalInputListener
 from game.controller.pygame_input_listener import PygameInputListener
 
-from game.controller.controller import MatchController
-from game.controller.end_game_controller import EndMatchController
+from game.controller.match_controller import MatchController
+from game.controller.end_game_controller import EndMatchScreen
 
 from game.screen_manager import IScreenManager, ScreenManager
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     match_controller = MatchController(
         {"pt-br": palavras_unidecode}, presenter, screen_manager
     )
-    end_match_controller = EndMatchController(screen_manager)
+    end_match_controller = EndMatchScreen(screen_manager)
 
     game = Game(input_listener=input_listener, screen_manager=screen_manager)
 

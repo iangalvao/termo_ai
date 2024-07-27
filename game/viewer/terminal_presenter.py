@@ -32,42 +32,8 @@ cores_das_dicas = {
 }
 
 
-class IKeyboard(ABC):
-    def __init__(self) -> None:
-        super().__init__()
-
-
 class Message:
     def __init__(self) -> None:
-        pass
-
-
-class IChallenge:
-    def __init__(self) -> None:
-        pass
-
-    def get_attempts(self) -> List[Attempt]:
-        pass
-
-    def get_lim_guesses(self) -> int:
-        pass
-
-    def get_keyboard(self) -> IKeyboard:
-        pass
-
-    def message(self, mensagem: str) -> None:
-        pass
-
-    def print_won_the_game(self, number_of_tries: int) -> None:
-        pass
-
-    def print_loss_the_game(self, challenges: List[IChallenge]) -> None:
-        pass
-
-    def print_word_not_accepted(self, palavra: str) -> None:
-        pass
-
-    def first_print(self) -> None:
         pass
 
 

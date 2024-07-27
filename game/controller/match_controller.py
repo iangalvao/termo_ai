@@ -5,7 +5,7 @@ from time import sleep
 from typing import Dict, List
 
 from game.model.match import Match
-from game.controller.controllercore import LEFTARROW, RIGHTARROW
+from game.controller.controllercore import DELETE, LEFTARROW, RIGHTARROW
 from game.controller.icontroller import IController
 from game.model.challenge import Challenge
 from game.model.match import IMatch
@@ -59,6 +59,23 @@ class MatchController(IMatchController):
             self.add_letter(key)
         if ord(key) in [10, 13]:
             self.submit_guess()
+        if key == DELETE:
+            self.match.delete_letter(self.match.cursor)
+            self.presenter.display_buffer(
+                "".join(self.match.input_buffer),
+                self.match.get_n_attempts(),
+                self.match.get_challenges(),
+                self.match.cursor,
+            )
+
+        if ord(key) == 127:
+            self.match.delete_letter(self.match.cursor - 1)
+            self.presenter.display_buffer(
+                "".join(self.match.input_buffer),
+                self.match.get_n_attempts(),
+                self.match.get_challenges(),
+                self.match.cursor,
+            )
         # IGNORE OTHER CASES
 
     def add_letter(self, key: str):
@@ -85,6 +102,12 @@ class MatchController(IMatchController):
             )
             return
 
+        self.presenter.display_buffer(
+            "".join(self.match.input_buffer),
+            self.match.get_n_attempts(),
+            self.match.get_challenges(),
+            self.match.cursor,
+        )
         end_match = self.match.update(guess)
         self.presenter.display_game_screen(
             self.match.get_challenges(), lim_guesses=self.match.lim_guesses

@@ -7,6 +7,7 @@ import termios
 ENTER = 0
 LEFTARROW = "l"
 RIGHTARROW = "r"
+DELETE = "d"
 
 
 class IInputListener(ABC):
@@ -42,9 +43,12 @@ class TerminalInputListener(IInputListener):
                             return RIGHTARROW
                         elif kk == "[D":
                             return LEFTARROW
+                        elif kk == "[3":
+                            return DELETE
                     else:
-                        return k.upper()
-
+                        if k.isalpha():
+                            return k.upper()
+                        return k
         finally:
 
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)

@@ -88,7 +88,7 @@ class Match(IMatch):
         if 0 <= pos <= 4:
             self.input_buffer[pos] = " "
         if pos != self.cursor:
-            self.cursor -= 1
+            self.move_cursor_left()
 
     def move_cursor_left(self) -> None:
         if self.cursor > 0:

@@ -80,6 +80,10 @@ if __name__ == "__main__":
         input_listener = TerminalInputListener()
 
     grid = [(0, 16 * i) for i in range(n_desafios)]
+    if n_desafios > 13:
+        grid = [(0, 16 * i) for i in range(8)] + [
+            (30, 16 * i) for i in range(n_desafios - 8)
+        ]
     presenter = TerminalPresenter(tmanipulator, grid=grid)
 
     screen_manager = ScreenManager()

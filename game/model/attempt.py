@@ -63,3 +63,4 @@ class Attempt(IAttempt):
         for i, letter in enumerate(self.guess):
             feedback = self.feedbacks[i]
             yield letter, feedback, i
+

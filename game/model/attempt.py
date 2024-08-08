@@ -21,7 +21,9 @@ class IAttempt(ABC):
 class Attempt(IAttempt):
     def __init__(self, guess: str, correct_word: str = None) -> None:
         self.guess: str = guess
-        self.feedbacks: list[Hint] = self.apply_feedback(guess, correct_word)
+        self.feedbacks: list[Hint] = [WRONG_LETTER for _ in guess]
+        if correct_word:
+            self.apply_feedback(guess, correct_word)
 
     def get_feedbacks(self) -> list[Hint]:
         return self.feedbacks
@@ -30,20 +32,18 @@ class Attempt(IAttempt):
         return self.guess
 
     def apply_feedback(self, guess: str, correct_word: str) -> list[Hint]:
-        feedbacks = [WRONG_LETTER for _ in guess]
-        feedbacks = self.mark_position_hints(guess, correct_word, feedbacks)
-        feedbacks = self.unmark_excess_wrong_pos(guess, correct_word, feedbacks)
-        return feedbacks
+        self.mark_position_hints(guess, correct_word)
+        self.unmark_excess_wrong_pos(guess, correct_word)
+
 
     def mark_position_hints(
-        self, guess: str, correct_word: str, feedbacks: list[int]
+        self, guess: str, correct_word: str
     ) -> list[Hint]:
         for pos, letter in enumerate(guess):
             if letter == correct_word[pos]:
-                feedbacks[pos] = RIGHT_POS
+                self.feedbacks[pos] = RIGHT_POS
             elif letter in correct_word:
-                feedbacks[pos] = WRONG_POS
-        return feedbacks
+                self.feedbacks[pos] = WRONG_POS
 
     def unmark_excess_wrong_pos(
         self, guess: str, correct_word: str, feedbacks: list[int]
@@ -55,13 +55,12 @@ class Attempt(IAttempt):
             right_pos_hints = sum(feedbacks[i] == RIGHT_POS for i in letter_indexes)
             max_wrong_pos_hints = correct_word.count(letter) - right_pos_hints
 
-            for count, i in enumerate(wrong_pos_indexes):
+            for count, wrong_pos_index in enumerate(wrong_pos_indexes):
                 if count >= max_wrong_pos_hints:
-                    feedbacks[i] = WRONG_LETTER
+                    feedbacks[wrong_pos_index] = WRONG_LETTER # Change from wrong_pos to wrong_letter
         return feedbacks
 
     def __iter__(self) -> Iterator[Tuple[str, str, int]]:
         for i, letter in enumerate(self.guess):
             feedback = self.feedbacks[i]
             yield letter, feedback, i
-

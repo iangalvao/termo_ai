@@ -17,7 +17,7 @@ class IAttempt(ABC):
         pass
 
 
-class Attempt:
+class Attempt(IAttempt):
     def __init__(self, guess: str, correct_word: str = None) -> None:
         self.guess: str = guess
         self.feedbacks: list[Hint] = self.apply_feedback(guess, correct_word)

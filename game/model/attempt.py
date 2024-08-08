@@ -17,6 +17,7 @@ class IAttempt(ABC):
         pass
 
 
+
 class Attempt(IAttempt):
     def __init__(self, guess: str, correct_word: str = None) -> None:
         self.guess: str = guess

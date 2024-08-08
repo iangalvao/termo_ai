@@ -17,15 +17,7 @@ from game.viewer.pygame_presenter import pygame_color_dict
 from game.viewer.terminal_manipulator import color_dict
 
 
-###########################################################################
-###########################################################################
-################                                       ####################
-################                 JOGO                  ####################
-################                                       ####################
-###########################################################################
-###########################################################################
-
-
+# JOGO
 class Game:
     def __init__(
         self, input_listener: IInputListener, screen_manager: IScreenManager
@@ -42,9 +34,7 @@ class Game:
 
 if __name__ == "__main__":
 
-    ###########################################################################
-    ################                ARGS                   ####################
-    ###########################################################################
+    # ARGS
     if len(sys.argv) > 1:
         try:
             n_desafios = int(sys.argv[1])
@@ -59,9 +49,7 @@ if __name__ == "__main__":
         if display_engine == "pygame":
             pygame = True
 
-    ###########################################################################
-    ################                DATA                   ####################
-    ###########################################################################
+    # DATA
     with open("palavras.csv") as csvfile:
         myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
         palavras = next(myreader)
@@ -69,9 +57,7 @@ if __name__ == "__main__":
     for palavra in palavras:
         palavras_unidecode[unidecode(palavra)] = palavra
 
-    ###########################################################################
-    ################              OBJECTS                  ####################
-    ###########################################################################
+    # OBJECTS
     if pygame:
         tmanipulator = PygameCore(pygame_color_dict)
         input_listener = PygameInputListener()
@@ -94,8 +80,6 @@ if __name__ == "__main__":
 
     game = Game(input_listener=input_listener, screen_manager=screen_manager)
 
-    ###########################################################################
-    ################             MAIN LOOP                 ####################
-    ###########################################################################
+    # MAIN LOOP
 
     game.run()

@@ -11,7 +11,7 @@ from game.viewer.terminal_manipulator import (
     COR_ERRADO,
     ColoredString,
 )
-from game.viewer.terminal_presenter import UNDERLINE, Screen, TerminalPresenter
+from game.viewer.game_display import UNDERLINE, Screen, TerminalPresenter
 
 
 @pytest.fixture

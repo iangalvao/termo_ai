@@ -9,8 +9,8 @@ from game.controller.controllercore import DELETE, LEFTARROW, RIGHTARROW
 from game.controller.icontroller import IController
 from game.model.challenge import Challenge
 from game.model.match import IMatch
-from game.iscreen_manager import IScreenManager
-from game.viewer.terminal_presenter import IGameDisplay
+from game.screen.iscreen_manager import IScreenManager
+from game.viewer.game_display import IGameDisplay
 
 
 class IMatchController(IController):

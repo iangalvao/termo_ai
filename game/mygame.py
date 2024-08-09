@@ -8,9 +8,9 @@ from game.controller.pygame_input_listener import PygameInputListener
 from game.controller.match_controller import MatchController
 from game.controller.end_game_controller import EndMatchScreen
 
-from game.screen_manager import IScreenManager, ScreenManager
+from game.screen.screen_manager import IScreenManager, ScreenManager
 
-from game.viewer.terminal_presenter import TerminalPresenter
+from game.viewer.game_display import TerminalPresenter
 from game.viewer.pygame_presenter import PygameCore
 from game.viewer.terminal_manipulator import TerminalCore
 from game.viewer.pygame_presenter import pygame_color_dict
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         tmanipulator = TerminalCore(color_dict)
         input_listener = TerminalInputListener()
 
-    grid = [(0, 16 * i) for i in range(n_desafios)]
+    grid = [(0, 11 * i) for i in range(n_desafios)]
     if n_desafios > 13:
         grid = [(0, 16 * i) for i in range(8)] + [
             (30, 16 * i) for i in range(n_desafios - 8)

@@ -150,6 +150,7 @@ class WordFilter:
 
     def get_hints_from_feedback_list(self, chutes, feedbacks):
         all_hints = HintList()
+        print(chutes, feedbacks)
         for i in range(len(feedbacks)):
             chute = chutes[i]
             fb = feedbacks[i]

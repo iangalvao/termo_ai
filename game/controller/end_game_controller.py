@@ -1,6 +1,6 @@
 from typing import List
 from game.controller.icontroller import IController
-from game.iscreen_manager import IScreenManager
+from game.screen.iscreen_manager import IScreenManager
 
 
 class IEndMatchController(IController):

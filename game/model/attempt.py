@@ -17,7 +17,6 @@ class IAttempt(ABC):
         pass
 
 
-
 class Attempt(IAttempt):
     def __init__(self, guess: str, correct_word: str = None) -> None:
         self.guess: str = guess
@@ -35,30 +34,30 @@ class Attempt(IAttempt):
         self.mark_position_hints(guess, correct_word)
         self.unmark_excess_wrong_pos(guess, correct_word)
 
-
-    def mark_position_hints(
-        self, guess: str, correct_word: str
-    ) -> list[Hint]:
+    def mark_position_hints(self, guess: str, correct_word: str) -> list[Hint]:
         for pos, letter in enumerate(guess):
             if letter == correct_word[pos]:
                 self.feedbacks[pos] = RIGHT_POS
             elif letter in correct_word:
                 self.feedbacks[pos] = WRONG_POS
 
-    def unmark_excess_wrong_pos(
-        self, guess: str, correct_word: str, feedbacks: list[int]
-    ) -> list[Hint]:
+    def unmark_excess_wrong_pos(self, guess: str, correct_word: str) -> list[Hint]:
         for letter in set(guess):
             letter_indexes = [i for i, l in enumerate(guess) if l == letter]
-            wrong_pos_indexes = [i for i in letter_indexes if feedbacks[i] == WRONG_POS]
+            wrong_pos_indexes = [
+                i for i in letter_indexes if self.feedbacks[i] == WRONG_POS
+            ]
 
-            right_pos_hints = sum(feedbacks[i] == RIGHT_POS for i in letter_indexes)
+            right_pos_hints = sum(
+                self.feedbacks[i] == RIGHT_POS for i in letter_indexes
+            )
             max_wrong_pos_hints = correct_word.count(letter) - right_pos_hints
 
             for count, wrong_pos_index in enumerate(wrong_pos_indexes):
                 if count >= max_wrong_pos_hints:
-                    feedbacks[wrong_pos_index] = WRONG_LETTER # Change from wrong_pos to wrong_letter
-        return feedbacks
+                    self.feedbacks[wrong_pos_index] = (
+                        WRONG_LETTER  # Change from wrong_pos to wrong_letter
+                    )
 
     def __iter__(self) -> Iterator[Tuple[str, str, int]]:
         for i, letter in enumerate(self.guess):

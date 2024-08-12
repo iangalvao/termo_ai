@@ -1,8 +1,10 @@
+import random
+import sys
 from typing import TextIO
 from game.solver.word_checker import WordChecker
 from abc import ABC
 from game.model.hint import *
-from game.solver.solver import Solver
+from game.solver.solver3 import Solver
 
 
 class ISolver(ABC):
@@ -177,6 +179,10 @@ class Tree:
         for n in children:
             self.get_nodes_by_level_rec(n, depth + 1, nodes)
 
+    def generate_answer(self, feedbacks):
+        node = self.get_node(feedbacks)
+        return node.word
+
 
 class TreeBuilder:
     def __init__(self, words) -> None:
@@ -189,33 +195,42 @@ class TreeBuilder:
         print("first_guess", first_guess)
         tree = Tree(root_word=first_guess)
         solver.reset()
-
+        tentativas = [0 for i in range(10)]
         for w in self.words:
             # print(w)
             feedbacks = []
             guess = first_guess
+            print("CORRECT WORD:", w)
+            sys.stdout.flush()
+            n = 0
             while w != guess:
                 node = tree.get_node(feedbacks)
                 if node:
                     guess = node.word
-                    print("GUESS:", guess, "FEEDBACKS:", feedbacks)
+                    # print("GUESSES:", solver.chutes, "FEEDBACKS:", feedbacks)
                     print("READY GUESS", guess)
+                    sys.stdout.flush()
                     solver.chutes.append(
                         guess
                     )  # Solver didn't generate response, add it to it's guess list.
                 else:
-                    print("GUESS:", guess, "FEEDBACKS:", feedbacks)
+                    # print("GUESSES:", solver.chutes, "FEEDBACKS:", feedbacks)
                     guess = solver.generate_answer(feedbacks)
                     print("GENERATED GUESS", guess)
+                    sys.stdout.flush()
                 # print(" "+guess)
                 tree.add(feedbacks, guess)
                 fb = wchecker.get_feedback_from_guess(guess, w)
-
                 feedbacks.append(fb)
+                n += 1
                 # print(guess)
                 if guess == w:
-                    # print(f"Ganhou. Palavra: {w} número de tentativas: {n}")
+                    print(f"Ganhou. Palavra: {w} número de tentativas: {n}")
+                    tentativas[n - 1] += 1
+                    print(tentativas)
+                    sys.stdout.flush()
                     break
+
             solver.reset()
         return tree
 
@@ -250,7 +265,7 @@ class TreeBuilder:
         max_depth = 0
         for line in file:
             if line:
-                print(line.strip())
+                # print(line.strip())
                 val = line[:5]
                 if any([l for l in val if l.isalpha()]):
                     depth = int(line[5])
@@ -286,7 +301,8 @@ def init_game():
         lista_unidecode.append(unidecode(palavra))
     lim_chutes = 5 + n_desafios
     palavra_possiveis = list(palavras_unidecode.keys())[9147:]
-    solver = Solver(palavra_possiveis)
+
+    solver = None
 
     return (
         n_desafios,
@@ -308,7 +324,9 @@ if __name__ == "__main__":
 
     # palavras_unidecode = ["arara", "arame", "todos", "virus", "belos"]
     # testes = ["todos", "virus", "belos"]
-    testes = palavras_unidecode
+    random.shuffle(palavras_unidecode)
+    testes = palavras_unidecode  # [0:2000]
+    testes = palavras_possiveis
     treebuilder = TreeBuilder(testes)
     solver = Solver(palavras_unidecode, possible_words=testes)
 

@@ -9,3 +9,4 @@ test*.txt
 test2.txt
 result*.txt
 game/resultados/
+solver*.txt

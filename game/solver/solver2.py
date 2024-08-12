@@ -1,5 +1,7 @@
 import copy
 import csv
+import random
+import sys
 from typing import List
 
 from unidecode import unidecode
@@ -10,26 +12,52 @@ from game.solver.solver_tools import WordFilter
 
 
 class Solver:
-    def __init__(
-        self, possible_guesses: List[str], tests: List[str], word_filter: WordFilter
-    ) -> None:
+    def __init__(self, possible_guesses: List[str], possible_words: List[str]) -> None:
         self.possible_guesses: List[str] = possible_guesses
-        self.tests: List[str] = tests
+        self.tests: List[str] = possible_words.copy()
+        self.original_tests: List[str] = possible_words.copy()
         self.aux_list1 = ["" for _ in range(len(possible_guesses))]
         self.aux_list2 = ["" for _ in range(len(possible_guesses))]
         self.feedbacks = []
-        self.word_filter = word_filter
+        self.word_filter = WordFilter()
+        self.chutes = []
+
+    def reset(self):
+        self.tests = self.original_tests.copy()
+        # print("RESET", self.tests)
+        self.chutes = []
+        self.feedbacks = []
 
     def generate_answer(self, feedbacks: List[Hint]):
         if len(self.tests) == 0:
             raise RuntimeError(
-                "Empty possible test words on Solver. No possible solution can be found."
+                f"Empty possible test words on Solver. No possible solution can be found: {feedbacks}, {self.chutes}."
             )
 
         self.feedbacks = feedbacks
-        # self.tests = self.word_filter.filter_from_feedback_list(
-        #    self.chutes, feedbacks, self.tests
-        # )
+        if len(self.feedbacks) > 0:
+            self.tests = self.word_filter.filter_from_feedback_list(
+                self.chutes, feedbacks, self.tests
+            )
+        if len(self.tests) == 0:
+            raise RuntimeError(
+                f"Empty possible test words on Solver. No possible solution can be found: {feedbacks}, {self.chutes}."
+            )
+
+        if len(self.chutes) == 0:
+            generated_guess = "ptdob"
+            self.chutes.append(generated_guess)
+            return generated_guess
+
+        consonants = "qrtpsdfgjlzxcvbnm"
+        for chute in self.chutes:
+            # print("chute:", chute)
+            for letter in chute:
+                if letter in consonants:
+                    consonants = consonants.replace(letter, "")
+        # print(feedbacks)
+        print("Remaining Words len:", len(self.tests))
+        sys.stdout.flush()
         result = {}
         dict_template = {}
         for i in range(243):
@@ -42,31 +70,106 @@ class Solver:
             key = f0 + f1 + f2 + f3 + f4
             # dict_template[key] = []
             dict_template[key] = 0
+
         i = 0
+        if len(self.tests) < 3:
+            self.chutes.append(self.tests[0])
+            return self.tests[0]
+
         for guess in self.possible_guesses:
-            # word_result = copy.deepcopy(dict_template)
-            word_result = dict_template.copy()
+            # guess_result = copy.deepcopy(dict_template)
+            guess_result = dict_template.copy()
             for word in self.tests:
                 attempt = Attempt(guess, word)
                 key = self.feedback_to_key(attempt.feedbacks)
-                # word_result[key].append(word)
-                word_result[key] += 1
+                #    guess_result[key].append(word)
+                guess_result[key] += 1
 
-            result[guess] = word_result
-            print(guess, i)
             i += 1
             s = 0
             m = 0
             c = 0
-            for value in word_result.values():
+            for value in guess_result.values():
+                # value = len(value)
                 if value > 0:
                     s += value
                     if value > m:
                         m = value
                     c += 1
-            s = s / c
-            print(s, m)
-        return result
+            # result[guess] = guess_result
+
+            # print(guess, i)
+            if c == 0:
+                # print(guess, s, m, i)
+                pass
+            else:
+                s = s / c
+                # print(f"{guess}: max = {m}, mean = {s}")
+                result[guess] = (m, s, c)
+            if m == 1:
+                # print(f"{guess}: max = {m}, mean = {s}")
+                self.chutes.append(guess)
+                return guess
+        # Sorting the dictionary items based on max value first, then mean value
+        sorted_list = sorted(result.items(), key=lambda item: (item[1][0], item[1][1]))
+
+        # Convert the list of tuples with word, max, and mean
+        sorted_tuples = [
+            (word, max_val, mean_val)
+            for word, (max_val, mean_val, count) in sorted_list
+        ]
+        three_consonants_tuples = []
+
+        for word, max_val, mean_val in sorted_tuples:
+            if len([1 for l in set(word) if l in consonants]) >= 3:
+                three_consonants_tuples.append((word, max_val, mean_val))
+
+        # Print the sorted list
+        # print("BEST WORDS")
+        # for word, max_val, mean_val in sorted_tuples[0:100]:
+        #   print(f"{word}: max = {max_val}, mean = {mean_val}")
+
+        # print("THREE CONSONANTS BEST WORDS")
+        # for word, max_val, mean_val in three_consonants_tuples[0:100]:
+        #    print(f"{word}: max = {max_val}, mean = {mean_val}")
+
+        three_regular_consonants_tuples = []
+
+        # print("TWO REGULAR CONSONANTS AND ONE SPECIAL BEST WORDS")
+
+        for word, max_val, mean_val in sorted_tuples:
+            if len([1 for l in set(word) if l in consonants]) >= 3:
+                if len([1 for l in set(word) if l in "qtpdfghjzxcvb"]) >= 2:
+                    three_regular_consonants_tuples.append((word, max_val, mean_val))
+
+        # for word, max_val, mean_val in three_regular_consonants_tuples[0:100]:
+        #   print(f"{word}: max = {max_val}, mean = {mean_val}")
+
+        four_regular_consonants_tuples = []
+
+        # print("TWO REGULAR CONSONANTS AND ONE SPECIAL BEST WORDS")
+
+        for word, max_val, mean_val in sorted_tuples:
+            if len([1 for l in set(word) if l in consonants]) >= 4:
+                four_regular_consonants_tuples.append((word, max_val, mean_val))
+
+        generated_guess = sorted_tuples[0][0]
+
+        if (len(self.chutes) == 1) and (len(four_regular_consonants_tuples) > 0):
+
+            generated_guess = four_regular_consonants_tuples[0][0]
+
+        elif len(self.chutes) <= 3:
+            if len(three_regular_consonants_tuples) > 0:
+
+                generated_guess = three_regular_consonants_tuples[0][0]
+                # print("GENERATED THREE LETTER CONSONANT GUESS:", generated_guess)
+            elif len(three_consonants_tuples) > 0:
+                # print("NO NEW THREE LETTER CONSONANT")
+                generated_guess = three_consonants_tuples[0][0]
+
+        self.chutes.append(generated_guess)
+        return generated_guess
 
     def feedback_to_key(self, fb):
         if len(fb) == 0:
@@ -84,47 +187,49 @@ class Solver:
 
 def init_game():
     # Check if an argument is passed
-    n_desafios = 1
+
     with open("palavras.csv") as csvfile:
         myreader = csv.reader(csvfile, delimiter=" ", quotechar="|")
         palavras_originais = next(myreader)
     palavras_unidecode = {}
-    lista_unidecode = []
     for palavra in palavras_originais:
         palavras_unidecode[unidecode(palavra)] = palavra
-        lista_unidecode.append(unidecode(palavra))
-    lim_chutes = 5 + n_desafios
     palavra_possiveis = list(palavras_unidecode.keys())[9147:]
 
     # lista_unidecode = ["arara", "arame", "morno", "azedo", "amado", "ximbo", "pizza"]
     # palavra_possiveis = ["morno", "azedo", "amado", "ximbo", "pizza"]
-    lista_unidecode = palavra_possiveis
     return (
-        n_desafios,
-        lim_chutes,
-        lista_unidecode,
+        list(palavras_unidecode.keys()),
         palavra_possiveis,
     )
 
 
 if __name__ == "__main__":
-    n_desafios, lim_chutes, palavras_unidecode, palavras_possiveis = init_game()
+    palavras_unidecode, palavras_possiveis = init_game()
     word_filter = WordFilter()
-    solver = Solver(palavras_unidecode, palavras_possiveis, word_filter)
-    for i in range(len(palavras_possiveis)):
-        feedbacks = []
-        palavra = palavras_possiveis[i]
-    results = solver.generate_answer(feedbacks)
-    for key, value in results.items():
-        print(key)
-        s = 0
-        m = 0
-        c = 0
-        for fb, words in value.items():
-            if words > 0:
-                s += words
-                if words > m:
-                    m = words
-                c += 1
-        s = s / c
-        print(s, m)
+    random.shuffle(palavras_unidecode)
+    tests = palavras_unidecode
+    # tests = palavras_possiveis
+    solver = Solver(palavras_unidecode, tests, word_filter)
+    for i in range(243):
+        solver.chutes = ["licor"]
+        f4 = str(i % 3)
+        f3 = str(i % 9 // 3)
+        f2 = str(i % 27 // 9)
+        f1 = str(i % 81 // 27)
+        f0 = str(i // 81)
+
+        feedback = [f0, f1, f2, f3, f4]
+
+        for i, f in enumerate(feedback):
+            if f == "0":
+                feedback[i] = Hint.WRONG_LETTER
+            elif f == "1":
+                feedback[i] = Hint.WRONG_POS
+            elif f == "2":
+                feedback[i] = Hint.RIGHT_POS
+        print(feedback)
+        feedback = [feedback]
+    feedback = []
+    results = solver.generate_answer(feedback)
+    solver.reset()

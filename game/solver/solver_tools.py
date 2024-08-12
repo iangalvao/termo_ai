@@ -78,6 +78,13 @@ class WordFilter:
 
         return self.filter_from_hint_list(hint_list, possible_words)
 
+    def filter_from_feedback_list(
+        self, chutes: list[str], feedbacks: list[int], possible_words: list[str]
+    ):
+        hint_list = self.get_hints_from_feedback_list(chutes, feedbacks)
+
+        return self.filter_from_hint_list(hint_list, possible_words)
+
     # no feedbacks. thats from other part of the system
     def filter_from_feedback(
         self, chute: str, feedback: list[int], possible_words: list[str]
@@ -193,7 +200,6 @@ class WordFilter:
 
     def get_hints_from_feedback_list(self, chutes, feedbacks):
         all_hints = HintList()
-        print(chutes, feedbacks)
         for i in range(len(feedbacks)):
             chute = chutes[i]
             fb = feedbacks[i]

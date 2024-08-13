@@ -25,7 +25,7 @@ class IMatchController(IController):
 class MatchController(IMatchController):
     def __init__(
         self,
-        accepted_words: Dict[str, str],
+        accepted_words: Dict[str, str],  # [language, list_of_words]
         presenter: IGameDisplay,
         screen_manager: IScreenManager,
     ) -> None:
@@ -102,6 +102,7 @@ class MatchController(IMatchController):
             )
             return
 
+        self.presenter.pull(guess)
         self.presenter.display_buffer(
             "".join(self.match.input_buffer),
             self.match.get_n_attempts(),

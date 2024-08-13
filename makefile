@@ -7,6 +7,7 @@ PIP := $(VENV_NAME)/bin/pip
 ACTIVATE := . $(VENV_NAME)/bin/activate
 REQUIREMENTS := requirements.txt
 FREEZE_FILE := requirements_freeze.txt
+
 # Variável para o número de jogos
 ngames := 1
 # Alvo padrão
@@ -24,6 +25,7 @@ setup-venv: $(REQUIREMENTS)
 check-deps: setup-venv
 	@echo "Verificando dependências..."
 	@$(ACTIVATE) && $(PIP) freeze | grep -F -f $(REQUIREMENTS) > $(FREEZE_FILE)
+
 	@if [ -s $(FREEZE_FILE) ]; then \
 		if ! cmp -s $(REQUIREMENTS) $(FREEZE_FILE); then \
 			echo "Dependências não estão atualizadas, instalando..."; \
@@ -37,13 +39,16 @@ check-deps: setup-venv
 	fi
 	@rm -f $(FREEZE_FILE)
 
+
 # Instala as dependências (só chamado por `check-deps`)
 install: check-deps
 
 # Executa o código Python
 termo: install
 	@echo "Executando o código..."
+
 	@$(ACTIVATE) && $(PYTHON) -m game.mygame ${ngames} && deactivate
+
 
 # Remove o ambiente virtual e arquivos temporários
 clean:

@@ -6,7 +6,8 @@ PYTHON := python3
 PIP := $(VENV_NAME)/bin/pip
 ACTIVATE := . $(VENV_NAME)/bin/activate
 REQUIREMENTS := requirements.txt
-FREEZE_FILE := requirements-freeze.txt
+FREEZE_FILE := requirements_freeze.txt
+
 # Variável para o número de jogos
 ngames := 1
 # Alvo padrão
@@ -24,15 +25,20 @@ setup-venv: $(REQUIREMENTS)
 check-deps: setup-venv
 	@echo "Verificando dependências..."
 	@$(ACTIVATE) && $(PIP) freeze | grep -F -f $(REQUIREMENTS) > $(FREEZE_FILE)
-	@if ! cmp -s $(REQUIREMENTS) $(FREEZE_FILE); then \
-		echo "Dependências não estão atualizadas, instalando..."; \
-		$(ACTIVATE) && $(PIP) install -r $(REQUIREMENTS) > /dev/null 2>&1; \
+
+	@if [ -s $(FREEZE_FILE) ]; then \
+		if ! cmp -s $(REQUIREMENTS) $(FREEZE_FILE); then \
+			echo "Dependências não estão atualizadas, instalando..."; \
+			$(ACTIVATE) && $(PIP) install -r $(REQUIREMENTS) > /dev/null 2>&1; \
+		else \
+			echo "Todas as dependências estão instaladas."; \
+		fi \
 	else \
-		echo "Todas as dependências estão instaladas."; \
+		echo "Nenhuma dependência instalada, instalando..."; \
+		$(ACTIVATE) && $(PIP) install -r $(REQUIREMENTS) > /dev/null 2>&1; \
 	fi
 	@rm -f $(FREEZE_FILE)
 
-# Instala as dependên
 
 # Instala as dependências (só chamado por `check-deps`)
 install: check-deps
@@ -40,7 +46,9 @@ install: check-deps
 # Executa o código Python
 termo: install
 	@echo "Executando o código..."
-	@$(ACTIVATE) && $(PYTHON) -m game.mygame ${ngames}
+
+	@$(ACTIVATE) && $(PYTHON) -m game.mygame ${ngames} && deactivate
+
 
 # Remove o ambiente virtual e arquivos temporários
 clean:

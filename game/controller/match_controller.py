@@ -9,8 +9,8 @@ from game.controller.controllercore import DELETE, LEFTARROW, RIGHTARROW
 from game.controller.icontroller import IController
 from game.model.challenge import Challenge
 from game.model.match import IMatch
-from game.iscreen_manager import IScreenManager
-from game.viewer.terminal_presenter import IGameDisplay
+from game.screen.iscreen_manager import IScreenManager
+from game.viewer.game_display import IGameDisplay
 
 
 class IMatchController(IController):
@@ -25,7 +25,7 @@ class IMatchController(IController):
 class MatchController(IMatchController):
     def __init__(
         self,
-        accepted_words: Dict[str, str],
+        accepted_words: Dict[str, str],  # [language, list_of_words]
         presenter: IGameDisplay,
         screen_manager: IScreenManager,
     ) -> None:

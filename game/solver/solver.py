@@ -7,15 +7,19 @@ from game.solver.word_checker import WordChecker
 
 
 class Solver:
-    def __init__(self, word_list) -> None:
+    def __init__(self, word_list, possible_words=None) -> None:
         self.word_list = word_list
-        self.possible_words = word_list.copy()
+        if possible_words:
+            self.original_possible_words = possible_words
+        else:
+            self.original_possible_words = word_list.copy()
+        self.possible_words = self.original_possible_words
         self.word_filter = WordFilter()
         self.chutes = []
         self.feedbacks = []
 
     def reset(self):
-        self.possible_words = self.word_list.copy()
+        self.possible_words = self.original_possible_words.copy()
         self.chutes = []
         self.feedbacks = []
 
@@ -28,11 +32,19 @@ class Solver:
             self.chutes, feedbacks, self.possible_words
         )
         if len(self.chutes) == 0:
-            res = "ricas"
+            res = "pcdob"
         elif len(self.chutes) == 1:
-            res = "nuvem"
+            # palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
+            # res = palavra
+            res = "flush"
+
         elif len(self.chutes) == 2:
-            res = "ptdob"
+            # palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
+            # res = palavra
+            res = "mixto"
+        # elif len(self.chutes) == 3:
+        #   res = "jazer"
+
         else:
             palavra, media = self.select_word_from_mean_filter_size(self.possible_words)
             res = palavra
@@ -44,9 +56,38 @@ class Solver:
     # return the distribution of remaining lenght of possible words after the filter.
     def filter_size_distribution(self, word, possible_words, word_checker: WordChecker):
         results = []
+        if len(possible_words) > 200:
+            for i in range(243):
+                f4 = i % 3
+                f3 = i % 9 // 3
+                f2 = i % 27 // 9
+                f1 = i % 81 // 27
+                f0 = i // 81
+
+                feedback = [f0, f1, f2, f3, f4]
+                # print(feedback)
+                for i, f in enumerate(feedback):
+                    if f == 0:
+                        feedback[i] = Hint.WRONG_LETTER
+                    elif f == 1:
+                        feedback[i] = Hint.WRONG_POS
+                    elif f == 2:
+                        feedback[i] = Hint.RIGHT_POS
+
+                filter = self.word_filter.filter_from_feedback(
+                    word,
+                    feedback,
+                    possible_words,
+                )
+                # print(word, feedback, filter)
+                remaining_words_size = len(filter)
+                if remaining_words_size > 0:
+                    #                    print(remaining_words_size)
+                    results.append(remaining_words_size)
+            return results
+
         for pw in possible_words:
             feedback = word_checker.get_feedback_from_guess(word, pw)
-
             remaining_words_size = len(
                 self.word_filter.filter_from_feedback(
                     word,
@@ -73,6 +114,7 @@ class Solver:
         return max_size
 
     def select_word_from_mean_filter_size(self, possible_words):
+        print("LEN POSSIBLE WORDS:", len(possible_words))
         best_max_value = len(possible_words) + 1
         best_mean = best_max_value
         best_word = self.word_list[0]
@@ -101,6 +143,7 @@ class Solver:
 
         #  try to find the guess, among all valid guesses, that minimizes the size of the remaining
         # words. i.e that does the best filtering considering the remaining words.
+
         for guess in self.word_list:
             filter_sizes = self.filter_size_distribution(
                 guess, possible_words, word_checker
@@ -111,14 +154,14 @@ class Solver:
             mean = sum(filter_sizes) / len(filter_sizes)
             max_value = max(filter_sizes)
             if max_value == 1:
-                return guess, mean
+                return guess, max_value
             if max_value <= best_max_value:
                 if mean < best_mean or max_value < best_max_value:
                     best_max_value = max_value
                     best_mean = mean
                     best_word = guess
-
-        return best_word, best_mean
+            # print(guess, max_value, mean)
+        return best_word, best_max_value
 
 
 from unidecode import unidecode  #

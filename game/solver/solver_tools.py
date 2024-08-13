@@ -78,6 +78,13 @@ class WordFilter:
 
         return self.filter_from_hint_list(hint_list, possible_words)
 
+    def filter_from_feedback_list(
+        self, chutes: list[str], feedbacks: list[int], possible_words: list[str]
+    ):
+        hint_list = self.get_hints_from_feedback_list(chutes, feedbacks)
+
+        return self.filter_from_hint_list(hint_list, possible_words)
+
     # no feedbacks. thats from other part of the system
     def filter_from_feedback(
         self, chute: str, feedback: list[int], possible_words: list[str]
@@ -108,6 +115,49 @@ class WordFilter:
                     w
                     for w in original_words
                     if len([l for l in w if l == letter]) == val
+                ]
+
+        return filtered_words
+
+    def negative_filter_from_feedback(
+        self, chute: str, feedback: list[int], possible_words: list[str]
+    ):
+        hint_list = self.get_hints_from_feedback(chute, feedback)
+        return self.negative_filter_from_hint_list(hint_list, possible_words)
+
+    def negative_filter_from_hint_list(
+        self, hint_list: IHintList, possible_words: list[str]
+    ):
+        filtered_words = possible_words
+        for letter, hint, val in hint_list:
+            filtered_words = self.filter_from_hint(hint, letter, val, filtered_words)
+        return filtered_words
+
+    def negative_filter_from_hint(
+        self, hint: int, letter: str, val: int, original_words: list[str]
+    ):
+        match hint:
+            case Hint.RIGHT_POS:
+                filtered_words = [w for w in original_words if not (w[val] == letter)]
+            case Hint.WRONG_POS:
+                filtered_words = [
+                    w
+                    for w in original_words
+                    if not ((letter in w and w[val] != letter))
+                ]
+            case Hint.WRONG_LETTER:
+                filtered_words = [w for w in original_words if letter in w]
+            case Hint.NUMBER_OF_LETTERS:
+                filtered_words = [
+                    w
+                    for w in original_words
+                    if len([l for l in w if l == letter]) < val
+                ]
+            case Hint.MAX_LETTERS:
+                filtered_words = [
+                    w
+                    for w in original_words
+                    if len([l for l in w if l == letter]) != val
                 ]
 
         return filtered_words

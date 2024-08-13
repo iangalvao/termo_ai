@@ -1,8 +1,10 @@
+import random
+import sys
 from typing import TextIO
 from game.solver.word_checker import WordChecker
 from abc import ABC
 from game.model.hint import *
-from game.solver.solver import Solver
+from game.solver.solver3 import Solver
 
 
 class ISolver(ABC):
@@ -32,31 +34,50 @@ class Node:
 class Tree:
     def __init__(self, root_word=None) -> None:
         self.root: Node = Node(root_word)
+        if root_word:
+            self.depth = 0
+        else:
+            self.depth = 1
 
     def add(self, feedbacks, guess):
         node = self.root
+
+        depth = 1
         for fb in feedbacks:
             k = self.feedback_to_key(fb)
+            if not k:
+                return  # This should be a error
             if node.children(k):
                 node = node.children(k)
+                depth += 1
             else:
                 node = self.add_children(node, k, guess)
+        if depth > self.depth:
+            self.depth = depth
 
     def get_node(self, feedbacks):
         node = self.root
         for fb in feedbacks:
             k = self.feedback_to_key(fb)
+            if not k:
+                return None
             if node.children(k):
+
                 node = node.children(k)
             else:
                 return None
         return node
 
     def add_children(self, node, k, guess):
-        new_node = Node(guess)
-        node._children[k] = new_node
+        if node:
+            new_node = Node(guess)
+            node._children[k] = new_node
+        else:
+            self.root = Node(guess)
 
     def feedback_to_key(self, fb):
+        if len(fb) == 0:
+            return None
         s = ""
         for i in fb:
             if i == RIGHT_POS:
@@ -141,6 +162,27 @@ class Tree:
                 print(padding + k + str(depth))
             self.print_node_and_keys_rec(n, depth + 1, padding_arg)
 
+    def get_nodes_by_level(self):
+        nodes = [[] for i in range(self.depth)]
+        self.get_nodes_by_level_rec(self.root, 0, nodes)
+        return nodes
+
+    def get_nodes_by_level_rec(self, node, depth, nodes):
+        if not node:
+            return
+        print(node.word, depth)
+        nodes[depth].append(node)
+        children = set()
+        for n in node._children.values():
+            children.add(n)
+
+        for n in children:
+            self.get_nodes_by_level_rec(n, depth + 1, nodes)
+
+    def generate_answer(self, feedbacks):
+        node = self.get_node(feedbacks)
+        return node.word
+
 
 class TreeBuilder:
     def __init__(self, words) -> None:
@@ -150,27 +192,45 @@ class TreeBuilder:
     def make_tree(self, solver: ISolver):
 
         first_guess = solver.generate_answer([])
+        print("first_guess", first_guess)
         tree = Tree(root_word=first_guess)
         solver.reset()
-
+        tentativas = [0 for i in range(10)]
         for w in self.words:
             # print(w)
             feedbacks = []
             guess = first_guess
+            print("CORRECT WORD:", w)
+            sys.stdout.flush()
+            n = 0
             while w != guess:
                 node = tree.get_node(feedbacks)
                 if node:
                     guess = node.word
+                    # print("GUESSES:", solver.chutes, "FEEDBACKS:", feedbacks)
+                    print("READY GUESS", guess)
+                    sys.stdout.flush()
+                    solver.chutes.append(
+                        guess
+                    )  # Solver didn't generate response, add it to it's guess list.
                 else:
+                    # print("GUESSES:", solver.chutes, "FEEDBACKS:", feedbacks)
                     guess = solver.generate_answer(feedbacks)
+                    print("GENERATED GUESS", guess)
+                    sys.stdout.flush()
                 # print(" "+guess)
                 tree.add(feedbacks, guess)
                 fb = wchecker.get_feedback_from_guess(guess, w)
                 feedbacks.append(fb)
+                n += 1
                 # print(guess)
                 if guess == w:
-                    # print(f"Ganhou. Palavra: {w} número de tentativas: {n}")
+                    print(f"Ganhou. Palavra: {w} número de tentativas: {n}")
+                    tentativas[n - 1] += 1
+                    print(tentativas)
+                    sys.stdout.flush()
                     break
+
             solver.reset()
         return tree
 
@@ -202,12 +262,15 @@ class TreeBuilder:
     def read_from_string(self, file: TextIO, d: int):
         tree = Tree()
         last_nodes: list[Node] = [None for i in range(50)]
+        max_depth = 0
         for line in file:
             if line:
-                print(line.strip())
+                # print(line.strip())
                 val = line[:5]
                 if any([l for l in val if l.isalpha()]):
                     depth = int(line[5])
+                    if depth > max_depth:
+                        max_depth = depth
                     if depth == 0:
                         node = tree.root
                         node.set_word(val)
@@ -217,7 +280,7 @@ class TreeBuilder:
                     last_nodes[depth] = node
                 else:
                     key = val
-
+        tree.depth = max_depth + 1
         return tree
 
 
@@ -238,7 +301,8 @@ def init_game():
         lista_unidecode.append(unidecode(palavra))
     lim_chutes = 5 + n_desafios
     palavra_possiveis = list(palavras_unidecode.keys())[9147:]
-    solver = Solver(lista_unidecode)
+
+    solver = None
 
     return (
         n_desafios,
@@ -256,9 +320,16 @@ if __name__ == "__main__":
     )
     palavra = "termo"
     wchecker = WordChecker()
-    testes = palavras_unidecode
+    testes = palavras_possiveis
+
+    # palavras_unidecode = ["arara", "arame", "todos", "virus", "belos"]
+    # testes = ["todos", "virus", "belos"]
+    random.shuffle(palavras_unidecode)
+    testes = palavras_unidecode  # [0:2000]
+    testes = palavras_possiveis
     treebuilder = TreeBuilder(testes)
-    solver = Solver(palavras_unidecode)
+    solver = Solver(palavras_unidecode, possible_words=testes)
+
     tree = treebuilder.make_tree(solver)
     tree.print_nodes_and_keys_padding("")
 

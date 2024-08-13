@@ -102,7 +102,6 @@ class MatchController(IMatchController):
             )
             return
 
-        self.presenter.pull(guess)
         self.presenter.display_buffer(
             "".join(self.match.input_buffer),
             self.match.get_n_attempts(),

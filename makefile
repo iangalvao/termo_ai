@@ -7,7 +7,8 @@ PIP := $(VENV_NAME)/bin/pip
 ACTIVATE := . $(VENV_NAME)/bin/activate
 REQUIREMENTS := requirements.txt
 FREEZE_FILE := requirements-freeze.txt
-
+# Variável para o número de jogos
+ngames := 1
 # Alvo padrão
 all: install
 
@@ -39,7 +40,7 @@ install: check-deps
 # Executa o código Python
 termo: install
 	@echo "Executando o código..."
-	@$(ACTIVATE) && $(PYTHON) -m game.mygame
+	@$(ACTIVATE) && $(PYTHON) -m game.mygame ${ngames}
 
 # Remove o ambiente virtual e arquivos temporários
 clean:

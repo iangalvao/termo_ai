@@ -7,6 +7,11 @@ import random
 from game.solver.word_checker import WordChecker
 
 
+class Dummy:
+    def __init__(self) -> None:
+        pass
+
+
 class Solver:
     def __init__(self, word_list, possible_words=None) -> None:
         self.word_list = word_list

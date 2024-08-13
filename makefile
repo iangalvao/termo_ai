@@ -22,7 +22,7 @@ setup-venv: $(REQUIREMENTS)
 # Verifica e instala as dependências se necessário
 check-deps: setup-venv
 	@echo "Verificando dependências..."
-	@$(ACTIVATE) && $(PIP) freeze > $(FREEZE_FILE)
+	@$(ACTIVATE) && $(PIP) freeze | grep -F -f $(REQUIREMENTS) > $(FREEZE_FILE)
 	@if ! cmp -s $(REQUIREMENTS) $(FREEZE_FILE); then \
 		echo "Dependências não estão atualizadas, instalando..."; \
 		$(ACTIVATE) && $(PIP) install -r $(REQUIREMENTS) > /dev/null 2>&1; \
@@ -30,6 +30,8 @@ check-deps: setup-venv
 		echo "Todas as dependências estão instaladas."; \
 	fi
 	@rm -f $(FREEZE_FILE)
+
+# Instala as dependên
 
 # Instala as dependências (só chamado por `check-deps`)
 install: check-deps

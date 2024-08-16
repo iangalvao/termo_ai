@@ -100,12 +100,12 @@ class BaseMenu(IMenu):
         self.focus: int = 0
 
     def set_action(self, action: Callable[[], None], action_id: int):
-        if action_id in self.actions.keys():
-            # OVERRIDE
-            self.actions = action
-        else:
+        if not action_id or not isinstance(action_id, str):
+            raise ValueError("Action ID must be a non-empty string.")
+
+        if action_id not in self.actions.keys():
             self.actions_ids.append(action_id)
-            self.actions[action_id] = action
+        self.actions[action_id] = action
 
     def remove_action_hook(self, action_id: str) -> None:
         self.actions.pop(action_id)
@@ -125,7 +125,7 @@ class BaseMenu(IMenu):
         s = ""
         s += "Actions dict:\n"
         for k, v in self.actions.items():
-            s += k + ": " + str(v) + "; "
+            s += k + ": " + str(v) + ";\n "
         s += "Actions_ids:\n"
         for action_id in self.actions_ids:
             s += action_id + ";"
@@ -223,7 +223,7 @@ class EndMatchMenu(BaseMenu):
         return False
 
     def __str__(self) -> str:
-        return super().__str__() + f" Results:{self.results}"
+        return super().__str__() + f" Results:\n{self.results}"
 
     def __repr__(self) -> str:
         return str(self)

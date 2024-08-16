@@ -6,6 +6,8 @@ import termios
 
 ENTER = 0
 LEFTARROW = "l"
+DOWNARROW = "2"
+UPARROW = "8"
 RIGHTARROW = "r"
 DELETE = "d"
 

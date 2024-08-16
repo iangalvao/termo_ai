@@ -83,7 +83,7 @@ def expected_screen_half(words, colors):
     for n, (word, color) in enumerate(zip(words[:3], colors[:3])):
         s.add(ColoredString(word, color), (n + 1, 6))
     for i in range(3, 6):
-        s.add(ColoredString("_____", [ENDC for i in range(6)]), (i + 1, 6))
+        s.add(ColoredString("     ", [UNDERLINE for i in range(6)]), (i + 1, 6))
     return s
 
 
@@ -91,7 +91,7 @@ def expected_screen_half(words, colors):
 def expected_screen_empty(words, colors):
     s = Screen()
     for i in range(6):
-        s.add(ColoredString("_____", [ENDC for i in range(6)]), (i + 1, 6))
+        s.add(ColoredString("     ", [UNDERLINE for i in range(6)]), (i + 1, 6))
     return s
 
 

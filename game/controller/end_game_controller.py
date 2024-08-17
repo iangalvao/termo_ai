@@ -25,7 +25,7 @@ class IMenu(ABC):
         pass
 
     @abstractmethod
-    def remove_action_hook(self, action_id: str) -> None:
+    def unregister_action(self, action_id: str) -> None:
         pass
 
     @abstractmethod
@@ -68,6 +68,27 @@ class IGameState(ABC):
         pass
 
 
+class Action:
+    def __init__(self, f: Callable[[], None], **kwargs) -> None:
+        self.func = f
+        self.fixed_args = kwargs
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        combined_args = {**self.fixed_args, **kwds}
+        return self.func(*args, **combined_args)
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Action):
+            return self.func == other.func and self.fixed_args == other.fixed_args
+        return False
+
+    def __str__(self) -> str:
+        return f"Action(func={self.func.__name__}, fixed_args={self.fixed_args})"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
 # This class does not implement on_enter abstract method. Thus, is a incomplete implementation,
 # intended to be used only as a base for other menu states
 class MenuState(IGameState):
@@ -99,7 +120,7 @@ class BaseMenu(IMenu):
         self.actions: Dict[str, Action] = {}
         self.focus: int = 0
 
-    def set_action(self, action: Callable[[], None], action_id: int):
+    def set_action(self, action: Action, action_id: int):
         if not action_id or not isinstance(action_id, str):
             raise ValueError("Action ID must be a non-empty string.")
 
@@ -107,7 +128,9 @@ class BaseMenu(IMenu):
             self.actions_ids.append(action_id)
         self.actions[action_id] = action
 
-    def remove_action_hook(self, action_id: str) -> None:
+    def unregister_action(self, action_id: str) -> None:
+        if action_id not in self.actions:
+            raise KeyError(f"Action ID '{action_id}' not found.")
         self.actions.pop(action_id)
         self.actions_ids.remove(action_id)
 
@@ -128,7 +151,7 @@ class BaseMenu(IMenu):
             s += k + ": " + str(v) + ";\n "
         s += "Actions_ids:\n"
         for action_id in self.actions_ids:
-            s += action_id + ";"
+            s += action_id + "; "
         return s
 
     def __repr__(self):
@@ -158,27 +181,6 @@ class MatchResult:
     won: bool
     n_attempts: int
     correct_words: List[str]
-
-
-class Action:
-    def __init__(self, f: Callable[[], None], **kwargs) -> None:
-        self.func = f
-        self.fixed_args = kwargs
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        combined_args = {**self.fixed_args, **kwds}
-        return self.func(*args, **combined_args)
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Action):
-            return self.func == other.func and self.fixed_args == other.fixed_args
-        return False
-
-    def __str__(self) -> str:
-        return f"Action(func={self.func.__name__}, fixed_args={self.fixed_args})"
-
-    def __repr__(self) -> str:
-        return str(self)
 
 
 # This completes the implementation of menustate, by implementing the method on enter.
@@ -219,7 +221,7 @@ class EndMatchMenu(BaseMenu):
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, EndMatchMenu):
-            return super().__eq__(self, other) and self.results == other.results
+            return super().__eq__(other) and self.results == other.results
         return False
 
     def __str__(self) -> str:
@@ -236,23 +238,24 @@ class EndMatchState(MenuState):
         super().__init__(presenter=presenter)
 
     def on_enter(self, context: IGameContext, match) -> None:
-        self.menu = EndMatchMenu(match.won, match.n_attempts, match.words)
+        results = match.get_results()
+        self.menu = EndMatchMenu(results)
 
         self.menu.set_action(
             Action(
                 context.change_state,
-                {"state_id": "play_state", "n_challenges": match.n_challenges},
+                **{"state_id": "play_state", "n_challenges": match.n_challenges},
             ),
             "retry",
         )
         self.menu.set_action(
-            Action(context.change_state, {"state_id": "main_menu_state"}), "main menu"
+            Action(context.change_state, **{"state_id": "main_menu_state"}), "main menu"
         )
         self.menu.set_action(
-            Action(context.change_state, {"state_id": "quit_state"}), "quit"
+            Action(context.change_state, **{"state_id": "quit_state"}), "quit"
         )
         self.menu.set_action(
-            Action(context.change_state, {"state_id": "play_state"}), "back"
+            Action(context.change_state, **{"state_id": "play_state"}), "back"
         )
         self.presenter.display_menu(self.menu)
 

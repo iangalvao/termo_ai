@@ -2,13 +2,10 @@ import pytest
 import unittest
 from unittest.mock import Mock
 
-from game.controller.end_game_controller import (
-    Action,
-    IGameContext,
-    MainMenu,
-    MainMenuState,
-    IMenuPresenter,
-)
+from game.game_states.action import Action
+from game.game_states.igame_context import IGameContext
+from game.game_states.main_menu import MainMenu, MainMenuState
+from game.viewer.imenu_presenter import IMenuPresenter
 
 
 @pytest.fixture

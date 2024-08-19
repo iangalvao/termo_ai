@@ -3,18 +3,12 @@ import pytest
 import unittest
 from unittest.mock import Mock
 
-from game.controller.end_game_controller import (
-    Action,
-    EndMatchMenu,
-    EndMatchState,
-    IGameContext,
-    MainMenu,
-    MainMenuState,
-    IMenuPresenter,
-    MatchResult,
-)
+from game.game_states.action import Action
+from game.game_states.end_match_menu import EndMatchMenu, EndMatchState, MatchResult
+from game.game_states.igame_context import IGameContext
 from game.model.challenge import IChallenge
 from game.model.match import IMatch
+from game.viewer.imenu_presenter import IMenuPresenter
 
 
 @pytest.fixture

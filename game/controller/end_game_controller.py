@@ -1,263 +1,25 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List
-from game.controller.controllercore import DOWNARROW, UPARROW
+from argparse import Action
+from typing import Any, Callable, Dict, List, Tuple
+from game.controller.controllercore import (
+    DELETE,
+    DOWNARROW,
+    LEFTARROW,
+    RIGHTARROW,
+    UPARROW,
+)
 from dataclasses import dataclass
 
-
-class IGameContext(ABC):
-    @abstractmethod
-    def change_state(self, state_id: str, **kwargs) -> None:
-        pass
-
-    @abstractmethod
-    def handle_input(self, input) -> None:
-        pass
-
-
-class IMenu(ABC):
-    def __init__(self) -> None:
-        super().__init__()
-
-    @abstractmethod
-    def set_action(
-        self, action: Callable[[], None], button_id: str, action_id: str
-    ) -> None:
-        pass
-
-    @abstractmethod
-    def unregister_action(self, action_id: str) -> None:
-        pass
-
-    @abstractmethod
-    def move_focus(self, direction: int) -> None:
-        pass
-
-    @abstractmethod
-    def call_action_on_focus(self) -> None:
-        pass
-
-    @abstractmethod
-    def end_menu(self) -> None:
-        pass
-
-
-class IMenuPresenter(ABC):
-    def __init__(self) -> None:
-        super().__init__()
-
-    @abstractmethod
-    def display_menu(self, menu: IMenu) -> None:
-        pass
-
-    @abstractmethod
-    def clear_menu(self) -> None:
-        pass
-
-
-class IGameState(ABC):
-    @abstractmethod
-    def handle_input(self, context: IGameContext, input: str) -> None:
-        pass
-
-    @abstractmethod
-    def on_enter(self, context) -> None:
-        pass
-
-    @abstractmethod
-    def on_exit(self, context) -> None:
-        pass
-
-
-class Action:
-    def __init__(self, f: Callable[[], None], **kwargs) -> None:
-        self.func = f
-        self.fixed_args = kwargs
-
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        combined_args = {**self.fixed_args, **kwds}
-        return self.func(*args, **combined_args)
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Action):
-            return self.func == other.func and self.fixed_args == other.fixed_args
-        return False
-
-    def __str__(self) -> str:
-        return f"Action(func={self.func.__name__}, fixed_args={self.fixed_args})"
-
-    def __repr__(self) -> str:
-        return str(self)
-
-
-# This class does not implement on_enter abstract method. Thus, is a incomplete implementation,
-# intended to be used only as a base for other menu states
-class MenuState(IGameState):
-    def __init__(self, presenter: IMenuPresenter) -> None:
-        super().__init__()
-        self.menu: IMenu = None
-        self.presenter: IMenuPresenter = presenter
-
-    def handle_input(self, context: IGameContext, key: str) -> None:
-        if ord(key) == 10:
-            self.menu.call_action_on_focus()
-        elif key == DOWNARROW:
-            self.menu.move_focus(1)
-        elif key == UPARROW:
-            self.menu.move_focus(-1)
-        elif ord(key) == 27:
-            self.menu.end_menu()
-
-        self.presenter.display_menu(self.menu)
-
-    def on_exit(self, context: IGameContext) -> None:
-        self.presenter.clear_menu()
-
-
-class BaseMenu(IMenu):
-    def __init__(self) -> None:
-        super().__init__()
-        self.actions_ids: List[str] = []
-        self.actions: Dict[str, Action] = {}
-        self.focus: int = 0
-
-    def set_action(self, action: Action, action_id: int):
-        if not action_id or not isinstance(action_id, str):
-            raise ValueError("Action ID must be a non-empty string.")
-
-        if action_id not in self.actions.keys():
-            self.actions_ids.append(action_id)
-        self.actions[action_id] = action
-
-    def unregister_action(self, action_id: str) -> None:
-        if action_id not in self.actions:
-            raise KeyError(f"Action ID '{action_id}' not found.")
-        self.actions.pop(action_id)
-        self.actions_ids.remove(action_id)
-
-    def move_focus(self, direction: int) -> None:
-        if 0 <= self.focus + direction < len(self.actions_ids):
-            self.focus += direction
-
-    def call_action_on_focus(self) -> None:
-        self.actions[self.actions_ids[self.focus]]()
-
-    def end_menu(self) -> None:
-        self.actions["back"]()
-
-    def __str__(self):
-        s = ""
-        s += "Actions dict:\n"
-        for k, v in self.actions.items():
-            s += k + ": " + str(v) + ";\n "
-        s += "Actions_ids:\n"
-        for action_id in self.actions_ids:
-            s += action_id + "; "
-        return s
-
-    def __repr__(self):
-        return str(self)
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, BaseMenu):
-            return (
-                self.actions_ids == other.actions_ids
-                and self.actions == other.actions
-                and self.focus == other.focus
-            )
-        return False
-
-
-class MainMenu(BaseMenu):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def end_menu(self) -> None:
-        # No return function on main menu. Override to quit instead.
-        self.actions["quit"]()
-
-
-@dataclass
-class MatchResult:
-    won: bool
-    n_attempts: int
-    correct_words: List[str]
-
-
-# This completes the implementation of menustate, by implementing the method on enter.
-# This is the point where the menu is in fact created, and should be implemented on
-# every menu state.
-class MainMenuState(MenuState):
-
-    def __init__(self, presenter: IMenuPresenter) -> None:
-        super().__init__(presenter)
-
-    def on_enter(self, context: IGameContext) -> None:
-        self.menu = MainMenu()
-
-        self.menu.set_action(
-            Action(
-                context.change_state,
-                **{"state_id": "play_state", "n_challenges": 1},
-            ),
-            "quick match",
-        )
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "match_config"}), "new match"
-        )
-
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "quit_state"}), "quit"
-        )
-        self.presenter.display_menu(self.menu)
-
-
-class EndMatchMenu(BaseMenu):
-    def __init__(self, result: MatchResult) -> None:
-        super().__init__()
-        self.results = result
-
-    def get_results(self):
-        return self.results
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, EndMatchMenu):
-            return super().__eq__(other) and self.results == other.results
-        return False
-
-    def __str__(self) -> str:
-        return super().__str__() + f" Results:\n{self.results}"
-
-    def __repr__(self) -> str:
-        return str(self)
-
-
-# Other implementation of menu state. This one receives a extra argument to create the menu,
-# that is the results being displayed.
-class EndMatchState(MenuState):
-    def __init__(self, presenter: IMenuPresenter) -> None:
-        super().__init__(presenter=presenter)
-
-    def on_enter(self, context: IGameContext, match) -> None:
-        results = match.get_results()
-        self.menu = EndMatchMenu(results)
-
-        self.menu.set_action(
-            Action(
-                context.change_state,
-                **{"state_id": "play_state", "n_challenges": match.n_challenges},
-            ),
-            "retry",
-        )
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "main_menu_state"}), "main menu"
-        )
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "quit_state"}), "quit"
-        )
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "play_state"}), "back"
-        )
-        self.presenter.display_menu(self.menu)
+from game.game_states.base_menu import BaseMenu
+from game.game_states.end_match_menu import EndMatchMenu, MatchResult
+from game.game_states.igame_context import IGameContext
+from game.game_states.igame_state import IGameState
+from game.game_states.menu import IMenu
+from game.game_states.menustate import MenuState
+from game.model.challenge import IChallenge
+from game.viewer.game_display import IGameDisplay
+from game.viewer.imenu_presenter import IMenuPresenter
+from game.viewer.terminal_manipulator import IDisplayCore
 
 
 # Not yet implemented
@@ -267,23 +29,63 @@ class MatchConfigState(MenuState):
 
 
 # Not yet implemented
-class PlayState(IGameState):
+class QuitState(MenuState):
     def __init__(self) -> None:
         pass
 
 
-class BaseMenuPresenter(IMenuPresenter):
-    def __init__(self) -> None:
-        super().__init__()
+class IScreenManager(ABC):
+    @abstractmethod
+    def get_center(self) -> Tuple[int, int]:
+        pass
 
-    def display_base_menu(self, menu: BaseMenu):
+
+class BaseMenuPresenter(IMenuPresenter):
+    def __init__(self, screen_manager: IScreenManager, core: IDisplayCore) -> None:
+        super().__init__()
+        self.screen_manager: IScreenManager = screen_manager
+        self.core: IDisplayCore = core
+
+    def display_base_menu(self, menu: BaseMenu, base_pos):
         for i, action_id in enumerate(menu.actions_ids):
-            pos = (i, 0)
+            pos = (base_pos[0] + i, base_pos[0])
+            self.core.print_at_pos(action_id, pos)
             # this go on printing every action at one line, and highlightning the one in focus.
+
+    def display_base_menu_frame(self, base_pos, size, height):
+        frame = ""
+        for i in range(size):
+            frame += "*"
+        self.core.print_at_pos(frame, base_pos)
+        for i in range(height - 2):
+            frame = "*"
+            for i in range(size - 2):
+                frame += " "
+                frame += "*"
+            self.core.print_at_pos(frame, (base_pos[0] + i, base_pos[1]))
+        frame = ""
+        for i in range(size):
+            frame += "*"
+        self.core.print_at_pos(frame, (base_pos[0] + height - 1, base_pos[1]))
 
     def display_menu(self, menu: IMenu) -> None:
         if isinstance(menu, BaseMenu):
-            self.display_base_menu(menu)
+            size = 40
+            heigth = len(menu.actions_ids) + 4
+            base_pos = self.screen_manager.get_center()
+            base_pos = (base_pos[0] - (heigth + 1) // 2, base_pos[1] - size // 2)
+            self.display_base_menu_frame(base_pos, size, heigth)
+            self.display_base_menu(menu, base_pos)
+
+
+class ScreenManager(IScreenManager):
+    def __init__(self, height, width) -> None:
+        super().__init__()
+        self.height = height
+        self.width = width
+
+    def get_center(self) -> Tuple[int]:
+        return (self.height, self.width)
 
 
 class EndMatchMenuPresenter(BaseMenuPresenter):
@@ -294,9 +96,38 @@ class EndMatchMenuPresenter(BaseMenuPresenter):
         results = EndMatchMenu.get_results()
         # Do something with result to print it...
         # something like:
-        # self.display_results()
-        # self.diplay_base_menu(menu)
+        size = 50
+        heigth = len(menu.actions_ids) + 6
+        base_pos = self.screen_manager.get_center()
+        base_pos = (base_pos[0] - (heigth + 1) // 2, base_pos[1] - size // 2)
+        self.display_results(results, (base_pos[0] + 2, base_pos[1]))
+        self.display_base_menu_frame(base_pos, size, heigth)
+        self.display_base_menu(menu, (base_pos[0] + 4, base_pos[1]))
 
     def clear_menu(self) -> None:
-        # If there is a area specific for the menu, this should be implemented. Otherwise, not.
+        # If there is a area specific only for the menu, this should be implemented. Otherwise, not.
         pass
+
+    def display_results(self, results: MatchResult, pos: Tuple[int, int]):
+        if results.won:
+            self.print_won_the_game(self, results.n_attempts, pos)
+        else:
+            self.print_loss_the_game(results.correct_words, pos)
+
+    def message(self, mensagem: str, pos: Tuple[int, int]):
+        self.tmanipulator.clear_line(self.lim_guesses + 6)
+        self.tmanipulator.print_at_pos(mensagem, pos)
+
+    def print_won_the_game(self, number_of_tries, pos: Tuple[int, int]):
+        self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!", pos)
+        print(self.tmanipulator.go_to_pos((self.lim_guesses + 7, 0)))
+
+    def print_loss_the_game(self, desafios, pos: Tuple[int, int]):
+        if len(desafios) == 1:
+            self.message(f"\rVocê perdeu. A palavra era {desafios[0].palavra}.", pos)
+        else:
+            palavras_sorteadas = ""
+            for d in desafios:
+                palavras_sorteadas += " " + d.palavra
+            self.message(f"\rVocê perdeu. As palavras eram{palavras_sorteadas}.", pos)
+        print(self.tmanipulator.go_to_pos((self.lim_guesses + 7, 0)))

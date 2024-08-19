@@ -1,5 +1,6 @@
-from game.controller.end_game_controller import Action
 import pytest
+
+from game.game_states.action import Action
 
 
 def dummy_func(a, b):

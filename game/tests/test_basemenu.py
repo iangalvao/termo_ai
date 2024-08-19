@@ -1,7 +1,8 @@
 import pytest
 from unittest.mock import Mock
 
-from game.controller.end_game_controller import Action, BaseMenu
+from game.game_states.action import Action as GameAction
+from game.game_states.base_menu import BaseMenu
 
 
 def dummy_func(a, b):
@@ -12,8 +13,8 @@ def test_base_menu_equality():
     menu1 = BaseMenu()
     menu2 = BaseMenu()
 
-    action1 = Action(dummy_func, a=1)
-    action2 = Action(dummy_func, a=2)
+    action1 = GameAction(dummy_func, a=1)
+    action2 = GameAction(dummy_func, a=2)
 
     menu1.set_action(action1, "action1")
     menu1.set_action(action2, "action2")
@@ -34,7 +35,7 @@ def test_base_menu_equality():
 
 def test_set_action_new_action():
     menu = BaseMenu()
-    action = Mock(spec=Action)
+    action = Mock(spec=GameAction)
     menu.set_action(action, "start_game")
 
     assert menu.actions_ids == ["start_game"]
@@ -43,8 +44,8 @@ def test_set_action_new_action():
 
 def test_set_action_override():
     menu = BaseMenu()
-    action1 = Mock(spec=Action)
-    action2 = Mock(spec=Action)
+    action1 = Mock(spec=GameAction)
+    action2 = Mock(spec=GameAction)
     menu.set_action(action1, "start_game")
     menu.set_action(action2, "start_game")
 
@@ -54,22 +55,18 @@ def test_set_action_override():
 
 def test_set_action_invalid_id_empty_string():
     menu = BaseMenu()
-    action = Mock(spec=Action)
+    action = Mock(spec=GameAction)
 
-    with pytest.raises(ValueError, match="Action ID must be a non-empty string."):
+    with pytest.raises(ValueError, match="GameAction ID must be a non-empty string."):
         menu.set_action(action, "")
 
 
 def test_set_action_invalid_id_none():
     menu = BaseMenu()
-    action = Mock(spec=Action)
+    action = Mock(spec=GameAction)
 
-    with pytest.raises(ValueError, match="Action ID must be a non-empty string."):
+    with pytest.raises(ValueError, match="GameAction ID must be a non-empty string."):
         menu.set_action(action, None)
-
-
-import pytest
-from game.controller.end_game_controller import BaseMenu, Action
 
 
 @pytest.fixture
@@ -77,13 +74,13 @@ def dummy_action():
     def dummy():
         return
 
-    return Action(dummy)
+    return GameAction(dummy)
 
 
 @pytest.fixture
 def action_mock_pair():
     mock = Mock()
-    return (Action(mock), mock)
+    return (GameAction(mock), mock)
 
 
 def test_unregister_action(dummy_action):
@@ -157,7 +154,7 @@ def test_call_action_on_focus():
     menu = BaseMenu()
 
     action_mock = Mock()
-    wrapped_action = Action(action_mock)
+    wrapped_action = GameAction(action_mock)
     menu.set_action(wrapped_action, "action_1")
 
     menu.call_action_on_focus()
@@ -166,7 +163,7 @@ def test_call_action_on_focus():
 
     # Test calling action after moving focus
     action_mock_2 = Mock()
-    wrapped_action_2 = Action(action_mock_2)
+    wrapped_action_2 = GameAction(action_mock_2)
     menu.set_action(wrapped_action_2, "action_2")
     menu.move_focus(1)
 

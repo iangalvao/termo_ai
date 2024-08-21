@@ -1,11 +1,11 @@
-from argparse import Action
 from dataclasses import dataclass
 from typing import Any, List
 
+from game.game_states.action import Action
 from game.game_states.base_menu import BaseMenu
 from game.game_states.igame_context import IGameContext
 from game.game_states.menustate import MenuState
-from game.model.match import IMatch
+from game.model.imatch import IMatch
 from game.viewer.imenu_presenter import IMenuPresenter
 
 
@@ -42,24 +42,31 @@ class EndMatchState(MenuState):
     def __init__(self, presenter: IMenuPresenter) -> None:
         super().__init__(presenter=presenter)
 
-    def on_enter(self, context: IGameContext, match: IMatch) -> None:
-        results = match.get_results()
-        self.menu = EndMatchMenu(results)
+    def on_enter(self, context: IGameContext, match: IMatch = None) -> None:
+        if match:
+            results = match.get_results()
+            self.menu = EndMatchMenu(results)
 
-        self.menu.set_action(
-            Action(
-                context.change_state,
-                **{"state_id": "play_state", "n_challenges": match.n_challenges},
-            ),
-            "retry",
-        )
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "main_menu_state"}), "main menu"
-        )
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "quit_state"}), "quit"
-        )
-        self.menu.set_action(
-            Action(context.change_state, **{"state_id": "play_state"}), "back"
-        )
+            self.menu.set_action(
+                Action(
+                    context.change_state,
+                    state_id="play_state",
+                    n_challenges=len(match.get_challenges()),
+                ),
+                "retry",
+            )
+            self.menu.set_action(
+                Action(context.change_state, state_id="main_menu_state"), "main menu"
+            )
+            self.menu.set_action(
+                Action(
+                    context.change_state,
+                    state_id="quit_state",
+                    previous_state="end_match_state",
+                ),
+                "quit",
+            )
+            self.menu.set_action(
+                Action(context.change_state, state_id="play_state"), "back"
+            )
         self.presenter.display_menu(self.menu)

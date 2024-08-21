@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import Mock
 
 from game.game_states.igame_context import IGameContext
-from game.game_states.play_state import PlayState
+from game.game_states.play_state import IMatchController, PlayState
 from game.viewer.game_display import IGameDisplay
 
 
@@ -26,8 +26,20 @@ def mock_presenter():
 
 
 @pytest.fixture
-def play_state(mock_presenter):
-    return PlayState(mock_presenter)
+def match_controller():
+    class DummyMatchController(IMatchController):
+        def submit_guess(self, guess: str) -> None:
+            pass
+
+        def new_match(self, n_challenges: int) -> None:
+            pass
+
+    return DummyMatchController()
+
+
+@pytest.fixture
+def play_state(mock_presenter, match_controller):
+    return PlayState(mock_presenter, match_controller)
 
 
 def test_move_cursor_right(play_state, dummy_context):

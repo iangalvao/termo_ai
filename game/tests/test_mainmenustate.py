@@ -25,10 +25,10 @@ def expected_menu(dummy_context):
     m = MainMenu()
     m.actions = {
         "quick match": Action(
-            dummy_context.change_state, **{"state_id": "play_state", "n_challenges": 1}
+            dummy_context.change_state, state_id="play_state", n_challenges=1
         ),
-        "new match": Action(dummy_context.change_state, **{"state_id": "match_config"}),
-        "quit": Action(dummy_context.change_state, **{"state_id": "quit_state"}),
+        "new match": Action(dummy_context.change_state, state_id="match_config"),
+        "quit": Action(dummy_context.change_state, state_id="quit_state"),
     }
     m.actions_ids = ["quick match", "new match", "quit"]
     return m

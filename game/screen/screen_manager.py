@@ -4,7 +4,7 @@ from game.controller.match_controller import IMatchController
 from game.controller.end_game_controller import IEndMatchController
 from game.controller.icontroller import IController
 from game.screen.iscreen_manager import IScreenManager
-from game.model.match import IMatch
+from game.model.imatch import IMatch
 
 
 class ScreenManager(IScreenManager):

@@ -8,7 +8,7 @@ class Action:
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         combined_args = {**self.fixed_args, **kwds}
-        return self.func(*args, **combined_args)
+        self.func(*args, **combined_args)
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, Action):

@@ -1,6 +1,6 @@
 import random
 import sys
-from typing import TextIO
+from typing import List, TextIO
 from game.solver.word_checker import WordChecker
 from abc import ABC
 from game.model.hint import *
@@ -261,7 +261,7 @@ class TreeBuilder:
     # leu numero chama recursivo (parent = node, key)
     def read_from_string(self, file: TextIO, d: int):
         tree = Tree()
-        last_nodes: list[Node] = [None for i in range(50)]
+        last_nodes: List[Node] = [None for i in range(50)]
         max_depth = 0
         for line in file:
             if line:

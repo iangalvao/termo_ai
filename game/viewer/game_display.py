@@ -5,6 +5,7 @@ from colorama import Back
 from game.model.attempt import Attempt
 from game.model.keyboard import Keyboard
 from game.model.challenge import IChallenge
+from game.model.imatch import IMatch
 from game.viewer.screen import IScreen, Screen
 from game.viewer.terminal_manipulator import *
 from game.model.hint import *
@@ -62,7 +63,7 @@ class TerminalPresenter(IGameDisplay):
         self.tmanipulator = tmanipulator
         self.lim_guesses = lim_chutes
         if not grid:
-            self.grid = [(0, 0)]
+            self.grid = [(3, 0)]
         else:
             if isinstance(grid, int):
                 self.grid = [(x, 0) for x in range(0, grid, 25)]
@@ -104,8 +105,9 @@ class TerminalPresenter(IGameDisplay):
             table_screen.add(self.table_line(), pos)
         return table_screen
 
-    def game_screen(self, challenges: List[IChallenge], lim_guesses) -> IScreen:
-
+    def game_screen(self, match: IMatch) -> IScreen:
+        challenges = match.get_challenges()
+        lim_guesses = len(challenges) + 5
         game_screen = Screen()
         # table_offset = self.offsets["table"]
         for challenge_number, challenge in enumerate(challenges):
@@ -146,8 +148,8 @@ class TerminalPresenter(IGameDisplay):
         colored_string = self.format_string_hints(string, hints)
         return colored_string
 
-    def display_game_screen(self, challenges: List[IChallenge], lim_guesses=6):
-        game_screen = self.game_screen(challenges, lim_guesses)
+    def display_game_screen(self, match: IMatch):
+        game_screen = self.game_screen(match)
         self.tmanipulator.print_screen(game_screen)
 
     def display_buffer(self, buffer, line, challenges, cursor):
@@ -172,65 +174,22 @@ class TerminalPresenter(IGameDisplay):
 
     def message(self, mensagem):
         self.tmanipulator.clear_line(self.lim_guesses + 6)
-        self.tmanipulator.print_at_pos(mensagem, (self.lim_guesses + 6, 0))
-
-    def print_won_the_game(self, number_of_tries):
-        self.message(f"\rParabéns! Você acertou em {number_of_tries} tentativas!")
-        print(self.tmanipulator.go_to_pos((self.lim_guesses + 7, 0)))
-
-    def print_loss_the_game(self, desafios):
-        if len(desafios) == 1:
-            self.message(f"\rVocê perdeu. A palavra era {desafios[0].palavra}.")
-        else:
-            palavras_sorteadas = ""
-            for d in desafios:
-                palavras_sorteadas += " " + d.palavra
-            self.message(f"\rVocê perdeu. As palavras eram{palavras_sorteadas}.")
-        print(self.tmanipulator.go_to_pos((self.lim_guesses + 7, 0)))
+        self.tmanipulator.print_at_pos(mensagem, (self.lim_guesses + 8, 0))
 
     def print_word_not_accepted(self, palavra):
         self.message(f"Essa palavra não é aceita:{palavra}")
 
     def first_print(self):
-        print("-------------O TERMO TERMINAL--------------")
-        print("versão para terminal de https://www.term.ooo")
         # Limpa a tela
         s = ""
         for i in range(80):
             s += " "
-        for i in range(self.lim_guesses + 7):
-            print(s)
-        print(f"\033[{self.lim_guesses + 7}A", end="")
+        for j in range(2, 22):
+            self.tmanipulator.print_at_pos(s, (j, 0))
+        # self.tmanipulator.print_at_pos(
+        #    "-------------O TERMO TERMINAL--------------", (0, 0)
+        # )
+        # self.tmanipulator.print_at_pos(
+        #    "versão para terminal de https://www.term.ooo", (1, 0)
+        # )
         sys.stdout.flush()
-
-        ###########################################################################
-        ###########################################################################
-        ################                                       ####################
-        ################                INPUTS                 ####################
-        ################                                       ####################
-        ###########################################################################
-        ###########################################################################
-
-    ###########################
-    def get_input(self, n, padding):
-        pos = (0, padding)
-        # print(self.tmanipulator.go_to_pos(pos), end="")
-        self.tmanipulator.clear_line(n + 1)
-        # self.print_tabela(n)
-        s = self.tmanipulator.go_to_pos((n + 1, 2))
-        chute_atual = unidecode(input(s)).upper()
-        # print(self.tmanipulator.go_to_line(-n - 2), end="")
-        # print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
-        sys.stdout.flush()
-        return chute_atual
-
-    def get_input_inplace(self, n, padding):
-        pos = (0, padding)
-        # print(self.tmanipulator.go_to_pos(pos), end="")
-        self.tmanipulator.clear_line(n + 1)
-        # self.print_tabela(n)
-        chute_atual = unidecode(input()).upper()
-        # print(self.tmanipulator.go_to_line(-n - 2), end="")
-        # print(self.tmanipulator.go_to_pos((-pos[0], -pos[1])), end="")
-        sys.stdout.flush()
-        return chute_atual

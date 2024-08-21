@@ -7,7 +7,7 @@ from game.game_states.action import Action
 from game.game_states.end_match_menu import EndMatchMenu, EndMatchState, MatchResult
 from game.game_states.igame_context import IGameContext
 from game.model.challenge import IChallenge
-from game.model.match import IMatch
+from game.model.imatch import IMatch
 from game.viewer.imenu_presenter import IMenuPresenter
 
 
@@ -34,13 +34,11 @@ def expected_menu(dummy_context, results):
 
     m.actions = {
         "retry": Action(
-            dummy_context.change_state, **{"state_id": "play_state", "n_challenges": 2}
+            dummy_context.change_state, state_id="play_state", n_challenges=2
         ),
-        "main menu": Action(
-            dummy_context.change_state, **{"state_id": "main_menu_state"}
-        ),
-        "quit": Action(dummy_context.change_state, **{"state_id": "quit_state"}),
-        "back": Action(dummy_context.change_state, **{"state_id": "play_state"}),
+        "main menu": Action(dummy_context.change_state, state_id="main_menu_state"),
+        "quit": Action(dummy_context.change_state, state_id="quit_state"),
+        "back": Action(dummy_context.change_state, state_id="play_state"),
     }
     m.actions_ids = ["retry", "main menu", "quit", "back"]
     return m
@@ -59,7 +57,7 @@ def dummy_match(results):
             return results
 
         def get_challenges(self) -> List[IChallenge]:
-            pass
+            return 2
 
         def get_words(self) -> List[str]:
             pass

@@ -1,4 +1,4 @@
-from argparse import Action
+from game.game_states.action import Action
 from game.game_states.base_menu import BaseMenu
 from game.game_states.igame_context import IGameContext
 from game.game_states.menustate import MenuState
@@ -28,15 +28,20 @@ class MainMenuState(MenuState):
         self.menu.set_action(
             Action(
                 context.change_state,
-                **{"state_id": "play_state", "n_challenges": 1},
+                state_id="play_state",
+                n_challenges=1,
             ),
             "quick match",
         )
         self.menu.set_action(
-            Action(context.change_state, **{"state_id": "match_config"}), "new match"
+            Action(context.change_state, state_id="match_config"), "new match"
         )
-
         self.menu.set_action(
-            Action(context.change_state, **{"state_id": "quit_state"}), "quit"
+            Action(
+                context.change_state,
+                state_id="quit_state",
+                previous_state="main_menu_state",
+            ),
+            "quit",
         )
         self.presenter.display_menu(self.menu)

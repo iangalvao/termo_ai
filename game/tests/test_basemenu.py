@@ -57,7 +57,7 @@ def test_set_action_invalid_id_empty_string():
     menu = BaseMenu()
     action = Mock(spec=GameAction)
 
-    with pytest.raises(ValueError, match="GameAction ID must be a non-empty string."):
+    with pytest.raises(ValueError, match="Action ID must be a non-empty string."):
         menu.set_action(action, "")
 
 
@@ -65,7 +65,7 @@ def test_set_action_invalid_id_none():
     menu = BaseMenu()
     action = Mock(spec=GameAction)
 
-    with pytest.raises(ValueError, match="GameAction ID must be a non-empty string."):
+    with pytest.raises(ValueError, match="Action ID must be a non-empty string."):
         menu.set_action(action, None)
 
 

@@ -1,6 +1,6 @@
 from abc import ABC
 from game.controller.icontroller import IController
-from game.model.match import IMatch
+from game.model.imatch import IMatch
 
 
 class IScreenManager(ABC):

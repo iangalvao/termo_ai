@@ -33,7 +33,7 @@ class Challenge:
     def __init__(self, palavra, lim_guesses=6) -> None:
         self.chutes = []
         self.feedbacks = []
-        self.attempts: list[Attempt] = []
+        self.attempts: List[Attempt] = []
         self.teclado = Keyboard()
         self.palavra = palavra
         self.solved = 0

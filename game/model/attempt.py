@@ -1,4 +1,4 @@
-from typing import Iterator, Tuple
+from typing import Iterator, List, Tuple
 from game.model.hint import *
 from abc import ABC
 
@@ -20,7 +20,7 @@ class IAttempt(ABC):
 class Attempt(IAttempt):
     def __init__(self, guess: str, correct_word: str = None) -> None:
         self.guess: str = guess
-        self.feedbacks: list[Hint] = [WRONG_LETTER for _ in guess]
+        self.feedbacks: List[Hint] = [WRONG_LETTER for _ in guess]
         if correct_word:
             self.apply_feedback(guess, correct_word)
 

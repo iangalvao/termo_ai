@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import List
 import unidecode
 from typeguard import typechecked
 from game.model.hint import *
@@ -64,7 +65,7 @@ class HintList(IHintList):
 
 
 class WordFilter:
-    def filter_from_hint_list(self, hint_list: IHintList, possible_words: list[str]):
+    def filter_from_hint_list(self, hint_list: IHintList, possible_words: List[str]):
         filtered_words = possible_words
         for letter, hint, val in hint_list:
             filtered_words = self.filter_from_hint(hint, letter, val, filtered_words)

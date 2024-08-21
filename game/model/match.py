@@ -10,46 +10,10 @@ from typing import List
 
 import unidecode
 
+from game.game_states.end_match_menu import MatchResult
 from game.model.challenge import IChallenge
+from game.model.imatch import IMatch
 from game.viewer.terminal_manipulator import IDisplayCore
-
-
-class IMatch(ABC):
-    def __init__(self, challenges: List[IChallenge], accepted_words: List[str]) -> None:
-        super().__init__()
-
-    def won(self) -> bool:
-        pass
-
-    def get_n_attempts(self) -> int:
-        pass
-
-    def get_challenges(self) -> List[IChallenge]:
-        pass
-
-    def get_words(self) -> List[str]:
-        pass
-
-    def delete_letter(self, pos: int) -> None:
-        pass
-
-    def input_letter(self) -> str:
-        pass
-
-    def move_cursor_left(self) -> None:
-        pass
-
-    def move_cursor_right(self) -> None:
-        pass
-
-    def submit_guess(self) -> str:
-        pass
-
-    def check_valid_word(self, word: str) -> bool:
-        pass
-
-    def update(self, guess: str) -> None:
-        pass
 
 
 class Match(IMatch):
@@ -95,7 +59,7 @@ class Match(IMatch):
             self.cursor -= 1
 
     def check_valid_word(self, word: str) -> bool:
-        return word.lower() in self.accepted_words.keys()
+        return word.lower() in self.accepted_words
 
     def input_letter(self, letter) -> str:
         if self.cursor < 5:
@@ -114,6 +78,10 @@ class Match(IMatch):
 
     def won(self) -> bool:
         return self._won
+
+    def get_results(self):
+
+        return MatchResult(self.won(), self.get_n_attempts(), self.get_words())
 
     def update(self, guess: str):
 

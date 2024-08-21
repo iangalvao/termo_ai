@@ -89,7 +89,6 @@ class MenuBuilder:
 
     def create(self):
         end_menu_controller = BaseMenu()
-        end_menu_controller.add_action_button_hook()
 
 
 class GameSettings:

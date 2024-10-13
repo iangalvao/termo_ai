@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
+from game.game_engine.igame_context import IGameContext
 
-from game.game_states.igame_context import IGameContext
 
 
 class IGameState(ABC):
@@ -9,7 +9,7 @@ class IGameState(ABC):
         pass
 
     @abstractmethod
-    def on_enter(self, context) -> None:
+    def on_enter(self, context: IGameContext, **kwargs) -> None:
         pass
 
     @abstractmethod

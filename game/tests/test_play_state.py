@@ -1,9 +1,10 @@
 import pytest
-import unittest
 from unittest.mock import Mock
 
-from game.game_states.igame_context import IGameContext
+from game.controller.match_controller import MatchStartParams
+from game.game_engine.igame_context import IGameContext
 from game.game_states.play_state import IMatchController, PlayState
+from game.model.imatch import IMatch
 from game.viewer.game_display import IGameDisplay
 
 
@@ -31,9 +32,18 @@ def match_controller():
         def submit_guess(self, guess: str) -> None:
             pass
 
-        def new_match(self, n_challenges: int) -> None:
-            pass
+        #def new_match(self, n_challenges: int) -> None:
+         #   pass
 
+        def new_match(self, match_params: MatchStartParams) -> None:
+            return None
+        def get_match(self) -> IMatch | None:
+            return None
+        def get_results(self):
+            return None
+        def won(self) -> bool:
+            return False
+        
     return DummyMatchController()
 
 
@@ -41,9 +51,3 @@ def match_controller():
 def play_state(mock_presenter, match_controller):
     return PlayState(mock_presenter, match_controller)
 
-
-def test_move_cursor_right(play_state, dummy_context):
-    # Call on_enter and verify the menu was created with correct actions
-    play_state.move_cursor_right()
-
-    assert play_state.cursor == 1

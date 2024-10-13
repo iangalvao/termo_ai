@@ -1,19 +1,18 @@
-from abc import ABC
-from typing import Tuple
+from abc import ABC, abstractmethod
+from typing import Dict
 from game.model.attempt import Attempt
-from game.model.hint import *
-
+from game.model.hint import UNKNOWN_LETTER, Hint
 
 class IKeyboard(ABC):
     def __init__(self) -> None:
         super().__init__()
-
+    @abstractmethod
     def process_hints(self, attempt: Attempt) -> None:
         pass
-
+    @abstractmethod
     def get_letter_hint(self, letter: str) -> Hint:
         pass
-
+    @abstractmethod
     def __iter__(self):
         pass
 
@@ -21,12 +20,12 @@ class IKeyboard(ABC):
 class Keyboard:
     def __init__(self) -> None:
         self.lines = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
-        self.state = {}
+        self.state: Dict[str, Hint] = {}
         for line in self.lines:
             for c in line:
                 self.set_letter_hint(c, UNKNOWN_LETTER)
 
-    def process_hints(self, attempt: Attempt):
+    def process_hints(self, attempt: Attempt) -> None:
         for letra, dica, _ in attempt:
             dica_atual = self.get_letter_hint(letra)
             if dica > dica_atual:

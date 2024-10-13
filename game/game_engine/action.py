@@ -2,7 +2,7 @@ from typing import Any, Callable
 
 
 class Action:
-    def __init__(self, f: Callable[[], None], **kwargs) -> None:
+    def __init__(self, f: Callable[..., None], kwargs) -> None:
         self.func = f
         self.fixed_args = kwargs
 

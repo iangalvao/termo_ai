@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import Mock
 
-from game.game_states.action import Action as GameAction
-from game.game_states.base_menu import BaseMenu
+from game.game_engine.action import Action as GameAction
+from game.game_engine.menus.base_menu import BaseMenu
 
 
 def dummy_func(a, b):
@@ -13,8 +13,8 @@ def test_base_menu_equality():
     menu1 = BaseMenu()
     menu2 = BaseMenu()
 
-    action1 = GameAction(dummy_func, a=1)
-    action2 = GameAction(dummy_func, a=2)
+    action1 = GameAction(dummy_func, {"a":1})
+    action2 = GameAction(dummy_func, {"a":2})
 
     menu1.set_action(action1, "action1")
     menu1.set_action(action2, "action2")
@@ -154,7 +154,7 @@ def test_call_action_on_focus():
     menu = BaseMenu()
 
     action_mock = Mock()
-    wrapped_action = GameAction(action_mock)
+    wrapped_action = GameAction(action_mock,{})
     menu.set_action(wrapped_action, "action_1")
 
     menu.call_action_on_focus()
@@ -163,7 +163,7 @@ def test_call_action_on_focus():
 
     # Test calling action after moving focus
     action_mock_2 = Mock()
-    wrapped_action_2 = GameAction(action_mock_2)
+    wrapped_action_2 = GameAction(action_mock_2, {})
     menu.set_action(wrapped_action_2, "action_2")
     menu.move_focus(1)
 

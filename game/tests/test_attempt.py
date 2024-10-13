@@ -1,7 +1,6 @@
 import pytest
 from game.model.attempt import Attempt
-from game.solver.word_checker import WordChecker
-from game.model.hint import *
+from game.model.hint import RIGHT_POS, WRONG_LETTER, WRONG_POS
 
 # test_my_module.py
 

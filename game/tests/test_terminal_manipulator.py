@@ -1,9 +1,7 @@
-from typing import Tuple
 import pytest
-from game.viewer.terminal_manipulator import *
-from game.model.hint import *
 
-from colorama import Back
+from game.game_engine.presenters.colored_string import ColoredString
+from game.game_engine.presenters.terminal_manipulator import COR_CERTO, COR_ERRADO, COR_POSICAO, ENDC, TerminalCore, color_dict
 
 
 @pytest.fixture

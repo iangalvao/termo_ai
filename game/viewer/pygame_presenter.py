@@ -1,6 +1,6 @@
-from game.viewer.screen import Screen
-from game.viewer.colored_string import ColoredString
-from game.viewer.terminal_manipulator import IDisplayCore
+from game.game_engine.presenters.screen import IScreen
+from game.game_engine.presenters.colored_string import ColoredString
+from game.game_engine.presenters.terminal_manipulator import IDisplayCore
 import pygame
 from typing import Tuple
 
@@ -56,7 +56,7 @@ class PygameCore(IDisplayCore):
         self.screen.fill(self.bg_color, clear_rect)
         pygame.display.flip()
 
-    def print_screen(self, screen: Screen):
+    def print_screen(self, screen: IScreen):
         self.screen.fill(self.bg_color)
         for colored_string, pos in screen:
             self.print_colored_string(colored_string, pos)

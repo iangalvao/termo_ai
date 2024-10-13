@@ -1,16 +1,11 @@
 import pytest
 
+from game.game_engine.presenters.colored_string import ColoredString
+from game.game_engine.presenters.terminal_manipulator import COR_CERTO, COR_ERRADO, COR_POSICAO, ENDC
 from game.model.attempt import Attempt
-from game.model.hint import RIGHT_POS, WRONG_LETTER, WRONG_POS, UNKNOWN_LETTER
+from game.model.hint import RIGHT_POS, WRONG_LETTER
 from game.model.keyboard import Keyboard
 from game.model.challenge import Challenge
-from game.viewer.terminal_manipulator import (
-    COR_CERTO,
-    ENDC,
-    COR_POSICAO,
-    COR_ERRADO,
-    ColoredString,
-)
 from game.viewer.game_display import UNDERLINE, Screen, TerminalPresenter
 
 
@@ -73,7 +68,7 @@ def colors():
 def expected_screen_full(words, colors):
     s = Screen()
     for n, (word, color) in enumerate(zip(words, colors)):
-        s.add(ColoredString(word, color), (n + 1, 6))
+        s.add(ColoredString(word, color), (n + 4, 6))
     return s
 
 
@@ -81,9 +76,9 @@ def expected_screen_full(words, colors):
 def expected_screen_half(words, colors):
     s = Screen()
     for n, (word, color) in enumerate(zip(words[:3], colors[:3])):
-        s.add(ColoredString(word, color), (n + 1, 6))
+        s.add(ColoredString(word, color), (n + 4, 6))
     for i in range(3, 6):
-        s.add(ColoredString("     ", [UNDERLINE for i in range(6)]), (i + 1, 6))
+        s.add(ColoredString("     ", [UNDERLINE for i in range(6)]), (i + 4, 6))
     return s
 
 
@@ -174,7 +169,7 @@ def test_game_screen_half(challenge_half, expected_screen_half):
     screen = tPresenter.table_screen(challenge_half[0], challenge_number, lim_guesses)
 
     assert len(list(screen)) == len(list((expected_screen_half)))
-    for (stringA, posA), (stringB, posB) in zip(screen, expected_screen_half):
-        assert stringA.str == stringB.str
-        assert stringA.colors == stringB.colors
-        assert posA == posB
+    for (colored_string, pos), (expected_colored_string, expected_pos) in zip(screen, expected_screen_half):
+        assert colored_string.str == expected_colored_string.str
+        assert colored_string.colors == expected_colored_string.colors
+        assert pos == expected_pos

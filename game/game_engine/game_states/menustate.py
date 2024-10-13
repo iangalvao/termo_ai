@@ -1,19 +1,21 @@
 # This class does not implement on_enter abstract method. Thus, is a incomplete implementation,
 # intended to be used only as a base for other menu states
-from game.controller.controllercore import DOWNARROW, ESC, UPARROW
-from game.game_states.igame_context import IGameContext
-from game.game_states.igame_state import IGameState
-from game.game_states.menu import IMenu
-from game.viewer.imenu_presenter import IMenuPresenter
+from typing import Optional
+from game.game_engine.controllercore import DOWNARROW, UPARROW
+from game.game_engine.igame_context import IGameContext
+from game.game_engine.game_states.igame_state import IGameState
+from game.game_engine.menus.menu import IMenu
+from game.game_engine.presenters.imenu_presenter import IMenuPresenter
 
 
 class MenuState(IGameState):
     def __init__(self, presenter: IMenuPresenter) -> None:
         super().__init__()
-        self.menu: IMenu = None
+        self.menu: Optional[IMenu] = None
         self.presenter: IMenuPresenter = presenter
 
     def handle_input(self, context: IGameContext, key: str) -> None:
+        assert self.menu is not None
         if ord(key) == 10:
             self.menu.call_action_on_focus()
             return

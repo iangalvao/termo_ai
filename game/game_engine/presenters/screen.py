@@ -1,32 +1,35 @@
-from abc import ABC
-from typing import Any, Iterator, List, Tuple
+from abc import ABC, abstractmethod
+from typing import Iterator, List, Tuple
 
-from game.viewer.colored_string import ColoredString
+from game.game_engine.presenters.colored_string import ColoredString
 
 
 class IScreen(ABC):
     def __init__(self) -> None:
         pass
 
+    @abstractmethod
     def add(self, colored_string: ColoredString, pos: Tuple[int, int]):
         pass
 
+    @abstractmethod
     def merge(self, other: object):
         pass
 
+    @abstractmethod
     def __iter__(self):
         pass
-
+    @abstractmethod
     def __eq__(self, value: object) -> bool:
         pass
-
+    @abstractmethod
     def __str__(self) -> str:
         pass
 
 
 class Screen(IScreen):
     def __init__(self) -> None:
-        self.strings: List[ColoredString] = []
+        self.strings: List[Tuple[ColoredString, Tuple[int,int]]] = []
 
     def add(self, colored_string: ColoredString, pos: Tuple[int, int]) -> None:
         self.strings.append((colored_string, pos))

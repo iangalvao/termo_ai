@@ -1,19 +1,28 @@
-from argparse import Action
 from typing import Any, Dict, List
-from game.game_states.menu import IMenu
+from game.game_engine.action import Action
+from game.game_engine.menus.menu import IMenu
 
 
 class BaseMenu(IMenu):
-    def __init__(self) -> None:
+    def __init__(self, attrs: Dict[str, Any] = {}) -> None:
         super().__init__()
         self.actions_ids: List[str] = []
         self.actions: Dict[str, Action] = {}
         self.focus: int = 0
+        self.attrs: Dict[str, Any] = attrs
 
-    def set_action(self, action: Action, action_id: int):
+    def get_actions_ids(self) -> List[str]:
+        return self.actions_ids
+    
+    def get_attr(self, attr_id: str) -> Any:
+        return self.attrs[attr_id]
+    
+    def get_focus(self) -> int:
+        return self.focus
+
+    def set_action(self, action: Action, action_id: str) -> None:
         if not action_id or not isinstance(action_id, str):
             raise ValueError("Action ID must be a non-empty string.")
-
         if action_id not in self.actions.keys():
             self.actions_ids.append(action_id)
         self.actions[action_id] = action

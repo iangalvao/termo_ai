@@ -1,14 +1,13 @@
 from typing import List
 import pytest
-import unittest
 from unittest.mock import Mock
 
-from game.game_states.action import Action
+from game.game_engine.action import Action
+from game.game_engine.presenters.imenu_presenter import IMenuPresenter
 from game.game_states.end_match_menu import EndMatchMenu, EndMatchState, MatchResult
-from game.game_states.igame_context import IGameContext
+from game.game_engine.igame_context import IGameContext
 from game.model.challenge import IChallenge
 from game.model.imatch import IMatch
-from game.viewer.imenu_presenter import IMenuPresenter
 
 
 @pytest.fixture
@@ -30,7 +29,7 @@ def results():
 
 @pytest.fixture
 def expected_menu(dummy_context, results):
-    m = EndMatchMenu(results)
+    m = EndMatchMenu({"result":results})
 
     m.actions = {
         "retry": Action(
@@ -48,37 +47,37 @@ def expected_menu(dummy_context, results):
 def dummy_match(results):
     class DummyMatch(IMatch):
         def won(self) -> bool:
-            pass
+            return False
 
         def get_n_attempts(self) -> int:
-            pass
+            return 0
 
         def get_results(self):
             return results
 
         def get_challenges(self) -> List[IChallenge]:
-            return 2
+            return []
 
         def get_words(self) -> List[str]:
-            pass
+            return []
 
         def delete_letter(self, pos: int) -> None:
-            pass
+            return
 
         def input_letter(self) -> str:
-            pass
+            return ""
 
         def move_cursor_left(self) -> None:
-            pass
+            return
 
         def move_cursor_right(self) -> None:
-            pass
+            return
 
         def submit_guess(self) -> str:
-            pass
+            return ""
 
         def check_valid_word(self, word: str) -> bool:
-            pass
+            return False
 
         def update(self, guess: str) -> None:
             pass

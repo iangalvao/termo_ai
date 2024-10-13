@@ -1,12 +1,10 @@
 import pytest
-import unittest
 from unittest.mock import Mock
 
-from game.game_states.action import Action
-from game.game_states.igame_context import IGameContext
+from game.game_engine.action import Action
+from game.game_engine.igame_context import IGameContext
+from game.game_engine.presenters.imenu_presenter import IMenuPresenter
 from game.game_states.main_menu import MainMenu, MainMenuState
-from game.viewer.imenu_presenter import IMenuPresenter
-
 
 @pytest.fixture
 def dummy_context():
@@ -25,10 +23,10 @@ def expected_menu(dummy_context):
     m = MainMenu()
     m.actions = {
         "quick match": Action(
-            dummy_context.change_state, state_id="play_state", n_challenges=1
+            dummy_context.change_state, {"state_id":"play_state", "n_challenges":1}
         ),
-        "new match": Action(dummy_context.change_state, state_id="match_config"),
-        "quit": Action(dummy_context.change_state, state_id="quit_state"),
+        "new match": Action(dummy_context.change_state, {"state_id":"match_config"}),
+        "quit": Action(dummy_context.change_state, {"state_id":"quit_state", "previous_state":"main_menu_state"}),
     }
     m.actions_ids = ["quick match", "new match", "quit"]
     return m

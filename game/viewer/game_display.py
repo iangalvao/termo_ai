@@ -1,15 +1,16 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import sys
-from typing import Iterator, List, Tuple
-from colorama import Back
+from typing import  List, Tuple
 from game.model.attempt import Attempt
+from game.game_engine.buffer import Buffer
+from game.model.hint import RIGHT_POS, UNKNOWN_LETTER, WRONG_LETTER, WRONG_POS, Hint
 from game.model.keyboard import Keyboard
 from game.model.challenge import IChallenge
 from game.model.imatch import IMatch
-from game.viewer.screen import IScreen, Screen
-from game.viewer.terminal_manipulator import *
-from game.model.hint import *
-from unidecode import unidecode
+from game.game_engine.presenters.colored_string import ColoredString
+from game.game_engine.presenters.screen import IScreen, Screen
+
+from game.game_engine.presenters.terminal_manipulator import COR_CERTO, COR_ERRADO, COR_INVERTIDA, COR_POSICAO, ENDC, UNDERLINE, IDisplayCore
 
 # CORES PARA VISUALIZAÇÂO NO TERMINAL
 bcolors = {
@@ -41,20 +42,22 @@ class Message:
 class IGameDisplay(ABC):
     def __init__(self, tmanipulator: IDisplayCore) -> None:
         super().__init__()
-
-    def display_challenge(self, challenge: IChallenge, pos: Tuple[int]) -> None:
+        
+    @abstractmethod
+    def display_game_screen(self, match: IMatch, buffer: Buffer) -> None:
         pass
 
-    def display_intro(self) -> None:
+    @abstractmethod
+    def print_word_not_accepted(self, palavra:str) -> None:
         pass
-
-    def display_message(self, message: Message) -> None:
+    
+    @abstractmethod
+    def first_print(self) -> None:
         pass
-
-    def display_game_screen(self, challenges: List[IChallenge]) -> None:
+    @abstractmethod
+    def start(self, n_challenges: int) -> None:
         pass
-
-
+    
 class TerminalPresenter(IGameDisplay):
     def __init__(
         self, tmanipulator: IDisplayCore, lim_chutes=6, grid=None, offsets=None
@@ -93,7 +96,6 @@ class TerminalPresenter(IGameDisplay):
     def table_screen(self, challenge: IChallenge, challenge_number, lim_guesses):
         game_pos = self.grid[challenge_number]
         table_offset = self.get_section_pos("table", game_pos)
-        # table_offset = self.grid[challenge_number] + table_offset
         n = 0
         table_screen = Screen()
         for attempt in challenge.get_attempts():
@@ -148,10 +150,11 @@ class TerminalPresenter(IGameDisplay):
         colored_string = self.format_string_hints(string, hints)
         return colored_string
 
-    def display_game_screen(self, match: IMatch):
+    def display_game_screen(self, match: IMatch, buffer: Buffer) -> None:
         game_screen = self.game_screen(match)
         self.tmanipulator.print_screen(game_screen)
-
+        self.display_buffer(buffer, match.get_n_attempts() + 1, match.get_challenges(), buffer.cursor_position)
+        
     def display_buffer(self, buffer, line, challenges, cursor):
         if line >= self.lim_guesses:
             return
@@ -168,10 +171,6 @@ class TerminalPresenter(IGameDisplay):
             buffer_screen.add(colored_string, pos)
             self.tmanipulator.print_screen(buffer_screen)
 
-    ###########################################################################
-    ################               MENSAGENS               ####################
-    ###########################################################################
-
     def message(self, mensagem):
         self.tmanipulator.clear_line(self.lim_guesses + 6)
         self.tmanipulator.print_at_pos(mensagem, (self.lim_guesses + 8, 0))
@@ -180,9 +179,9 @@ class TerminalPresenter(IGameDisplay):
         self.message(f"Essa palavra não é aceita:{palavra}")
 
     def first_print(self):
-        # Limpa a tela
+        # clear screen
         s = ""
-        for i in range(80):
+        for i in range(80): # TODO replace literals by screen_manager width and height
             s += " "
         for j in range(2, 22):
             self.tmanipulator.print_at_pos(s, (j, 0))
@@ -193,3 +192,6 @@ class TerminalPresenter(IGameDisplay):
         #    "versão para terminal de https://www.term.ooo", (1, 0)
         # )
         sys.stdout.flush()
+
+    def start(self, n_challenges: int) -> None:
+        self.grid = [(2, 11 * i) for i in range(n_challenges)]

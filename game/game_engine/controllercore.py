@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import os
 import sys
 import select
@@ -17,7 +17,7 @@ ESC = "\x1b"
 class IInputListener(ABC):
     def __init__(self) -> None:
         super().__init__()
-
+    @abstractmethod
     def get_input(self) -> str:
         pass
 
@@ -63,7 +63,7 @@ class TerminalInputListener(IInputListener):
                         if k.isalpha():
                             return k.upper()
                         return k
-        finally:
 
+        finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
             sys.stdout.write("\033[?25h")

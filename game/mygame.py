@@ -2,7 +2,8 @@ import csv
 import sys
 
 from unidecode import unidecode
-from game.controller.controllercore import IInputListener, TerminalInputListener
+from game.controller.match_controller import MatchController
+from game.game_engine.controllercore import IInputListener, TerminalInputListener
 from game.controller.end_game_controller import (
     BaseMenuPresenter,
     EndMatchMenuPresenter,
@@ -11,13 +12,12 @@ from game.controller.end_game_controller import (
     QuitState,
     ScreenManager,
 )
+from game.game_engine.presenters.terminal_manipulator import TerminalCore, color_dict
 from game.game_states.end_match_menu import EndMatchState
-from game.game_states.igame_context import IGameContext
-from game.game_states.igame_state import IGameState
-from game.game_states.main_menu import MainMenu, MainMenuState
-from game.game_states.play_state import MatchController, PlayState
+from game.game_engine.igame_context import IGameContext
+from game.game_states.main_menu import  MainMenuState
+from game.game_states.play_state import PlayState
 from game.viewer.game_display import TerminalPresenter
-from game.viewer.terminal_manipulator import TerminalCore, color_dict
 
 
 class StateFactory:

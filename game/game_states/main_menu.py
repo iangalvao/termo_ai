@@ -1,8 +1,8 @@
-from game.game_states.action import Action
-from game.game_states.base_menu import BaseMenu
-from game.game_states.igame_context import IGameContext
-from game.game_states.menustate import MenuState
-from game.viewer.imenu_presenter import IMenuPresenter
+from game.game_engine.action import Action
+from game.game_engine.menus.base_menu import BaseMenu
+from game.game_engine.igame_context import IGameContext
+from game.game_engine.game_states.menustate import MenuState
+from game.game_engine.presenters.imenu_presenter import IMenuPresenter
 
 
 class MainMenu(BaseMenu):
@@ -22,25 +22,27 @@ class MainMenuState(MenuState):
     def __init__(self, presenter: IMenuPresenter) -> None:
         super().__init__(presenter)
 
-    def on_enter(self, context: IGameContext) -> None:
+    def on_enter(self, context: IGameContext, **kwargs) -> None:
         self.menu = MainMenu()
 
         self.menu.set_action(
             Action(
                 context.change_state,
-                state_id="play_state",
-                n_challenges=1,
+                {"state_id":"play_state",
+                "n_challenges":1,
+                }
             ),
             "quick match",
         )
         self.menu.set_action(
-            Action(context.change_state, state_id="match_config"), "new match"
+            Action(context.change_state, {"state_id":"match_config"}), "new match"
         )
         self.menu.set_action(
             Action(
                 context.change_state,
-                state_id="quit_state",
-                previous_state="main_menu_state",
+                {"state_id":"quit_state",
+                "previous_state":"main_menu_state",
+                }
             ),
             "quit",
         )

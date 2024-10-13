@@ -1,13 +1,12 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import re
 import sys
 from typing import Tuple
 
 from colorama import Back
-from game.model.attempt import Attempt
-from game.viewer.colored_string import ColoredString
-from game.model.hint import *
-from game.viewer.screen import IScreen, Screen
+from game.game_engine.presenters.colored_string import ColoredString
+from game.game_engine.presenters.screen import IScreen
+
 
 
 UNDERLINE = 3
@@ -30,19 +29,19 @@ color_dict = {
 class IDisplayCore(ABC):
     def __init__(self) -> None:
         super().__init__()
-
+    @abstractmethod
     def go_to_pos(self, pos: Tuple[int, int]) -> str:
         pass
-
+    @abstractmethod
     def print_at_pos(self, s: str, pos: Tuple[int, int]) -> None:
         pass
-
-    def print_colored_string(self, colored_string: ColoredString, pos: Tuple[int, int]):
+    @abstractmethod
+    def print_colored_string_at_pos(self, colored_string: ColoredString, pos: Tuple[int, int]):
         pass
-
+    @abstractmethod
     def clear_line(self, n: int) -> None:
         pass
-
+    @abstractmethod
     def print_screen(self, screen: IScreen):
         pass
 
@@ -114,7 +113,7 @@ class TerminalCore(IDisplayCore):
         formatted_string = self.string_at_pos(formatted_string, pos)
         return formatted_string
 
-    def print_screen(self, screen: Screen):
+    def print_screen(self, screen: IScreen):
         for colored_string, pos in screen:
             self.print_colored_string_at_pos(colored_string, pos)
 

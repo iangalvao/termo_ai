@@ -1,4 +1,4 @@
-from game.controller.controllercore import IInputListener
+from game.game_engine.controllercore import IInputListener
 
 
 class PygameInputListener(IInputListener):
